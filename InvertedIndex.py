@@ -1,8 +1,10 @@
-""" Inverted Index Construction
+""" Inverted Index 
 
 This module builds the inverted index for the Automatic Fact Verification System, watson-junior.
 
+RUN THIS SCRIPT
 """
+
 import math
 import os
 
@@ -18,8 +20,10 @@ def inverted_index_builder():
     """ Build Inverted Index from the collection of Page objects loaded from the folder
     
     returns
-    inverted_index; {term: {page_id:weight, page_id:weight}}
-    
+    inverted_index object
+
+    Note:
+    inverted_index.inverted_index; {term: {page_id:weight, page_id:weight}}
     """
 
     pages_dict = wiki_parser.parse_wiki_docs()
@@ -38,17 +42,17 @@ class InvertedIndex():
         self.pages_collection = pages_collection
         self.N = len(pages_collection)
         self.doc_term_freqs = {}        #{token: df_t}  i.e. df_t = frequency of term in entire collection
+        
         self.inverted_index = {}        #{token: {page_id:weight, page_id:weight, ...}}
         
-        
-        self.test_term = ""
-        self.parse_pages()
+        self.test_term = ""             # test term
         self.build()
 
 
 
     def build(self):
         """ Builds the Inverted Index"""
+        self.parse_pages()
         print("[INFO] Building inverted index...")
         inverted_index = self.inverted_index
         for page in tqdm(self.pages_collection):
@@ -66,7 +70,7 @@ class InvertedIndex():
                 self.test_term = term
 
     def parse_pages(self):
-        """ Parse pages and construct the term_freqs_dicts and doc_term_freqs"""
+        """ Parse the collection of pages and construct the term_freqs_dicts and doc_term_freqs """
         print("[INFO] Creating term_freqs and doc_freqs dictionaries from pages collection to build the inverted index...")
         seen_terms = []
         for page in tqdm(self.pages_collection):
@@ -92,9 +96,8 @@ class InvertedIndex():
     def get_BOW(self, passages):
         """ return a bag of preprocessed tokens from the list of passages
             
-            Preprocess include (lower case & non-numeric filtering)
+                preprocess steps are (lower case & non-numeric filtering)
         """
-
         return [token.lower() for passage in passages for token in passage.tokens if token.isalpha()]
 
 
@@ -130,4 +133,4 @@ if __name__ == "__main__":
     inv_idx = inverted_index.inverted_index
     term = inverted_index.test_term
     print("Term: {}, postings list: {}".format(term, inv_idx[term]))
-    pickle.dump(inverted_index, open("inverted_index.pkl", 'wb'))     # dump inverted index
+    pickle.dump(inv_idx, open("inverted_index.pkl", 'wb'))     # dump inverted index
