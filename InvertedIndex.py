@@ -6,13 +6,22 @@ This module builds the inverted index for the Automatic Fact Verification System
 import math
 import os
 
+import pickle
+from tqdm import tqdm
+
 import utils
 import wiki_parser
 
-@staticmethod 
-def inverted_index_builder():
 
-    # get array of tokens with each row being an individual page_id
+
+def inverted_index_builder():
+    """ Build Inverted Index from the collection of Page objects loaded from the folder
+    
+    returns
+    inverted_index; {term: {page_id:weight, page_id:weight}}
+    
+    """
+
     pages_dict = wiki_parser.parse_wiki_docs()
     pages_collection = list(pages_dict.values())
 
@@ -26,28 +35,46 @@ def inverted_index_builder():
 class InvertedIndex():
 
     def __init__(self, pages_collection):
-        self.pages_collection = []
+        self.pages_collection = pages_collection
         self.N = len(pages_collection)
-        self.doc_term_freqs = []
-        self.inverted_index = {}        #{token: {page_id:weight, page_id:weight, ...}}
         self.doc_term_freqs = {}        #{token: df_t}  i.e. df_t = frequency of term in entire collection
+        self.inverted_index = {}        #{token: {page_id:weight, page_id:weight, ...}}
+        
+        
+        self.test_term = ""
+        self.parse_pages()
+        self.build()
+
 
 
     def build(self):
         """ Builds the Inverted Index"""
+        print("[INFO] Building inverted index...")
         inverted_index = self.inverted_index
-        for page in self.pages_collection:
-
-            page.term_freqs_dict = self.create_term_freqs_dict(page)    # create & update page.term_freqs_dict
-
+        for page in tqdm(self.pages_collection):
             for term, tf in page.term_freqs_dict.items():
                 # compute tfidf
                 df_t = self.doc_term_freqs.get(term)
                 tfidf = self.compute_tfidf(tf, df_t)
                 posting = {page.page_id: tfidf}
                 # update inverted_index
-                inverted_index[term] = inverted_index.get(term, {}).update(posting)
+                if inverted_index.get(term) is None:
+                    inverted_index[term] = posting
+                else:
+                    inverted_index[term].update(posting)
 
+                self.test_term = term
+
+    def parse_pages(self):
+        """ Parse pages and construct the term_freqs_dicts and doc_term_freqs"""
+        print("[INFO] Creating term_freqs and doc_freqs dictionaries from pages collection to build the inverted index...")
+        seen_terms = []
+        for page in tqdm(self.pages_collection):
+            page.term_freqs_dict = self.create_term_freqs_dict(page)                    # create & update page.term_freqs_dict
+            for term in page.term_freqs_dict.keys():
+                if term not in seen_terms:
+                    seen_terms.append(term)
+                    self.doc_term_freqs[term] = self.doc_term_freqs.get(term, 0) + 1    # update doc_term_freqs {term: doc_freqs}
 
 
     def create_term_freqs_dict(self, page):
@@ -68,7 +95,7 @@ class InvertedIndex():
             Preprocess include (lower case & non-numeric filtering)
         """
 
-        return [token.lower() for passage in passages for token in passage if token.isalpha()]
+        return [token.lower() for passage in passages for token in passage.tokens if token.isalpha()]
 
 
     def compute_tfidf(self, tf, df_t):
@@ -99,4 +126,8 @@ class Passage:
 
 
 if __name__ == "__main__":
-    inverted_index_builder()
+    inverted_index = inverted_index_builder()
+    inv_idx = inverted_index.inverted_index
+    term = inverted_index.test_term
+    print("Term: {}, postings list: {}".format(term, inv_idx[term]))
+    pickle.dump(inverted_index, open("inverted_index.pkl", 'wb'))     # dump inverted index

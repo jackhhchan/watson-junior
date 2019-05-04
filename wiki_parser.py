@@ -4,6 +4,12 @@ import utils
 from InvertedIndex import Page
 from InvertedIndex import Passage
 
+#### PATHS ####
+FOLDER_NAME = "resource"            # CHANGE TO NAME OF FOLDER CONTAINING WIKI TEXT FILES
+
+# FILE_NAME = "wiki-001.txt"          # for testing
+# PATH = "{}/{}".format(FOLDER_NAME, FILE_NAME) 
+###################
 
 
 def parse_wiki_docs(folder_name=FOLDER_NAME):
@@ -41,10 +47,3 @@ def parse_raw_line(raw_line):
     return page_id, passage_idx, tokens
 
 
-
-#### PATHS ####
-FOLDER_NAME = "resource"
-
-FILE_NAME = "wiki-001.txt"          # for testing
-PATH = "{}/{}".format(FOLDER_NAME, FILE_NAME) 
-###################
