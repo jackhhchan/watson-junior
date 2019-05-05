@@ -10,11 +10,11 @@ RUN THIS SCRIPT
 
 import math
 import os
+import sys
 
 import pickle
 from tqdm import tqdm
 
-import utils
 import wiki_parser
 
 #### CHANGE THIS FOR A DIFFERENT SAVE FILE NAME
@@ -44,14 +44,17 @@ def inverted_index_builder():
         print("[INFO] Building portion {} of the inverted index...".format(idx))
         inverted_index_object = InvertedIndex(pages_collection=pages_collection, inverted_index=inverted_index)
         inverted_index = inverted_index_object.inverted_index
-        pages_collection = None
+        print(id(pages_collection))
+        del pages_collection
+        print(id(pages_collection))
+        print(sys.getsizeof(pages_collection))
 
-    return inverted_index
+    return inverted_index_object
 
 
 
 
-class InvertedIndex():
+class InvertedIndex(object):
 
     def __init__(self, pages_collection, inverted_index = {}):
         self.N = len(pages_collection)
@@ -126,14 +129,16 @@ class InvertedIndex():
         return idf
 
 
-class Page:
+class Page(object):
+    __slots__ = ('page_id', 'passages', 'term_freqs_dict')   # prevents other properties from being added to objects of this class
     def __init__(self, page_id):
         self.page_id = page_id
         self.passages = []
         self.term_freqs_dict = {}
 
 
-class Passage:
+class Passage(object):
+    __slots__ = ('page_id', 'passage_idx', 'tokens')       
     def __init__(self, page_id, passage_idx, tokens):
         self.page_id = page_id
         self.passage_idx = passage_idx
