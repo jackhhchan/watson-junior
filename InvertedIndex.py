@@ -32,11 +32,19 @@ def inverted_index_builder():
     Note:
     inverted_index.inverted_index; {term: {page_id:weight, page_id:weight}}
     """
-
-    pages_dict = wiki_parser.parse_wiki_docs()
-    pages_collection = list(pages_dict.values())
-
-    inverted_index = InvertedIndex(pages_collection=pages_collection)     # placeholder
+    folders_name = 'resource'
+    folders = os.listdir(folders_name)
+    inverted_index = {}
+    for idx, wiki_folder in enumerate(folders):
+        folder_path = "{}/{}".format(folders_name, wiki_folder)
+        
+        print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
+        pages_dict = wiki_parser.parse_wiki_docs(folder_name=folder_path)
+        pages_collection = list(pages_dict.values())
+        print("[INFO] Building portion {} of the inverted index...".format(idx))
+        inverted_index_object = InvertedIndex(pages_collection=pages_collection, inverted_index=inverted_index)
+        inverted_index = inverted_index_object.inverted_index
+        pages_collection = None
 
     return inverted_index
 
@@ -45,26 +53,27 @@ def inverted_index_builder():
 
 class InvertedIndex():
 
-    def __init__(self, pages_collection):
-        self.pages_collection = pages_collection
+    def __init__(self, pages_collection, inverted_index = {}):
         self.N = len(pages_collection)
-        self.doc_term_freqs = {}        #{token: df_t}  i.e. df_t = frequency of term in entire collection
+        self.doc_term_freqs = {}                    #{token: df_t}  i.e. df_t = frequency of term in entire collection
         
-        self.inverted_index = {}        #{token: {page_id:weight, page_id:weight, ...}}
+        self.inverted_index = inverted_index        #{token: {page_id:weight, page_id:weight, ...}}
         
-        self.test_term = ""             # test term
-        self.build()
+        self.test_term = ""                         # test term
+        self.build(pages_collection)
+        
+        pages_collection = None                     # clear memory
 
 
 
-    def build(self):
+    def build(self, pages_collection):
         """ Builds the Inverted Index"""
         print("[INFO] Creating term_freqs and doc_freqs dictionaries from pages collection to build the inverted index...")
-        self.parse_pages()
+        self.parse_pages(pages_collection)
 
         print("[INFO] Building inverted index...")
         inverted_index = self.inverted_index
-        for page in tqdm(self.pages_collection):
+        for page in tqdm(pages_collection):
             for term, tf in page.term_freqs_dict.items():
                 # compute tfidf
                 df_t = self.doc_term_freqs.get(term)
@@ -78,9 +87,9 @@ class InvertedIndex():
 
                 self.test_term = term
 
-    def parse_pages(self):
+    def parse_pages(self, pages_collection):
         """ Parse the collection of pages and construct the term_freqs_dicts and doc_term_freqs """
-        for page in tqdm(self.pages_collection):
+        for page in tqdm(pages_collection):
             page.term_freqs_dict = self.create_term_freqs_dict(page)                    # create & update page.term_freqs_dict
             
             seen_terms = []
@@ -113,7 +122,7 @@ class InvertedIndex():
         return tf*idf
 
     def compute_idf(self, df_t):
-        idf = math.log(self.N/df_t, 2)
+        idf = math.log(self.N/df_t, 2)          # log base 2
         return idf
 
 
