@@ -2,6 +2,9 @@
 
 This module builds the inverted index for the Automatic Fact Verification System, watson-junior.
 
+Note:
+-- preprocessing only lower-case
+
 RUN THIS SCRIPT
 """
 
@@ -13,6 +16,10 @@ from tqdm import tqdm
 
 import utils
 import wiki_parser
+
+#### CHANGE THIS FOR A DIFFERENT SAVE FILE NAME
+INVERTED_INDEX_FNAME = "inverted_index.pkl"
+# INVERTED_INDEX_FNAME = "mock-inv-index.pkl"
 
 
 
@@ -52,7 +59,9 @@ class InvertedIndex():
 
     def build(self):
         """ Builds the Inverted Index"""
+        print("[INFO] Creating term_freqs and doc_freqs dictionaries from pages collection to build the inverted index...")
         self.parse_pages()
+
         print("[INFO] Building inverted index...")
         inverted_index = self.inverted_index
         for page in tqdm(self.pages_collection):
@@ -71,10 +80,10 @@ class InvertedIndex():
 
     def parse_pages(self):
         """ Parse the collection of pages and construct the term_freqs_dicts and doc_term_freqs """
-        print("[INFO] Creating term_freqs and doc_freqs dictionaries from pages collection to build the inverted index...")
-        seen_terms = []
         for page in tqdm(self.pages_collection):
             page.term_freqs_dict = self.create_term_freqs_dict(page)                    # create & update page.term_freqs_dict
+            
+            seen_terms = []
             for term in page.term_freqs_dict.keys():
                 if term not in seen_terms:
                     seen_terms.append(term)
@@ -94,11 +103,9 @@ class InvertedIndex():
         return term_freqs_dict
 
     def get_BOW(self, passages):
-        """ return a bag of preprocessed tokens from the list of passages
-            
-                preprocess steps are (lower case & non-numeric filtering)
-        """
-        return [token.lower() for passage in passages for token in passage.tokens if token.isalpha()]
+        """ return a bag of preprocessed tokens from the list of passages """
+
+        return [token for passage in passages for token in passage.tokens]
 
 
     def compute_tfidf(self, tf, df_t):
@@ -106,7 +113,7 @@ class InvertedIndex():
         return tf*idf
 
     def compute_idf(self, df_t):
-        idf = math.log(self.N/df_t)
+        idf = math.log(self.N/df_t, 2)
         return idf
 
 
@@ -133,4 +140,4 @@ if __name__ == "__main__":
     inv_idx = inverted_index.inverted_index
     term = inverted_index.test_term
     print("Term: {}, postings list: {}".format(term, inv_idx[term]))
-    pickle.dump(inv_idx, open("inverted_index.pkl", 'wb'))     # dump inverted index
+    pickle.dump(inv_idx, open(INVERTED_INDEX_FNAME, 'wb'))     # dump inverted index
