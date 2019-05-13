@@ -6,9 +6,6 @@ from InvertedIndex import Passage
 
 #### PATHS ####
 FOLDER_NAME = "resource"            # CHANGE TO NAME OF FOLDER CONTAINING WIKI TEXT FILES
-
-# FILE_NAME = "wiki-001.txt"          # for testing
-# PATH = "{}/{}".format(FOLDER_NAME, FILE_NAME) 
 ###################
 
 
@@ -47,3 +44,40 @@ def parse_raw_line(raw_line):
     return page_id, passage_idx, tokens
 
 
+####                 ####
+#### Doc-term matrix ####
+####                 ####
+
+import re
+
+
+def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME):
+    """ Parses the wiki docs and extract and process the page-ids only.
+        
+    
+        returns:
+        page_ids_term_freq_dicts --  list of term frequencies dictionaries of each page-id
+    """
+    page_ids_term_freq_dicts = []       # to be returned
+
+    seen_page_ids = []
+    for file_name in os.listdir(folder_name):
+        path = "{}/{}".format(folder_name, file_name)
+        raw_lines = utils.load_file(path)
+        for raw_line in raw_lines:
+            page_id, _, _ = parse_raw_line(raw_line)
+            page_id_tokens = re.split('_|-', page_id)
+            page_id_tokens = [token for token in page_id_tokens if token.isalpha() and not token == "LRB" and not token == "RRB"]
+
+            if page_id not in seen_page_ids:
+                seen_page_ids.append(page_id)
+                page_ids_term_freq_dicts.append(get_BOW(page_id_tokens))
+
+    return page_ids_term_freq_dicts
+
+
+def get_BOW(tokens_list):
+    BOW = {}
+    for word in tokens_list:
+        BOW[word.lower()] = BOW.get(word.lower(), 0) + 1
+    return BOW
