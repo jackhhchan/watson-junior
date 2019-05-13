@@ -7,6 +7,8 @@ Created on Sun May 12 21:19:18 2019
 """
 
 from allennlp.predictors import Predictor
+import wikipedia
+
 predictor = Predictor.from_path(
             "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo-constituency-parser-2018.03.14.tar.gz")
 #https://allennlp.org/models
@@ -55,3 +57,12 @@ if __name__ == '__main__':
     for subject in subjects:
         if len(subject) > 0:
             noun_phrases.append(subject)
+            
+#"""
+#wikipedia API 
+#"""
+    predicted_pages = []
+    for np in noun_phrases:
+        doc = wikipedia.search(np)
+        predicted_pages.extend(doc)
+    predicted_pages = list(set(predicted_pages))
