@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 
 import utils
 from InvertedIndex import Page
@@ -59,24 +60,36 @@ def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME):
         page_ids_term_freq_dicts --  list of term frequencies dictionaries of each page-id
     """
     page_ids_term_freq_dicts = []       # to be returned
+    page_idx = 0
+    page_idx_id_dict = {}               # {page_idx: page_id}
 
     seen_page_ids = []
     for file_name in os.listdir(folder_name):
+        if not file_name.endswith(".txt"):
+            continue
         path = "{}/{}".format(folder_name, file_name)
         raw_lines = utils.load_file(path)
-        for raw_line in raw_lines:
+        for raw_line in tqdm(raw_lines):
             page_id, _, _ = parse_raw_line(raw_line)
-            page_id_tokens = re.split('_|-', page_id)
-            page_id_tokens = [token for token in page_id_tokens if token.isalpha() and not token == "LRB" and not token == "RRB"]
 
             if page_id not in seen_page_ids:
                 seen_page_ids.append(page_id)
+
+                page_idx_id_dict[page_idx] = page_id
+                page_idx += 1
+
+                page_id_tokens = re.split('_|-', page_id)
+                page_id_tokens = [token.lower() for token in page_id_tokens if token.isalpha() and not token == "LRB" and not token == "RRB"]
+
                 page_ids_term_freq_dicts.append(get_BOW(page_id_tokens))
 
-    return page_ids_term_freq_dicts
+        assert len(seen_page_ids) == len(page_idx_id_dict)
+
+    return page_ids_term_freq_dicts, page_idx_id_dict
 
 
 def get_BOW(tokens_list):
+    """ return bag of words in tokens list with words lowered."""
     BOW = {}
     for word in tokens_list:
         BOW[word.lower()] = BOW.get(word.lower(), 0) + 1
