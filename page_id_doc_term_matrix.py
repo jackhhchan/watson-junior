@@ -23,7 +23,7 @@ def main():
     wiki_matrix_tfidf = tfidf_transform_matrix(transformer, wiki_matrix)
 
     # Truncate using single value decomposition
-    svd = TruncatedSVD(n_components=100)
+    svd = TruncatedSVD(n_components=10)
     wiki_matrix_truncated = truncate_matrix(svd, wiki_matrix_tfidf)
     # pickle.dump(wiki_matrix_truncated, open("wiki_matrix_truncated.pkl", 'wb'))
 

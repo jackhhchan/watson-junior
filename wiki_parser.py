@@ -7,6 +7,7 @@ from InvertedIndex import Passage
 
 #### PATHS ####
 FOLDER_NAME = "resource"            # CHANGE TO NAME OF FOLDER CONTAINING WIKI TEXT FILES
+FOLDER_NAME_DOC_TERM_MATRIX = "resource_doc_term_matrix"
 ###################
 
 
@@ -52,7 +53,7 @@ def parse_raw_line(raw_line):
 import re
 
 
-def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME):
+def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME_DOC_TERM_MATRIX):
     """ Parses the wiki docs and extract and process the page-ids only.
         
     
@@ -63,7 +64,7 @@ def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME):
     page_idx = 0
     page_idx_id_dict = {}               # {page_idx: page_id}
 
-    seen_page_ids = []
+    # seen_page_ids = list
     for file_name in os.listdir(folder_name):
         if not file_name.endswith(".txt"):
             continue
@@ -72,10 +73,8 @@ def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME):
         for raw_line in tqdm(raw_lines):
             page_id, _, _ = parse_raw_line(raw_line)
 
-            if page_id not in seen_page_ids:
-                seen_page_ids.append(page_id)
-
-                page_idx_id_dict[page_idx] = page_id
+            if page_idx_id_dict.get(page_id) is None:
+                page_idx_id_dict[page_id] = page_idx
                 page_idx += 1
 
                 page_id_tokens = re.split('_|-', page_id)
@@ -83,7 +82,20 @@ def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME):
 
                 page_ids_term_freq_dicts.append(get_BOW(page_id_tokens))
 
-        assert len(seen_page_ids) == len(page_idx_id_dict)
+            # if page_id not in seen_page_ids:
+            #     seen_page_ids.append(page_id)
+
+            #     page_idx_id_dict[page_idx] = page_id
+            #     page_idx += 1
+
+            #     page_id_tokens = re.split('_|-', page_id)
+            #     page_id_tokens = [token.lower() for token in page_id_tokens if token.isalpha() and not token == "LRB" and not token == "RRB"]
+
+            #     page_ids_term_freq_dicts.append(get_BOW(page_id_tokens))
+
+        # assert len(seen_page_ids) == len(page_idx_id_dict)
+    
+    page_idx_id_dict = {page_idx:page_id for page_id, page_idx in page_idx_id_dict.items()}
 
     return page_ids_term_freq_dicts, page_idx_id_dict
 
@@ -92,5 +104,5 @@ def get_BOW(tokens_list):
     """ return bag of words in tokens list with words lowered."""
     BOW = {}
     for word in tokens_list:
-        BOW[word.lower()] = BOW.get(word.lower(), 0) + 1
+        BOW[word.lower()] = BOW.get(word.lower(), 0) + 1            # should this be binary for doc-term-matrix? i.e. either 0 or 1 not raw count
     return BOW

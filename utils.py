@@ -18,6 +18,7 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     for raw_line in f_handle:
         # split line into tokens
         raw_lines.append(raw_line.split())
+    f_handle.close()
 
     print("[INFO] Extracted {}, len(raw_lines) = {}".format(f_path, len(raw_lines)))
     return raw_lines
