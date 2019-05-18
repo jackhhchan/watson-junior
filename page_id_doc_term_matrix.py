@@ -35,11 +35,13 @@ def main():
         cos_sim = cosine_sim(query_vector, page_vector)
         doc_query_sims.append((cos_sim, page_idx))
 
+    # print top 10 page_ids most similar to query
     doc_query_sims.sort(reverse=True)
     for (_, page_idx) in doc_query_sims[:9]:
         page_id = page_idx_id_dict.get(page_idx)
         print("{}:{}".format(page_id, page_ids_term_freq_dicts[page_idx]))
 
+    ## NOTE THIS DOES NOT TAKE INTO ACCOUNT SPELLING MISTAKES OR TYPOS
 
 
 

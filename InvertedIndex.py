@@ -12,6 +12,7 @@ import math
 import os
 import sys
 import gc
+# gc.set_debug(gc.DEBUG_LEAK)
 
 import pickle
 from tqdm import tqdm
@@ -19,8 +20,8 @@ from tqdm import tqdm
 import wiki_parser
 
 #### CHANGE THIS FOR A DIFFERENT SAVE FILE NAME
-INVERTED_INDEX_FNAME = "inverted_index_tf_normalized_proper.pkl"
-PAGE_IDS_IDX_DICT_FNAME = "page_ids_idx_dict_normalized_proper.pkl"
+INVERTED_INDEX_FNAME = "inverted_index_tf_normalized_proper_fixed.pkl"
+PAGE_IDS_IDX_DICT_FNAME = "page_ids_idx_dict_normalized_proper_fixed.pkl"
 # INVERTED_INDEX_FNAME = "mock-inv-index.pkl"
 
 
@@ -33,24 +34,65 @@ def inverted_index_builder():
     Note:
     inverted_index.inverted_index; {term: {page_id:weight, page_id:weight}}
     """
+    # folders_name = 'resource'
+    # folders = os.listdir(folders_name)
+    # inverted_index = {}
+    # page_ids_idx_dict = {}
+    # doc_term_freqs = {}
+    # num_folders = len(folders)
+    # for idx, wiki_folder in enumerate(folders):
+    #     folder_path = "{}/{}".format(folders_name, wiki_folder)
+        
+    #     print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
+    #     pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values())               # change this to pages_collection = wiki_parser.parse_wiki_docs(folder_name=folder_path).values()
+    #     print("[INFO] Building portion {}/{} of the inverted index...".format(idx + 1, num_folders))
+    #     inverted_index_object = InvertedIndex(pages_collection=pages_collection, 
+    #                                           inverted_index=inverted_index, 
+    #                                           doc_term_freqs=doc_term_freqs, 
+    #                                           page_ids_idx_dict=page_ids_idx_dict)
+    #     inverted_index = inverted_index_object.inverted_index
+    #     page_ids_idx_dict = inverted_index_object.page_ids_idx_dict
+    #     doc_term_freqs = inverted_index_object.doc_term_freqs
+
+    #     # force garbage collection
+    #     for page in pages_collection: 
+    #         del page
+    #     del pages_collection
+    #     del inverted_index_object
+    #     gc.collect()
+
+    # folder_name = 'resource_doc_term_matrix'
+    # print("[INFO] Parsing the wiki docs in {}...".format(folder_name))
+    # pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_name).values())
+    # inverted_index_object = InvertedIndex(pages_collection=pages_collection)
+    # inverted_index = inverted_index_object.inverted_index
+    # page_ids_idx_dict = inverted_index_object.page_ids_idx_dict
+
+
     folders_name = 'resource'
     folders = os.listdir(folders_name)
     inverted_index = {}
+    page_ids_idx_dict = {}
     num_folders = len(folders)
+
+    inverted_index_object = InvertedIndex()
+
     for idx, wiki_folder in enumerate(folders):
         folder_path = "{}/{}".format(folders_name, wiki_folder)
-        
+
         print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
-        pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values())               # change this to pages_collection = wiki_parser.parse_wiki_docs(folder_name=folder_path).values()
+        pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values()) 
         print("[INFO] Building portion {}/{} of the inverted index...".format(idx + 1, num_folders))
-        inverted_index_object = InvertedIndex(pages_collection=pages_collection, inverted_index=inverted_index)
-        inverted_index = inverted_index_object.inverted_index
-        page_ids_idx_dict = inverted_index_object.page_ids_idx_dict
-        for page in pages_collection: 
-            del page
-        del pages_collection
-        del inverted_index_object
-        gc.collect()
+
+        # build up term freqs and doc term freqs and page collection
+        inverted_index_object.parse_pages(pages_collection)
+
+    with open('parsed_inv_object.pkl', 'wb') as handle:
+        pickle.dump(inverted_index_object, handle)
+
+    inverted_index_object.build()
+    inverted_index = inverted_index_object.inverted_index
+    page_ids_idx_dict = inverted_index_object.page_ids_idx_dict
 
     return inverted_index, page_ids_idx_dict
 
@@ -59,26 +101,19 @@ def inverted_index_builder():
 
 class InvertedIndex(object):
 
-    def __init__(self, pages_collection, inverted_index = {}):
-        self.N = len(pages_collection)
-        self.doc_term_freqs = {}                    #{token: df_t}  i.e. df_t = frequency of term in entire collection
+    def __init__(self, pages_collection = [], inverted_index={}, doc_term_freqs={}, page_ids_idx_dict={}):
+        self.doc_term_freqs = doc_term_freqs                    #{token: df_t}  i.e. df_t = frequency of term in entire collection
         
         self.inverted_index = inverted_index        #{token: {page_id:weight, page_id:weight, ...}}
-        self.page_ids_idx_dict = {}                 # page-idx : page-id look up dictionary to reduce inverted index size    
+        self.page_ids_idx_dict = page_ids_idx_dict  # page-idx : page-id look up dictionary to reduce inverted index size    
+
+        self.pages_collection = pages_collection
 
 
-        self.test_term = ""                         # test term
-        self.build(pages_collection)
-
-        
-        del pages_collection                        # clear memory
-
-
-
-    def build(self, pages_collection):
+    def build(self):
         """ Builds the Inverted Index"""
-        print("[INFO] Creating term_freqs and doc_freqs dictionaries from pages collection to build the inverted index...")
-        self.parse_pages(pages_collection)
+        pages_collection = self.pages_collection
+        N = len(pages_collection)
 
         print("[INFO] Building inverted index...")
         inverted_index = self.inverted_index
@@ -88,7 +123,7 @@ class InvertedIndex(object):
             for term, tf in page.term_freqs_dict.items():
                 # compute tfidf
                 df_t = self.doc_term_freqs.get(term)
-                tfidf = self.compute_tfidf(tf, df_t)
+                tfidf = self.compute_tfidf(tf, df_t, N)
 
                 posting = {page_idx: tfidf}
 
@@ -98,12 +133,11 @@ class InvertedIndex(object):
                 else:
                     inverted_index[term].update(posting)
 
-                self.test_term = term
-
 
 
     def parse_pages(self, pages_collection):
         """ Parse the collection of pages and construct the term_freqs_dicts and doc_term_freqs """
+        self.pages_collection.extend(pages_collection)
         for page in tqdm(pages_collection):
             page.term_freqs_dict = self.create_term_freqs_dict(page)                    # create & update page.term_freqs_dict
             
@@ -132,14 +166,14 @@ class InvertedIndex(object):
         return [token for passage in passages for token in passage.tokens]
 
 
-    def compute_tfidf(self, tf, df_t, normalize=True):
+    def compute_tfidf(self, tf, df_t, N, normalize=True):
         if normalize:
             tf = math.log(1+tf, 2)
-        idf = self.compute_idf(df_t)
+        idf = self.compute_idf(df_t, N)
         return tf*idf
 
-    def compute_idf(self, df_t):
-        idf = math.log(self.N/df_t, 2)          # log base 2
+    def compute_idf(self, df_t, N):
+        idf = math.log(N/df_t, 2)          # log base 2
         return idf
 
 
@@ -167,5 +201,7 @@ if __name__ == "__main__":
     inverted_index, page_ids_idx_dict = inverted_index_builder()
     # term = inverted_index.test_term
     # print("Term: {}, postings list: {}".format(term, inv_idx[term]))
-    pickle.dump(inverted_index, open(INVERTED_INDEX_FNAME, 'wb'))       # dump inverted index
-    pickle.dump(page_ids_idx_dict, open(PAGE_IDS_IDX_DICT_FNAME, 'wb'))  # dump page id idx dict
+    with open(INVERTED_INDEX_FNAME, 'wb') as inv_handle:
+        pickle.dump(inverted_index, inv_handle)                     # dump inverted index
+    with open(PAGE_IDS_IDX_DICT_FNAME, 'wb') as page_ids_idx_dict_handle:
+        pickle.dump(page_ids_idx_dict, page_ids_idx_dict_handle)    # dump page id idx dict

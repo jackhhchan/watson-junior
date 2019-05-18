@@ -95,7 +95,7 @@ def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME_DOC_TERM_MATRIX):
 
         # assert len(seen_page_ids) == len(page_idx_id_dict)
     
-    page_idx_id_dict = {page_idx:page_id for page_id, page_idx in page_idx_id_dict.items()}
+    page_idx_id_dict = {page_idx:page_id for page_id, page_idx in page_idx_id_dict.items()}         # reverse dictionary keys to page_idx : page_id for ease of use.
 
     return page_ids_term_freq_dicts, page_idx_id_dict
 
