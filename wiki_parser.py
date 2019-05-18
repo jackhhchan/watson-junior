@@ -30,14 +30,22 @@ def parse_wiki_docs(folder_name=FOLDER_NAME):
 
             pages[page_id] = pages.get(page_id, Page(page_id))      # instantiate page if not exist
             pages[page_id].passages.append(passage)                 # append passage to page's passages list
+        
 
     return pages
             
 
 def parse_raw_line(raw_line):
     """ Extract page id, passage index and tokens from raw line to build Passage objects 
-    
-        Helper function
+
+        Returns:
+        --------
+        page_id
+            the page id of the line in a string
+        passage_idx
+            the passage index of the line in a string
+        tokens
+            a list of tokens associated with the passage (lower-cased)
     """
     page_id = raw_line[0]
     passage_idx = raw_line[1]
@@ -81,19 +89,6 @@ def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME_DOC_TERM_MATRIX):
                 page_id_tokens = [token.lower() for token in page_id_tokens if token.isalpha() and not token == "LRB" and not token == "RRB"]
 
                 page_ids_term_freq_dicts.append(get_BOW(page_id_tokens))
-
-            # if page_id not in seen_page_ids:
-            #     seen_page_ids.append(page_id)
-
-            #     page_idx_id_dict[page_idx] = page_id
-            #     page_idx += 1
-
-            #     page_id_tokens = re.split('_|-', page_id)
-            #     page_id_tokens = [token.lower() for token in page_id_tokens if token.isalpha() and not token == "LRB" and not token == "RRB"]
-
-            #     page_ids_term_freq_dicts.append(get_BOW(page_id_tokens))
-
-        # assert len(seen_page_ids) == len(page_idx_id_dict)
     
     page_idx_id_dict = {page_idx:page_id for page_id, page_idx in page_idx_id_dict.items()}         # reverse dictionary keys to page_idx : page_id for ease of use.
 

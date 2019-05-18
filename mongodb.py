@@ -1,26 +1,74 @@
+from enum import Enum
+
 import os
 import pymongo
+from tqdm import tqdm
 
-myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+import utils
+import wiki_parser
 
-mydb = myclient["wiki"]         # create database
+class Field(Enum):
+    """ Field types used in the collection """
+    page_id = "page_id"
+    passage_idx = "passage_idx"
+    tokens = "tokens"
 
-mycol = mydb["wiki"]           # create collection
+###################################
+######## DATABASE SET UP ##########
+###################################
 
-# loop through files and create dictionary 
-# with format -- {page_id : {passage_idx: passage, passage_idx: passage, ...}}
-wiki_files = os.listdir('resource')
-for wiki_file in wiki_files:
-    path = "{}/{}".format('resource', wiki_file)
+def _connected_db():
+    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    mydb = myclient["wikiDatabase"]         # create database
+    mycol = mydb["wiki"]                    # create collection
+
+    return mydb, mycol
+
+
+def populate_db(collection, folder_name='resource'):
+    """ Populates the database with passages loaded from wiki txt files """
+    # loop through files insert each passage
+    # with
+    wiki_files = os.listdir(folder_name)
+    for wiki_file in wiki_files:
+        path = "{}/{}".format(folder_name, wiki_file)
+
+        raw_lines = utils.load_file(path)
+        for raw_line in tqdm(raw_lines):
+            page_id, passage_idx, tokens = wiki_parser.parse_raw_line(raw_line)
+
+            json = db_formatted(page_id, passage_idx, tokens)
+            mycol.insert_one(json)
+        break
+
+
+def db_formatted(page_id, passage_idx, tokens):
+    """ Returns the formatted dictionary format to store each passage """
+    return {Field.page_id: page_id, Field.passage_idx: passage_idx, Field.tokens: tokens}
+
+
+###################################
+############ QUERY ################
+###################################
+
+def query(collection, page_id, passage_idx):
+    """ Returns the query cursor for the query matching the page_id and passage_idx """
+    return collection.find({Field.page_id: str(page_id), Field.tokens: str(passage_idx)})
+
+####################################
+
+
+if __name__ == "__main__":
+    # connect to db, return db and the 'wiki' collection
+    mydb, mycol = _connected_db()
+    print(mydb.list_collection_names())
+
+    # populate the database with wiki txt file passages
+    # populate_db(collection=mycol)                           # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
+
+    # test query
+    query_cursor = query(collection=mycol, page_id="Alexander_McNair", passage_idx="0")
     
-
-
-
-x = mycol.insert_one()
-
-print(mydb.list_collection_names())
-
-
-# x = mycol.find_one()
-
-# print(x)
+    for data in query_cursor:
+        print(data.get(Field.tokens))
+    
