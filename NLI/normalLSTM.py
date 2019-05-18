@@ -142,12 +142,12 @@ def buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
 
 #    STAMP = 'lstm_%d_%d_%.2f_%.2f' % (self.number_lstm_units, self.number_dense_units, self.rate_drop_lstm, self.rate_drop_dense)
 
-    checkpoint_dir = './trained_model/LSTM_' + str(int(time.time())) + '/'
+    checkpoint_dir = './trained_model/LSTM/'
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    bst_model_path = checkpoint_dir + '.h5'
+    bst_model_path = checkpoint_dir + str(int(time.time())) + '.h5'
 
     model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=False)
 

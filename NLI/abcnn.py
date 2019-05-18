@@ -11,24 +11,19 @@ This script to build ABCNN model
 
 from __future__ import print_function
 from keras import backend as K
-from keras.layers import Input,Embedding, Convolution1D, Convolution2D, AveragePooling1D, GlobalAveragePooling1D, Dense, Lambda, merge, TimeDistributed, RepeatVector, Permute, ZeroPadding1D, ZeroPadding2D, Reshape, Dropout, BatchNormalization
+from keras.layers import Input,Embedding, Convolution1D, Convolution2D, AveragePooling1D, \
+    GlobalAveragePooling1D, Dense, Lambda, TimeDistributed, RepeatVector, Permute, \
+    ZeroPadding1D, ZeroPadding2D, Reshape, Dropout, BatchNormalization
 from keras.models import Model
 import numpy as np
 from keras.layers.merge import concatenate,multiply,dot
 import keras
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
-import pandas as pd
-import tensorflow as tf
-import scipy
 from gensim.models import Word2Vec
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 import time
 import os
-from keras.models import load_model
-from keras.optimizers import RMSprop,Adam
-from sklearn.preprocessing import MinMaxScaler
-import tqdm
 import json
 from sentence_selection.generateTrainingFile import getPage_index,readOneFile
 
@@ -172,20 +167,10 @@ def out_shape(shapes):
 def MatchScore(l, r, mode="euclidean"):
     if mode == "euclidean":
         return Lambda(compute_euclidean_match_score, output_shape=out_shape)([l, r])
-#    
-#        return merge(
-#            [l, r],
-#            mode=compute_euclidean_match_score,
-#            output_shape=lambda shapes: (None, shapes[0][1], shapes[1][1])
-#        )
+
     elif mode == "cos":
         return Lambda(compute_cos_match_score, output_shape=out_shape)([l, r])
 
-#        return merge(
-#            [l, r],
-#            mode=compute_cos_match_score,
-#            output_shape=lambda shapes: (None, shapes[0][1], shapes[1][1])
-#        )
     elif mode == "dot":
         return dot([l, r],axes=-1)
     else:
@@ -204,7 +189,7 @@ def ABCNN_w2v(
     assert len(filter_widths) == depth
 
     print("Using %s match score" % mode)
-
+    print("start training...")
     left_sentence_representations = []
     right_sentence_representations = []
     left_input = Input(shape=(left_seq_len,))
@@ -363,14 +348,14 @@ def ABCNN_w2v(
     model = Model([left_input, right_input], output=classify)
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['acc'])
 
-    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
-    checkpoint_dir = './trained_model/ABCNN_' + str(int(time.time())) + '/'
+    checkpoint_dir = './trained_model/ABCNN' 
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    bst_model_path = checkpoint_dir + '.h5'
+    bst_model_path = checkpoint_dir + str(int(time.time())) + '.h5'
 
     model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=False, save_weights_only=False)
 
