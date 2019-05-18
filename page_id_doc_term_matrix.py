@@ -41,7 +41,7 @@ def main():
         cos_sim = cosine_similarity(query_vector, page_vector)
         doc_query_sims.append((cos_sim, page_idx))
 
-    
+    # print top 10 page_ids most similar to query
     doc_query_sims.sort(reverse=True)
     for (cos_sim, page_idx) in doc_query_sims[:9]:
         page_id = page_idx_id_dict.get(page_idx)

@@ -14,11 +14,10 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     """ Load text file from path and return raw array of split strings"""
 
     raw_lines = []
-    f_handle = open(f_path, 'r', encoding=encoding)
-    for raw_line in f_handle:
-        # split line into tokens
-        raw_lines.append(raw_line.split())
-    f_handle.close()
+    with open(f_path, 'r', encoding=encoding) as f_handle:
+        for raw_line in f_handle:
+            # split line into tokens
+            raw_lines.append(raw_line.split())
 
     print("[INFO] Extracted {}, len(raw_lines) = {}".format(f_path, len(raw_lines)))
     return raw_lines
