@@ -94,12 +94,12 @@ def buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
     
     early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
-    checkpoint_dir = './trained_model/ESIM_' + str(int(time.time()))
+    checkpoint_dir = './trained_model/ESIM'
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    bst_model_path = checkpoint_dir + '.h5'
+    bst_model_path = checkpoint_dir + str(int(time.time())) + '.h5'
 
     model_checkpoint = ModelCheckpoint(bst_model_path, monitor='val_acc', mode='auto',\
                                        save_best_only=True, save_weights_only=False)

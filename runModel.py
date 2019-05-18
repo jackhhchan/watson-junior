@@ -81,3 +81,4 @@ if __name__ == '__main__':
     model,his = buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
                 number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
                 max_len,num_classes,epoch,batch_size)
+#    plot(model,'normalLSTM.png')
