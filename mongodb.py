@@ -61,7 +61,7 @@ def db_formatted(page_id, passage_idx, tokens):
 
 def query(collection, page_id, passage_idx):
     """ Returns the query cursor for the query matching the page_id and passage_idx """
-    return collection.find({Field.page_id.value : str(page_id), 
+    return collection.find_one({Field.page_id.value : str(page_id), 
                             Field.passage_idx.value : str(passage_idx)})
 
 ####################################
