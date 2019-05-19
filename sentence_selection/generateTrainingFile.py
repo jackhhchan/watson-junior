@@ -56,7 +56,7 @@ class encoding(Enum):
     UTF8 = "UTF-8"
 
 
-def load_file(f_path, encoding=encoding.UTF8.name):
+def load_file(f_path, encoding=encoding.UTF8.value):
     """ Load text file from path and return raw array of split strings"""
 
     raw_lines = []
@@ -69,7 +69,7 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     return raw_lines
 
     
-def getPages(folder_name = 'resource/wiki_files'):
+def getPages(folder_name = 'resource_model/wiki_files'):
     pages = {}      # {page_id, Page object}
     for file_name in os.listdir(folder_name):
         # load file
@@ -89,7 +89,7 @@ def getPages(folder_name = 'resource/wiki_files'):
 #list(page_index.values())[0]
 #page_index['Alexander_McNair']
 
-def getPage_index(folder_name = 'resource/wiki_files'):
+def getPage_index(folder_name = 'resource_model/wiki_files'):
     page_index = {}      # {page_id, path}
     page_size = {}
     for file_name in os.listdir(folder_name):
@@ -105,10 +105,11 @@ def getPage_index(folder_name = 'resource/wiki_files'):
                     page_index[page_id] = path
             except:
                 pass
+        # break       ## add for debugging runModel.py script (runs entire script without loading all txt files)
     return page_index, page_size
  
 def readOneFile(path,pg_id,index):
-    with open(path) as data:
+    with open(path, 'r', encoding=encoding.UTF8.value) as data:
         for line in data:
             content = line[:-1].split(' ')
             if content[0] == pg_id and content[1] == str(index):

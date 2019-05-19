@@ -17,7 +17,7 @@ import pandas as pd
 import keras
 
 if __name__ == '__main__':
-    with open('resource/train.json') as data:
+    with open('resource_model/train.json') as data:
             json_data = json.load(data)
         
     # read the json_file
@@ -59,7 +59,8 @@ if __name__ == '__main__':
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
     epoch = 50
-    batch_size = 1024
+    # batch_size = 1024
+    batch_size = 256
     
     sim = keras.utils.to_categorical(label_v2, num_classes)
             

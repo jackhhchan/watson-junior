@@ -25,6 +25,7 @@ from keras.layers import LSTM, Bidirectional, GlobalAveragePooling1D, Input,\
       concatenate, Lambda, subtract, multiply, Dense, TimeDistributed, Embedding
 from NLI.attention import DotProductAttention
 from NLI.abcnn import word_embed_meta_data, create_train_dev_set
+
 from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
 
 
