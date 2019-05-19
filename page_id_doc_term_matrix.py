@@ -8,9 +8,9 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.decomposition import TruncatedSVD
 
 def main():
-    page_ids_term_freq_dicts, page_idx_id_dict = wiki_parser.get_page_ids_term_freq_dicts()
-    pickle.dump(page_ids_term_freq_dicts, open("page_ids_term_freq_dicts.pkl", 'wb'))
-    pickle.dump(page_idx_id_dict, open("page_idx_id_dict.pkl", "wb"))
+    # page_ids_term_freq_dicts, page_idx_id_dict = wiki_parser.get_page_ids_term_freq_dicts()
+    # pickle.dump(page_ids_term_freq_dicts, open("page_ids_term_freq_dicts.pkl", 'wb'))
+    # pickle.dump(page_idx_id_dict, open("page_idx_id_dict.pkl", "wb"))
 
     page_ids_term_freq_dicts = pickle.load(open("page_ids_term_freq_dicts.pkl", 'rb'))
     page_idx_id_dict = pickle.load(open("page_idx_id_dict.pkl", 'rb'))
@@ -23,26 +23,33 @@ def main():
     wiki_matrix_tfidf = tfidf_transform_matrix(transformer, wiki_matrix)
 
     # Truncate using single value decomposition
-    svd = TruncatedSVD(n_components=10)
+    svd = TruncatedSVD(n_components=100)
     wiki_matrix_truncated = truncate_matrix(svd, wiki_matrix_tfidf)
     # pickle.dump(wiki_matrix_truncated, open("wiki_matrix_truncated.pkl", 'wb'))
 
-    query = "Nikoloj is an actor in fox broadcasting company"
+    query = "Nikoloj is an actor in the fox broadcasting company"
+    query = "Nikoloj fox broadcasting company"
+    # NER
     query_vector = transform_query(dictVectorizer, transformer, svd, query)
 
     doc_query_sims = []
+    # for page_idx, page_vector in enumerate(wiki_matrix_truncated):
+    #     cos_sim = cosine_sim(query_vector, page_vector)
+    #     doc_query_sims.append((cos_sim, page_idx))
+
     for page_idx, page_vector in enumerate(wiki_matrix_truncated):
-        cos_sim = cosine_sim(query_vector, page_vector)
+        cos_sim = cosine_similarity(query_vector, page_vector)
         doc_query_sims.append((cos_sim, page_idx))
 
     # print top 10 page_ids most similar to query
     doc_query_sims.sort(reverse=True)
-    for (_, page_idx) in doc_query_sims[:9]:
+    for (cos_sim, page_idx) in doc_query_sims[:9]:
         page_id = page_idx_id_dict.get(page_idx)
-        print("{}:{}".format(page_id, page_ids_term_freq_dicts[page_idx]))
+        print("{}:{}, {}".format(page_id, cos_sim, page_ids_term_freq_dicts[page_idx]))
 
-    ## NOTE THIS DOES NOT TAKE INTO ACCOUNT SPELLING MISTAKES OR TYPOS
-
+import numpy as np
+def cosine_similarity(v1, v2):
+    return np.dot(v1, v2) / np.sqrt(np.dot(v1, v1)*np.dot(v2,v2))
 
 
 
