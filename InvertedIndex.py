@@ -75,9 +75,14 @@ def inverted_index_builder():
     page_ids_idx_dict = {}
     num_folders = len(folders)
 
-    inverted_index_object = InvertedIndex()
+
+    # inverted_index_object = InvertedIndex()
+    with open('3.pkl', 'rb') as handle:
+        inverted_index_object = pickle.load(handle)
 
     for idx, wiki_folder in enumerate(folders):
+        if wiki_folder in ['0', '1', '2', '3', '10']: 
+            continue
         folder_path = "{}/{}".format(folders_name, wiki_folder)
 
         print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
@@ -86,9 +91,12 @@ def inverted_index_builder():
 
         # build up term freqs and doc term freqs and page collection
         inverted_index_object.parse_pages(pages_collection)
+        with open(wiki_folder+'.pkl', 'wb') as handle:
+            pickle.dump(inverted_index_object, handle)
 
-    with open('parsed_inv_object.pkl', 'wb') as handle:
-        pickle.dump(inverted_index_object, handle)
+
+    # with open('parsed_inv_object.pkl', 'wb') as handle:
+    #     pickle.dump(inverted_index_object, handle)
 
     inverted_index_object.build()
     inverted_index = inverted_index_object.inverted_index
