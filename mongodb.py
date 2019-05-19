@@ -7,8 +7,14 @@ from tqdm import tqdm
 import utils
 import wiki_parser
 
+# run server --
+# mongod --dbpath /Users/jackchan/downloads/mongodb/data/db
+
 class Field(Enum):
     """ Field types used in the collection """
+    def __str__(self):
+        return str(self.value)      # string conversion
+
     page_id = "page_id"
     passage_idx = "passage_idx"
     tokens = "tokens"
@@ -44,7 +50,9 @@ def populate_db(collection, folder_name='resource'):
 
 def db_formatted(page_id, passage_idx, tokens):
     """ Returns the formatted dictionary format to store each passage """
-    return {Field.page_id: page_id, Field.passage_idx: passage_idx, Field.tokens: tokens}
+    return {Field.page_id.value : page_id, 
+            Field.passage_idx.value : passage_idx, 
+            Field.tokens.value : tokens}
 
 
 ###################################
@@ -53,7 +61,8 @@ def db_formatted(page_id, passage_idx, tokens):
 
 def query(collection, page_id, passage_idx):
     """ Returns the query cursor for the query matching the page_id and passage_idx """
-    return collection.find({Field.page_id: str(page_id), Field.tokens: str(passage_idx)})
+    return collection.find({Field.page_id.value : str(page_id), 
+                            Field.passage_idx.value : str(passage_idx)})
 
 ####################################
 
@@ -70,5 +79,5 @@ if __name__ == "__main__":
     query_cursor = query(collection=mycol, page_id="Alexander_McNair", passage_idx="0")
     
     for data in query_cursor:
-        print(data.get(Field.tokens))
+        print(data.get(Field.tokens.value))
     
