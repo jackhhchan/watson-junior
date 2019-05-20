@@ -9,8 +9,8 @@ import os
 import sys
 import json
 from tqdm import tqdm
-import pandas as pd
-import numpy as np
+# import pandas as pd
+# import numpy as np
 
 import mongodb_query    
 #from watson_junior.utils.utils import load_file
@@ -200,13 +200,13 @@ def generate_training_data_from_db(concatenate):
     """
     # parse train.json file
     try:
-        with open("resource_model/train.json", 'r') as handle:
+        with open("resource_train/train.json", 'r') as handle:
             train_json = json.load(handle)
     except:
-        print("Unable to open or load train.json")
+        print("Unable to load train.json")
     
     # connect to db -- host=192.168.1.10 for ubuntu, port=27017 is default
-    mydb, mycol = mongodb_query._connected_db(host="ubuntu",port="27017")       # throws exception
+    mydb, mycol = mongodb_query._connected_db(host="localhost",port="27017")       # throws exception
     print("[INFO] collections in db: {}".format(mydb.list_collection_names()))
 
     train_claims = []
@@ -233,11 +233,13 @@ def generate_training_data_from_db(concatenate):
         else:
             # evidences tokens are not concatenated
             for evidence in evidences:
-                train_claims.append(claim)
-                train_labels.append(label)
-
                 tokens = get_tokens(evidence, mycol)
+                if tokens == None:
+                    continue
                 train_evidences.append(tokens)
+
+                train_claims.append(claim)          # these two appends must be after token, for db check
+                train_labels.append(label)
 
     return train_claims, train_evidences, train_labels
         
@@ -246,14 +248,27 @@ def get_tokens(evidence, collection):
     page_id = evidence[0]
     passage_idx = evidence[1]
     doc = mongodb_query.query(collection=collection, page_id=page_id, passage_idx=passage_idx)
+    if doc is None: return None
+        
     tokens = doc.get('tokens')
     assert tokens is not None
-    
-    return tokens
+
+    tokens_string = ''
+    for token in tokens:
+        tokens_string = tokens_string + token + ' '
+        
+    return tokens_string
 
 labels = {'SUPPORTS':0, 'REFUTES':1}    
 def encoded_label(label):
     return labels.get(label)
 
+import pickle
 if __name__ == '__main__' :
-    generate_training_data_from_db(concatenate=False)
+    train_claims, train_evidences, train_labels = generate_training_data_from_db(concatenate=False)
+    with open("train_claims.pkl", 'wb') as handle:
+        pickle.dump(train_claims, handle)
+    with open("train_evidences.pkl", 'wb') as handle:
+        pickle.dump(train_evidences, handle)
+    with open("train_labels.pkl", 'wb') as handle:
+        pickle.dump(train_labels, handle)
