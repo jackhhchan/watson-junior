@@ -115,14 +115,11 @@ def query(collection, page_id, passage_idx):
 
 import argparse
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-ho', '--host', help="host name of mongodb server")
-    parser.add_argument('-p', '--port', help="port number of mongodb server", default=27017)
-    args = parser.parse_args()
-    
+
     collection_name = "InvertedIndex"                                   # CHANGE THIS TO CONNECT TO DIFF COLLECTION
-    # connect to db, return db and the 'wiki' collection
-    mydb, mycol = _connected_db(args.host, args.port, collection_name)
+    
+    # connect to db, return db and the collection
+    mydb, mycol = _connected_db("localhost", 27017, collection_name)
     print(mydb.list_collection_names())
 
     if collection_name == "wiki":
