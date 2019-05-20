@@ -22,6 +22,16 @@ class InvertedIndexField(Enum):
     term = "term"
     postings = "postings"
 
+class Host(Enum):
+    ubuntu = "192.168.1.10"
+    localhost = "127.0.0.1"
+
+def get_ip_address(host):
+    return {
+        Host.ubuntu.name : Host.ubuntu.value,
+        Host.localhost.name : Host.localhost.value
+    }.get(host)
+
 
 ###################################
 ######## DATABASE SET UP ##########
@@ -76,17 +86,20 @@ def populate_inverted_index_db(index_pkl, page_id_dict_pkl, collection):
 
     with open(index_pkl, 'rb') as handle:
         inverted_index = pickle.load(handle)
-    with open(page_id_dict_pkl, 'rb') as handle:
-        page_id_idx_dict = pickle.load(handle)
+    # with open(page_id_dict_pkl, 'rb') as handle:          # DONT EVEN NEED THIS DICT
+    #     page_id_idx_dict = pickle.load(handle)
 
-    for term, postings in tqdm(inverted_index.items()):
-        # convert back from page_idx to page_id (i.e. strings)
+    length = len(inverted_index)
+    for idx, (term, postings) in enumerate(inverted_index.items()): 
         db_postings = {}
         for page_idx, tfidf in postings.items():
-            db_postings.update({page_id_idx_dict.get(page_idx): tfidf})
-        
+            db_postings.update({str(page_idx): tfidf})
         doc_json = inverted_index_doc_formatted(term, db_postings)
         mycol.insert_one(doc_json)
+
+        if idx%100 == 0:
+            print("{}/{} complete transfer to db".format(idx, length))
+        # note page_idx not converted back to page_id because page_id sometime contains '$' or '.' which is invalid for mongodb as key
 
 
 
@@ -113,13 +126,14 @@ def query(collection, page_id, passage_idx):
 
 ####################################
 
-import argparse
 if __name__ == "__main__":
 
-    collection_name = "InvertedIndex"                                   # CHANGE THIS TO CONNECT TO DIFF COLLECTION
+    collection_name = "InvertedIndex"                                   #!!!!!! CHANGE THIS TO CONNECT TO DIFF COLLECTION
     
     # connect to db, return db and the collection
-    mydb, mycol = _connected_db("localhost", 27017, collection_name)
+    hosts = ['ubuntu', 'localhost']                                     # available hosts
+    host = get_ip_address(host=hosts[1])                                #!!!!!! CHANGE THIS FOR DIFF HOST
+    mydb, mycol = _connected_db(host, 27017, collection_name)
     print(mydb.list_collection_names())
 
     if collection_name == "wiki":

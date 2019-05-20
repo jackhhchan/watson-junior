@@ -23,10 +23,12 @@ class Field(Enum):
 
 class Host(Enum):
     ubuntu = "192.168.1.10"
+    localhost = "127.0.0.1"
 
 def get_ip_address(host):
     return {
-        Host.ubuntu.name : Host.ubuntu.value
+        Host.ubuntu.name : Host.ubuntu.value,
+        Host.localhost.name : Host.localhost.value
     }.get(host)
 
 
@@ -56,7 +58,8 @@ def query(collection, page_id, passage_idx):
 
 if __name__ == "__main__":
     # connect to db, return db and the 'wiki' collection
-    mydb, mycol = _connected_db()
+    available_hosts = ['ubuntu', 'localhost']
+    mydb, mycol = _connected_db(host=available_hosts[1])
     print(mydb.list_collection_names())
 
     # populate the database with wiki txt file passages
