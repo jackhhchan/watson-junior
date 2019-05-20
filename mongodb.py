@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     if collection_name == "wiki":
         # populate the database with wiki txt file passages
-        # populate_db(collection=mycol)                           # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
+        # populate_db(collection=mycol)                                 # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
 
         # test query
         query_cursor = query(collection=mycol, page_id="Alexander_McNair", passage_idx="0")
