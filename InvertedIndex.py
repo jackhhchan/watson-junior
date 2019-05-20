@@ -76,13 +76,13 @@ def inverted_index_builder():
     num_folders = len(folders)
 
 
-    # inverted_index_object = InvertedIndex()
-    with open('3.pkl', 'rb') as handle:
-        inverted_index_object = pickle.load(handle)
+    inverted_index_object = InvertedIndex()
+    # with open('4.pkl', 'rb') as handle:
+    #     inverted_index_object = pickle.load(handle)
 
     for idx, wiki_folder in enumerate(folders):
-        if wiki_folder in ['0', '1', '2', '3', '10']: 
-            continue
+        # if wiki_folder in ['0', '1', '2', '3', '10', '4']: 
+        #     continue
         folder_path = "{}/{}".format(folders_name, wiki_folder)
 
         print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
@@ -91,7 +91,7 @@ def inverted_index_builder():
 
         # build up term freqs and doc term freqs and page collection
         inverted_index_object.parse_pages(pages_collection)
-        with open(wiki_folder+'.pkl', 'wb') as handle:
+        with open(wiki_folder+'no_pages_kept.pkl', 'wb') as handle:
             pickle.dump(inverted_index_object, handle)
 
 
@@ -120,12 +120,11 @@ class InvertedIndex(object):
 
     def build(self):
         """ Builds the Inverted Index"""
-        pages_collection = self.pages_collection
-        N = len(pages_collection)
+        N = len(page_ids_idx_dict)
 
         print("[INFO] Building inverted index...")
         inverted_index = self.inverted_index
-        for page_idx, page in tqdm(enumerate(pages_collection)):
+        for page_idx, page in tqdm(enumerate(pages_collection)):            # PROBLEM: -- pages_collection here
             self.page_ids_idx_dict[page_idx] = page.page_id
 
             for term, tf in page.term_freqs_dict.items():
@@ -145,7 +144,7 @@ class InvertedIndex(object):
 
     def parse_pages(self, pages_collection):
         """ Parse the collection of pages and construct the term_freqs_dicts and doc_term_freqs """
-        self.pages_collection.extend(pages_collection)
+        # self.pages_collection.extend(pages_collection)
         for page in tqdm(pages_collection):
             page.term_freqs_dict = self.create_term_freqs_dict(page)                    # create & update page.term_freqs_dict
             

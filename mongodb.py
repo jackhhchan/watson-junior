@@ -23,8 +23,14 @@ class Field(Enum):
 ######## DATABASE SET UP ##########
 ###################################
 
-def _connected_db():
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+def _connected_db(host, port):
+    database_connect_format = "mongodb://{}:{}/".format(host, port)
+    try:
+        myclient = pymongo.MongoClient(database_connect_format)
+    except:
+        print("Unable to connect to host: {} at port: {}".format(host, port))
+        print("Make sure bind_ip option includes the ip address of this machine.")
+    
     mydb = myclient["wikiDatabase"]         # create database
     mycol = mydb["wiki"]                    # create collection
 
@@ -66,10 +72,15 @@ def query(collection, page_id, passage_idx):
 
 ####################################
 
-
+import argparse
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-ho', '--host', help="host name of mongodb server")
+    parser.add_argument('-p', '--port', help="port number of mongodb server", default=27017)
+    args = parser.parse_args()
+    
     # connect to db, return db and the 'wiki' collection
-    mydb, mycol = _connected_db()
+    mydb, mycol = _connected_db(args.host, args.port)
     print(mydb.list_collection_names())
 
     # populate the database with wiki txt file passages
