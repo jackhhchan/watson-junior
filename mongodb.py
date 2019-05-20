@@ -23,8 +23,9 @@ class Field(Enum):
 ######## DATABASE SET UP ##########
 ###################################
 
-def _connected_db():
+def connected_db():
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    # myclient = pymongo.MongoClient("mongodb://jack-XPS-15-9550:27017/")
     mydb = myclient["wikiDatabase"]         # create database
     mycol = mydb["wiki"]                    # create collection
 
@@ -36,7 +37,8 @@ def populate_db(collection, folder_name='resource'):
     # loop through files insert each passage
     # with
     wiki_files = os.listdir(folder_name)
-    for wiki_file in wiki_files:
+    num_files = len(wiki_files)
+    for idx, wiki_file in enumerate(wiki_files):
         path = "{}/{}".format(folder_name, wiki_file)
 
         raw_lines = utils.load_file(path)
@@ -45,7 +47,8 @@ def populate_db(collection, folder_name='resource'):
 
             json = db_formatted(page_id, passage_idx, tokens)
             mycol.insert_one(json)
-        break
+        
+        print("[INFO] {}/{} complete".format(idx+1, num_files))
 
 
 def db_formatted(page_id, passage_idx, tokens):
@@ -69,11 +72,11 @@ def query(collection, page_id, passage_idx):
 
 if __name__ == "__main__":
     # connect to db, return db and the 'wiki' collection
-    mydb, mycol = _connected_db()
+    mydb, mycol = connected_db()
     print(mydb.list_collection_names())
 
     # populate the database with wiki txt file passages
-    # populate_db(collection=mycol)                           # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
+    populate_db(collection=mycol)                           # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
 
     # test query
     query_cursor = query(collection=mycol, page_id="Alexander_McNair", passage_idx="0")
