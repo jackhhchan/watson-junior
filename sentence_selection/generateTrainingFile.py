@@ -7,17 +7,16 @@ Created on Tue May 14 21:55:05 2019
 """
 import os
 import sys
-print(sys.path)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
 import json
 from tqdm import tqdm
-#from watson_junior.utils.wiki_parser import parse_raw_line
 import pandas as pd
 import numpy as np
-#from watson_junior.utils.utils import load_file
 
 import mongodb_query    
+#from watson_junior.utils.utils import load_file
+#from watson_junior.utils.wiki_parser import parse_raw_line
+
+
 #list(json_data.keys())[:5]
 
 #folders_name = 'resource'
@@ -207,7 +206,7 @@ def generate_training_data_from_db(concatenate):
         print("Unable to open or load train.json")
     
     # connect to db -- host=192.168.1.10 for ubuntu, port=27017 is default
-    mydb, mycol = mongodb_query._connected_db(host="192.168.1.10",port="27017")       # throws exception
+    mydb, mycol = mongodb_query._connected_db(host="ubuntu",port="27017")       # throws exception
     print("[INFO] collections in db: {}".format(mydb.list_collection_names()))
 
     train_claims = []

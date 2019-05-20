@@ -21,8 +21,17 @@ class Field(Enum):
 ######## DATABASE SET UP ##########
 ###################################
 
+class Host(Enum):
+    ubuntu = "192.168.1.10"
+
+def get_ip_address(host):
+    return {
+        Host.ubuntu.name : Host.ubuntu.value
+    }.get(host)
+
+
 def _connected_db(host, port=27017):
-    host = str(host)
+    host = get_ip_address(host)
     port = str(port)
     connected_data_format = "mongodb://{}:{}/".format(host, port)
     myclient = pymongo.MongoClient(connected_data_format)
