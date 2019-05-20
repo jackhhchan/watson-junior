@@ -186,8 +186,7 @@ class JSONField(Enum):
     evidence = 'evidence'
     label = 'label'
 
-
-def generate_training_data_from_db(concatenate):
+def generate_training_data_from_db(train_json, concatenate):
     """ Pull tokens from DB based on train.json script
     Arguments:
     ----------
@@ -198,12 +197,6 @@ def generate_training_data_from_db(concatenate):
     train_claims
         A list of claims
     """
-    # parse train.json file
-    try:
-        with open("resource_train/train.json", 'r') as handle:
-            train_json = json.load(handle)
-    except:
-        print("Unable to load train.json")
     
     # connect to db -- host=192.168.1.10 for ubuntu, port=27017 is default
     mydb, mycol = mongodb_query._connected_db(host="localhost",port="27017")       # throws exception
@@ -213,9 +206,9 @@ def generate_training_data_from_db(concatenate):
     train_evidences = []
     train_labels = []
     
+    file_idx = 0
     print("[INFO] Extracting training data from db...")
-    for key in tqdm(train_json.keys()):
-        data = train_json[key]
+    for idx, data in tqdm(enumerate(train_json)):
         label = data[JSONField.label.value]
         claim = data[JSONField.claim.value]
         evidences = data[JSONField.evidence.value]
@@ -241,6 +234,14 @@ def generate_training_data_from_db(concatenate):
                 train_claims.append(claim)          # these two appends must be after token, for db check
                 train_labels.append(label)
 
+                if idx%1000 == 0:
+                    name = 'refutes_' + str(file_idx) + '.pkl'
+                    save_pickle(train_claims, 'claims_'+name)
+                    save_pickle(train_labels, 'labels_'+name)
+                    save_pickle(train_evidences, 'evidences_'+name)
+                    
+
+
     return train_claims, train_evidences, train_labels
         
 
@@ -249,7 +250,7 @@ def get_tokens(evidence, collection):
     passage_idx = evidence[1]
     doc = mongodb_query.query(collection=collection, page_id=page_id, passage_idx=passage_idx)
     if doc is None: return None
-        
+
     tokens = doc.get('tokens')
     assert tokens is not None
 
@@ -259,16 +260,70 @@ def get_tokens(evidence, collection):
         
     return tokens_string
 
+class Label(Enum):
+    SUPPORTS = 'SUPPORTS'
+    REFUTES = 'REFUTES'
+
 labels = {'SUPPORTS':0, 'REFUTES':1}    
 def encoded_label(label):
     return labels.get(label)
 
+def load_train_json():
+    # parse train.json file
+    try:
+        with open("resource_train/train.json", 'r') as handle:
+            train_json = json.load(handle)
+    except:
+        print("Unable to load train.json")
+
+    return train_json
+
+def parse_train_json(train_json_file):
+    
+    supports_train_json = []
+    refutes_train_json = []
+    for key in tqdm(train_json_file.keys()):
+        label = train_json_file.get(key).get('label')
+        if label == Label.SUPPORTS.value:
+            supports_train_json.append(train_json_file.get(key))
+        elif label == Label.REFUTES.value:
+            refutes_train_json.append(train_json_file.get(key))
+        else:
+            continue        # skip NOT ENOUGH INFO
+
+    return supports_train_json, refutes_train_json
+
+
+def save_pickle(obj, name):
+    assert name.endswith('.pkl')
+    with open(name, 'wb') as handle:
+        pickle.dump(obj, name)
+
+
 import pickle
 if __name__ == '__main__' :
-    train_claims, train_evidences, train_labels = generate_training_data_from_db(concatenate=False)
-    with open("train_claims.pkl", 'wb') as handle:
-        pickle.dump(train_claims, handle)
-    with open("train_evidences.pkl", 'wb') as handle:
-        pickle.dump(train_evidences, handle)
-    with open("train_labels.pkl", 'wb') as handle:
-        pickle.dump(train_labels, handle)
+    # train_claims, train_evidences, train_labels = generate_training_data_from_db(concatenate=False)
+    # with open("train_claims.pkl", 'wb') as handle:
+    #     pickle.dump(train_claims, handle)
+    # with open("train_evidences.pkl", 'wb') as handle:
+    #     pickle.dump(train_evidences, handle)
+    # with open("train_labels.pkl", 'wb') as handle:
+    #     pickle.dump(train_labels, handle)
+
+    train_json = load_train_json()
+    supports_train_json, refutes_train_json = parse_train_json(train_json)
+    with open("supports_train_json.pkl", 'wb') as handle:
+        pickle.dump(supports_train_json, handle)
+    with open("refutes_train_json.pkl", 'wb') as handle:
+        pickle.dump(refutes_train_json, handle)
+
+    print("Number of SUPPORTS: {}".format(len(supports_train_json)))
+    print("Number of REFUTES: {}".format(len(refutes_train_json)))
+
+    generate_training_data_from_db(supports_train_json, False)
+
+
+
+
+
+
