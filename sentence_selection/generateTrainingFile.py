@@ -5,19 +5,19 @@ Created on Tue May 14 21:55:05 2019
 
 @author: loretta
 """
+import os
+import sys
+print(sys.path)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 import json
 from tqdm import tqdm
 #from watson_junior.utils.wiki_parser import parse_raw_line
-import os
 import pandas as pd
 import numpy as np
 #from watson_junior.utils.utils import load_file
 
-
-
-
-    
+import mongodb_query    
 #list(json_data.keys())[:5]
 
 #folders_name = 'resource'
@@ -56,7 +56,7 @@ class encoding(Enum):
     UTF8 = "UTF-8"
 
 
-def load_file(f_path, encoding=encoding.UTF8.name):
+def load_file(f_path, encoding=encoding.UTF8.value):
     """ Load text file from path and return raw array of split strings"""
 
     raw_lines = []
@@ -69,7 +69,7 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     return raw_lines
 
     
-def getPages(folder_name = 'resource/wiki_files'):
+def getPages(folder_name = 'resource_model/wiki_files'):
     pages = {}      # {page_id, Page object}
     for file_name in os.listdir(folder_name):
         # load file
@@ -89,7 +89,7 @@ def getPages(folder_name = 'resource/wiki_files'):
 #list(page_index.values())[0]
 #page_index['Alexander_McNair']
 
-def getPage_index(folder_name = 'resource/wiki_files'):
+def getPage_index(folder_name = 'resource_model/wiki_files'):
     page_index = {}      # {page_id, path}
     page_size = {}
     for file_name in os.listdir(folder_name):
@@ -105,10 +105,11 @@ def getPage_index(folder_name = 'resource/wiki_files'):
                     page_index[page_id] = path
             except:
                 pass
+        # break       ## add for debugging runModel.py script (runs entire script without loading all txt files)
     return page_index, page_size
  
 def readOneFile(path,pg_id,index):
-    with open(path) as data:
+    with open(path, 'r', encoding=encoding.UTF8.value) as data:
         for line in data:
             content = line[:-1].split(' ')
             if content[0] == pg_id and content[1] == str(index):
@@ -125,51 +126,135 @@ def generateRandom(fileList,page_size):
                 content = line[:-1].split(' ')
                 return ' '.join(content[2:])
 
-#generateRandom(fileList)    
+#generateRandom(fileList)
 
-if __name__ == '__main__':
 
-    with open('resource/train.json') as data:
-        json_data = json.load(data)
+# if __name__ == '__main__':
+
+#     with open('resource/train.json') as data:
+#         json_data = json.load(data)
         
-    pages = getPages()
-    page_index, page_size = getPage_index()
-    fileList = list(set(list(page_index.values())))
+#     pages = getPages()
+#     page_index, page_size = getPage_index()
+#     fileList = list(set(list(page_index.values())))
     
     
-    training_corpus = pd.DataFrame()
-    claims = []
-    evidences = []
-    labels = []
-    for evd in json_data['75397']['evidence']:
-        if evd[0] in page_index:
-            claims.append(json_data['75397']['claim'])
-            evidences.append(readOneFile(page_index[evd[0]],evd[0],evd[1]))
-            labels.append(1)
-    while len(evidences) < 5:
-        claims.append(json_data['75397']['claim'])
-        evidences.append(generateRandom(fileList))
-        labels.append(0)
+#     training_corpus = pd.DataFrame()
+#     claims = []
+#     evidences = []
+#     labels = []
+#     for evd in json_data['75397']['evidence']:
+#         if evd[0] in page_index:
+#             claims.append(json_data['75397']['claim'])
+#             evidences.append(readOneFile(page_index[evd[0]],evd[0],evd[1]))
+#             labels.append(1)
+#     while len(evidences) < 5:
+#         claims.append(json_data['75397']['claim'])
+#         evidences.append(generateRandom(fileList))
+#         labels.append(0)
             
-    training_corpus = pd.DataFrame({'claims':claims,'evidences':evidences,'label':labels})
-    training_corpus.info()
-    training_corpus.to_csv('training_random.csv')
-    claims.pop(-1)
+#     training_corpus = pd.DataFrame({'claims':claims,'evidences':evidences,'label':labels})
+#     training_corpus.info()
+#     training_corpus.to_csv('training_random.csv')
+#     claims.pop(-1)
     
-    ('Fox_Broadcasting_Company', 0) in pages
+#     ('Fox_Broadcasting_Company', 0) in pages
     
-    claims = []
-    evidences = []
-    labels = []
-    for item in tqdm(json_data):
-        for k,evd in enumerate(json_data[item]['evidence']):
-            if evd[0] in page_index:
-                claims.append(json_data[item]['claim'])
-                evidences.append(readOneFile(page_index[evd[0]],evd[0],evd[1]))
-                labels.append(1)
-        while k < 4:
-            claims.append(json_data[item]['claim'])
-            evidences.append(generateRandom(fileList))
-            labels.append(0)    
-            k += 1
+#     claims = []
+#     evidences = []
+#     labels = []
+#     for item in tqdm(json_data):
+#         for k,evd in enumerate(json_data[item]['evidence']):
+#             if evd[0] in page_index:
+#                 claims.append(json_data[item]['claim'])
+#                 evidences.append(readOneFile(page_index[evd[0]],evd[0],evd[1]))
+#                 labels.append(1)
+#         while k < 4:
+#             claims.append(json_data[item]['claim'])
+#             evidences.append(generateRandom(fileList))
+#             labels.append(0)    
+#             k += 1
+
+
+
+#####################################################
+######## Generate Training Data with MongoDB ########
+#####################################################
+
+class JSONField(Enum):
+    # nested field identifiers
+    claim = 'claim'
+    evidence = 'evidence'
+    label = 'label'
+
+
+def generate_training_data_from_db(concatenate):
+    """ Pull tokens from DB based on train.json script
+    Arguments:
+    ----------
+    cocatenate (Bool)
+        Takes a boolean, if true then evidences are cocatenated else other wise.
+    Returns:
+    ----------
+    train_claims
+        A list of claims
+    """
+    # parse train.json file
+    try:
+        with open("resource_model/train.json", 'r') as handle:
+            train_json = json.load(handle)
+    except:
+        print("Unable to open or load train.json")
+    
+    # connect to db -- host=192.168.1.10 for ubuntu, port=27017 is default
+    mydb, mycol = mongodb_query._connected_db(host="192.168.1.10",port="27017")       # throws exception
+    print("[INFO] collections in db: {}".format(mydb.list_collection_names()))
+
+    train_claims = []
+    train_evidences = []
+    train_labels = []
+    
+    print("[INFO] Extracting training data from db...")
+    for key in tqdm(train_json.keys()):
+        data = train_json[key]
+        label = data[JSONField.label.value]
+        claim = data[JSONField.claim.value]
+        evidences = data[JSONField.evidence.value]
+
+        if label == 'NOT ENOUGH INFO': continue     # skip data points with no evidences
+
+        label = encoded_label(label)                # encode label, SUPPORTS=0, REFUTES=1
+        if concatenate:
+            # evidences tokens are concatenated
+            train_claims.append(claim)
+            train_labels.append(label)
+            concatenated_tokens = []
+            [concatenated_tokens.extend(get_tokens(evidence, mycol)) for evidence in evidences]
+            train_evidences.append(concatenated_tokens)        
+        else:
+            # evidences tokens are not concatenated
+            for evidence in evidences:
+                train_claims.append(claim)
+                train_labels.append(label)
+
+                tokens = get_tokens(evidence, mycol)
+                train_evidences.append(tokens)
+
+    return train_claims, train_evidences, train_labels
         
+
+def get_tokens(evidence, collection):
+    page_id = evidence[0]
+    passage_idx = evidence[1]
+    doc = mongodb_query.query(collection=collection, page_id=page_id, passage_idx=passage_idx)
+    tokens = doc.get('tokens')
+    assert tokens is not None
+    
+    return tokens
+
+labels = {'SUPPORTS':0, 'REFUTES':1}    
+def encoded_label(label):
+    return labels.get(label)
+
+if __name__ == '__main__' :
+    generate_training_data_from_db(concatenate=False)

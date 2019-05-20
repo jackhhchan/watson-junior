@@ -16,8 +16,10 @@ import json
 import pandas as pd
 import keras
 
+from tqdm import tqdm
+
 if __name__ == '__main__':
-    with open('resource/train.json') as data:
+    with open('resource_model/train.json') as data:
             json_data = json.load(data)
         
     # read the json_file
@@ -27,8 +29,8 @@ if __name__ == '__main__':
     claims = []
     evidences = []
     labels = []
-    for j,item in enumerate(json_data):
-#        if j < 100:
+    for j, item in tqdm(enumerate(json_data)):
+       if j < 1000:
         # only get first 100, [FOR NOW]
         evds = []
         if json_data[item]['evidence'] == []:
@@ -45,10 +47,11 @@ if __name__ == '__main__':
     for l in labels:
         if l in label_transfer:
             label_v2.append(label_transfer[l])
-                
-#    training_file = pd.DataFrame({'claim':claims,'evidences':evidences,'labels':label_v2})  
-#    training_file.labels.value_counts()  
-#    training_file.to_csv('resource/training_file_v3.csv')    
+    
+    # save training files into csv
+    training_file = pd.DataFrame({'claim':claims,'evidences':evidences,'labels':label_v2})  
+    training_file.labels.value_counts()  
+    training_file.to_csv('resource_model/training_file_v3.csv')    
             
     tokenizer, embedding_matrix = word_embed_meta_data(claims+evidences,mode = "Glove")
     # return the embedding_matrix for sentences.
@@ -58,8 +61,9 @@ if __name__ == '__main__':
     num_samples = len(claims)
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
-    epoch = 50
-    batch_size = 1024
+    epoch = 20
+    # batch_size = 1024
+    batch_size = 128
     
     sim = keras.utils.to_categorical(label_v2, num_classes)
             
