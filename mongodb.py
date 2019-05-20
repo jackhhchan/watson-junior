@@ -23,8 +23,14 @@ class Field(Enum):
 ######## DATABASE SET UP ##########
 ###################################
 
-def _connected_db():
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+def _connected_db(host, port):
+    database_connect_format = "mongodb://{}:{}/".format(host, port)
+    try:
+        myclient = pymongo.MongoClient(database_connect_format)
+    except:
+        print("Unable to connect to host: {} at port: {}".format(host, port))
+        print("Make sure bind_ip option includes the ip address of this machine.")
+    
     mydb = myclient["wikiDatabase"]         # create database
     mycol = mydb["wiki"]                    # create collection
 
@@ -36,7 +42,8 @@ def populate_db(collection, folder_name='resource'):
     # loop through files insert each passage
     # with
     wiki_files = os.listdir(folder_name)
-    for wiki_file in wiki_files:
+    num_files = len(wiki_files)
+    for idx, wiki_file in enumerate(wiki_files):
         path = "{}/{}".format(folder_name, wiki_file)
 
         raw_lines = utils.load_file(path)
@@ -45,7 +52,8 @@ def populate_db(collection, folder_name='resource'):
 
             json = db_formatted(page_id, passage_idx, tokens)
             mycol.insert_one(json)
-        break
+        
+        print("[INFO] {}/{} complete".format(idx+1, num_files))
 
 
 def db_formatted(page_id, passage_idx, tokens):
@@ -66,14 +74,19 @@ def query(collection, page_id, passage_idx):
 
 ####################################
 
-
+import argparse
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-ho', '--host', help="host name of mongodb server")
+    parser.add_argument('-p', '--port', help="port number of mongodb server", default=27017)
+    args = parser.parse_args()
+    
     # connect to db, return db and the 'wiki' collection
-    mydb, mycol = _connected_db()
+    mydb, mycol = _connected_db(args.host, args.port)
     print(mydb.list_collection_names())
 
     # populate the database with wiki txt file passages
-    # populate_db(collection=mycol)                           # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
+    populate_db(collection=mycol)                           # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.
 
     # test query
     query_cursor = query(collection=mycol, page_id="Alexander_McNair", passage_idx="0")
