@@ -8,7 +8,7 @@ from tqdm import tqdm
 # run server --
 # mongod --dbpath /Users/jackchan/downloads/mongodb/data/db
 
-class Field(Enum):
+class WikiField(Enum):
     """ Field types used in the collection """
     def __str__(self):
         return str(self.value)      # string conversion
@@ -50,8 +50,11 @@ def _connected_db(host, port=27017):
 
 def query(collection, page_id, passage_idx):
     """ Returns the query cursor for the query matching the page_id and passage_idx """
-    return collection.find_one({Field.page_id.value : str(page_id), 
-                                Field.passage_idx.value : str(passage_idx)})
+    return collection.find_one({WikiField.page_id.value : str(page_id), 
+                                WikiField.passage_idx.value : str(passage_idx)})
+
+def query_page_id_only(collection, page_id):
+    return collection.find_one({WikiField.page_id.value: page_id})
 
 ####################################
 
@@ -69,5 +72,5 @@ if __name__ == "__main__":
     query_cursor = query(collection=mycol, page_id="Alexander_McNair", passage_idx="0")
     
     for data in query_cursor:
-        print(data.get(Field.tokens.value))
+        print(data.get(WikiField.tokens.value))
     

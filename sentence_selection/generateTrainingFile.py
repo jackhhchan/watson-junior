@@ -7,12 +7,15 @@ Created on Tue May 14 21:55:05 2019
 """
 import os
 import sys
+import random
 import json
 from tqdm import tqdm
+import pickle
 # import pandas as pd
 # import numpy as np
 
-import mongodb_query    
+import mongodb_query
+from mongodb_query import WikiField    
 #from watson_junior.utils.utils import load_file
 #from watson_junior.utils.wiki_parser import parse_raw_line
 
@@ -305,13 +308,45 @@ def parse_json(json_file, separate):
     return supports_train_json, refutes_train_json
 
 
+####################################################################
+############### TRAINING DATA FOR SENTENCE SELECTION ###############
+####################################################################
+
+def get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, number_of_irrelevant):
+    """ Get irrelevant evidences for training data """
+
+    irrelevant_page_ids = []
+    # generate random number
+    max_page_ids_idx = len(page_ids_idx_dict) - 1
+    idx = 0
+    while idx < max_page_ids_idx:
+        random_num = random.randint(0, max_page_ids_idx)
+        page_id = page_ids_idx_dict.get(random_num)
+
+        # check if random page id is one of the relevant evidences' page ids
+        if page_id not in relevant_page_ids:
+            irrelevant_page_ids.append(page_id)
+            if len(irrelevant_page_ids) >= number_of_irrelevant: 
+                return irrelevant_page_ids              # return irrelevant page ids
+        idx += 1
+    
+    return None
+
+def get_irrelevant_passage(relevant_page_id, mycol):
+    """ Pulls a passage from the database for each relevant page id"""
+    # pull from database a passage from each relevant page id
+    doc = mongodb_query.query_page_id_only(collection=mycol, page_id=relevant_page_id)
+
+    return doc.get(WikiField.tokens.value)
+
+
+
 def save_pickle(obj, name):
     assert name.endswith('.pkl')
     with open(name, 'wb') as handle:
         pickle.dump(obj, handle)
 
 
-import pickle
 if __name__ == '__main__' :
     # train_json = load_train_json()
     # supports_train_json, refutes_train_json = parse_train_json(train_json)
@@ -339,6 +374,20 @@ if __name__ == '__main__' :
     save_pickle(dev_labels, 'dev_labels.pkl')
 
 
-
-
+    {"RELEVANT": 0, "IRRELEVANT": 1}
+    ######
+    # get train array after parsing train.json
+    # for each row, 
+    #   for each evidence
+    #       append evidence's tokens into train_evidences
+    #       append claim into train_claims
+    #       append label 0 to train_labels
+    #   
+    # 
+    #   irrelevant_page_ids = parse the evidence's page id into the get irrelevant page ids function
+    #   for irrelevant_page_id in irrelevant_page_ids:
+    #       irrelevant_passage = get irrelevant passage
+    #       append irrelevant passage tokens to train_evidences
+    #       append claim into train_claims
+    #       append label 1 to train_labels
 
