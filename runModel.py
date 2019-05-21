@@ -12,15 +12,21 @@ from NLI.esim import buildESIM, plot
 from NLI.normalLSTM import buildLSTM
 from NLI.abcnn import word_embed_meta_data, create_test_data
 from utils import load_pickle, save_pickle
+from NLI.attention import DotProductAttention
 #from sentence_selection.generateTrainingFile import getPage_index,readOneFile   
 import json
 import pandas as pd
 import keras
+from keras.models import load_model
 import pickle
 from tqdm import tqdm
+import time
+from sklearn.metrics import mean_squared_error,confusion_matrix,f1_score
+import matplotlib.pyplot as plt
+import numpy as np
 
 #define folder directory
-mask_dir = 'training_data/'
+mask_dir = 'resource/training_data/'
 claims_supports = mask_dir + 'train_claims_supports_downsampled.pkl'
 claims_refutes = mask_dir + 'train_claims_refutes.pkl'
 evidences_supports = mask_dir + 'train_evidences_supports_downsampled.pkl'
@@ -28,10 +34,12 @@ evidences_refutes = mask_dir + 'train_evidences_refutes.pkl'
 labels_supports = mask_dir + 'train_labels_supports_downsampled.pkl'
 labels_refutes = mask_dir + 'train_labels_refutes.pkl'
 
-def plot_acc(his,name):
-    import matplotlib.pyplot as plt
+def plot_acc(his,name,index):
+    fig = plt.figure(index)
     plt.plot(his.history['acc'], 'r:')
     plt.plot(his.history['val_acc'], 'g-')
+    plt.plot(his.history['loss'], 'r:')
+    plt.plot(his.history['val_loss'],'g-')
     plt.savefig(name+".png")
 
 if __name__ == '__main__':
@@ -121,16 +129,19 @@ if __name__ == '__main__':
     num_samples = len(claims)
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
-    epoch = 50
+    epoch = 1
     # batch_size = 1024
     batch_size = 512
     
     sim = keras.utils.to_categorical(labels, num_classes)
             
+    test_sentences_pair = [(x1, x2) for x1, x2 in zip(claims[:5], evidences[:5])]
+    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
+                                                left_sequence_length, right_sequence_length)
+    
     #"""
     #ESIM 
-    #"""
-    print("[INFO] Training ESIM neural network...")        
+    #"""        
     model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
                           left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
     
@@ -140,14 +151,25 @@ if __name__ == '__main__':
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    #plot the damn stuff
-    plot_acc(his,'ESIM_acc.png')
+    name = 'ESIM'+str(int(time.time())) + '.png'
+    plot_acc(his,name,0)
+
+    
+#    model = load_model('/Users/loretta/watson-junior/trained_model/ESIM/1558325833.h5',\
+#                       custom_objects={'DotProductAttention':DotProductAttention})
+
+    pred = model.predict([test_claim,test_evidence])
+    pred = np.argmax(pred,axis=1)
+    print('mean_squared_error: '+mean_squared_error(pred,labels_dev))
+    print('f1_score: '+f1_score(pred,labels_dev))
+    print("confusion_matrix:")
+    print(confusion_matrix(pred,labels_dev))
+    print("=============================")
+
     
     #"""
     #siamese LSTM
     #"""
-
-    print("[INFO] Training LSTM neural network...")
     number_lstm_units = 50
     rate_drop_lstm = 0.17
     rate_drop_dense = 0.15
@@ -156,4 +178,5 @@ if __name__ == '__main__':
                 number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
                 left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
 #    plot(model,'normalLSTM.png')
-    plot_acc(his,'LSTM_acc.png')
+    name = 'LSTM'+str(int(time.time())) + '.png'
+    plot_acc(his,name,1)

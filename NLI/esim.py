@@ -25,7 +25,7 @@ from keras.layers import LSTM, Bidirectional, GlobalAveragePooling1D, Input,\
       concatenate, Lambda, subtract, multiply, Dense, TimeDistributed, Embedding
 from NLI.attention import DotProductAttention
 from NLI.abcnn import word_embed_meta_data, create_train_dev_set,create_test_data
-#from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
+from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
 
 
 def plot(*args, **kwargs):
@@ -49,7 +49,7 @@ def buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
     train_data_x1, train_data_x2, train_labels, \
     val_data_x1, val_data_x2, val_labels  = create_train_dev_set(
             tokenizer, sentences_pair, sim, left_sequence_length, right_sequence_length, \
-            validation_split_ratio=0.1)
+            validation_split_ratio=0)
     nb_words = len(tokenizer.word_index) + 1
     emb_layer = Embedding(nb_words, embed_dimensions,
 #                          input_length=max_len,
@@ -101,7 +101,7 @@ def buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
     model = Model([input_premise, input_hypothesis], output)
     model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
-    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
 
     checkpoint_dir = './trained_model/ESIM/'
 
@@ -221,7 +221,9 @@ if __name__ == '__main__':
     
     test_file = pd.DataFrame({'claim':claims_dev,'evidences':evidences_dev,'labels':label_v2_dev})
     test_file.labels.value_counts()
-    test_sentences_pair = [(x1, x2) for x1, x2 in zip(test_file.claim, test_file.evidences)]
+    
+    tokenizer.word_index
+    test_sentences_pair = [(x1, x2) for x1, x2 in zip(claims[:5], evidences[:5])]
     test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
                                                 left_sequence_length, right_sequence_length)
     pred = model.predict([test_claim,test_evidence])
