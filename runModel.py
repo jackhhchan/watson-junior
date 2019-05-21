@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #define folder directory
-mask_dir = 'resource/training_data/'
+mask_dir = 'training_data/'
 claims_supports = mask_dir + 'train_claims_supports_downsampled.pkl'
 claims_refutes = mask_dir + 'train_claims_refutes.pkl'
 evidences_supports = mask_dir + 'train_evidences_supports_downsampled.pkl'
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     num_samples = len(claims)
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
-    epoch = 1
+    epoch = 10
     # batch_size = 1024
     batch_size = 512
     
@@ -158,8 +158,8 @@ if __name__ == '__main__':
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    name = 'ESIM_'+str(int(time.time())) + '.png'
-    plot_acc(his,name,0)
+    # name = 'ESIM_'+str(int(time.time())) + '.png'
+    # plot_acc(his,name,0)
 
     
 #    model = load_model('/Users/loretta/watson-junior/trained_model/ESIM/1558325833.h5',\
@@ -167,8 +167,8 @@ if __name__ == '__main__':
 
     pred = model.predict([test_claim,test_evidence])
     pred = np.argmax(pred,axis=1)
-    print('mean_squared_error: '+mean_squared_error(pred,labels_dev))
-    print('f1_score: '+f1_score(pred,labels_dev))
+    print('mean_squared_error: '+str(mean_squared_error(pred,labels_dev)))
+    print('f1_score: '+str(f1_score(pred,labels_dev)))
     print("confusion_matrix: ")
     print(confusion_matrix(pred,labels_dev))
     print("=============================")
@@ -177,20 +177,20 @@ if __name__ == '__main__':
     #"""
     #siamese LSTM
     #"""
-    number_lstm_units = 50
-    rate_drop_lstm = 0.17
-    rate_drop_dense = 0.15
-    number_dense_units = 100
-    model,his = buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
-#    plot(model,'normalLSTM.png')
-    name = 'LSTM_'+str(int(time.time())) + '.png'
-    plot_acc(his,name,1)
+#     number_lstm_units = 50
+#     rate_drop_lstm = 0.17
+#     rate_drop_dense = 0.15
+#     number_dense_units = 100
+#     model,his = buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
+#                 number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
+#                 left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+# #    plot(model,'normalLSTM.png')
+#     name = 'LSTM_'+str(int(time.time())) + '.png'
+#     plot_acc(his,name,1)
     
-    pred = model.predict([test_claim,test_evidence])
-    pred = np.argmax(pred,axis=1)
-    print('mean_squared_error: '+ str(mean_squared_error(pred,labels_dev)))
-    print('f1_score: '+str(f1_score(pred,labels_dev)))
-    print("confusion_matrix: ")
-    print(confusion_matrix(pred,labels_dev))
+#     pred = model.predict([test_claim,test_evidence])
+#     pred = np.argmax(pred,axis=1)
+#     print('mean_squared_error: '+ str(mean_squared_error(pred,labels_dev)))
+#     print('f1_score: '+str(f1_score(pred,labels_dev)))
+#     print("confusion_matrix: ")
+#     print(confusion_matrix(pred,labels_dev))

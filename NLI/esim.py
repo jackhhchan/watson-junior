@@ -110,7 +110,7 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev=None,s
     model = Model([input_premise, input_hypothesis], output)
     model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
-    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
+    # early_stopping = EarlyStopping(monitor='val_loss', patience=8)
 
     checkpoint_dir = './trained_model/ESIM/'
 
@@ -125,7 +125,8 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev=None,s
     his = model.fit([train_data_x1, train_data_x2], train_labels,
               validation_data=([val_data_x1, val_data_x2], val_labels),
               epochs=epoch, batch_size=batch_size, shuffle=False,verbose=1,
-              callbacks=[early_stopping,model_checkpoint]
+            #   callbacks=[early_stopping,model_checkpoint]
+              callbacks=[model_checkpoint]
                 )
     return model,his
 

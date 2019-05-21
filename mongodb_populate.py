@@ -4,6 +4,7 @@ import os
 import pymongo
 from tqdm import tqdm
 import pickle
+import json
 
 import utils
 import wiki_parser
@@ -143,9 +144,51 @@ def load_pickle(name):
 
     return data
 
+def save_json(obj, name):
+    assert name.endswith('.json')
+    with open(name, 'w') as handle:
+        json.dump(obj, handle)
+
+
+###########################################
+def json_dump_inverted_index(inverted_index):
+    # split the inverted index and save it into 100 parts
+    file_idx = 0
+    json_file = {}
+    f_name = "inverted_index_json_{}.json".format(file_idx)
+
+    for idx, (term, postings) in tqdm(enumerate(inverted_index.items())):
+        if not term.isalpha(): continue     # skip if not alpha
+
+        for (page_idx, tfidf)  in postings.items():
+            page_id = page_ids_idx_dict.get(page_idx)
+            doc_json = inverted_index_doc_formatted(term, page_id, tfidf)
+            json_file.update(doc_json)
+
+
+        if idx+1%1000:
+            save_json(json_file, f_name)
+            file_idx += 1
+            json_file = {}
+    
+    save_json(json_file, f_name)
+
+
+
 if __name__ == "__main__":
 
-    collection_name = "InvertedIndex"                                   #!!!!!! CHANGE THIS TO CONNECT TO DIFF COLLECTION
+    # SPLIT DUMP INVERTED INDEX TO MULTIPLE JSON FILES TO BE IMPORTED TO MONGODB
+    INVERTED_INDEX_FNAME = "inverted_index_tf_normalized_proper_fixed.pkl"
+    inverted_index = load_pickle(INVERTED_INDEX_FNAME)
+
+    json_dump_inverted_index(inverted_index)
+    quit()
+
+    #### IGNORE THE REST OF THE SCRIPT ####
+    #### this is for populating the db one by one. (slow) ####
+
+    collection_names = ["wiki", "InvertedIndex"]
+    collection_name = None                                   #!!!!!! CHANGE THIS TO CONNECT TO DIFF COLLECTION
     
     # connect to db, return db and the collection
     hosts = ['ubuntu', 'localhost']                                     # available hosts
@@ -174,4 +217,3 @@ if __name__ == "__main__":
         
         print("[INFO] Populating the {} collection in the wikiDatabase...".format(collection_name))
         populate_inverted_index_db(mycol, inverted_index, page_ids_idx_dict)
-
