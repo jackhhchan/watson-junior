@@ -1,4 +1,5 @@
 import pickle
+import json
 from tqdm import tqdm
 
 from utils import load_pickle, save_pickle
@@ -57,6 +58,7 @@ if __name__ == '__main__':
     # save inverted index into json file
 
 
+    # save_pickle(tuple_inverted_index, 'tuple_inverted_index.pkl')
 
     # claims = [claims[3], claims[4]]
     claims = [claims[0]]
