@@ -36,7 +36,7 @@ def plot(*args, **kwargs):
 
 
 
-def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev=None,sim_dev=None,\
+def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
               embed_dimensions,embedding_matrix,left_sequence_length,right_sequence_length,\
               num_classes,epoch,batch_size):
     
@@ -48,7 +48,7 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev=None,s
 #    premise_embed = embedding(input_premise)
 #    hypothesis_embed = embedding(input_hypothesis)
     
-    if sentences_pair == None:
+    if sentences_pair_dev == None:
         train_data_x1, train_data_x2, train_labels, \
         val_data_x1, val_data_x2, val_labels  = create_train_dev_set(
                 tokenizer, sentences_pair_train, sim_train, left_sequence_length, right_sequence_length, \
@@ -110,7 +110,7 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev=None,s
     model = Model([input_premise, input_hypothesis], output)
     model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
-    # early_stopping = EarlyStopping(monitor='val_loss', patience=8)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
 
     checkpoint_dir = './trained_model/ESIM/'
 
@@ -125,8 +125,7 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev=None,s
     his = model.fit([train_data_x1, train_data_x2], train_labels,
               validation_data=([val_data_x1, val_data_x2], val_labels),
               epochs=epoch, batch_size=batch_size, shuffle=False,verbose=1,
-            #   callbacks=[early_stopping,model_checkpoint]
-              callbacks=[model_checkpoint]
+              callbacks=[early_stopping,model_checkpoint]
                 )
     return model,his
 
@@ -189,9 +188,13 @@ if __name__ == '__main__':
     
     sim = keras.utils.to_categorical(sampled_file.labels, num_classes)
                  
-    model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
-    
+#    model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
+#                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+#
+    model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+                          sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
+                          right_sequence_length,num_classes,epoch,batch_size)
+
     his = his.history
     
 #    import matplotlib.pyplot as plt
