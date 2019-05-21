@@ -187,7 +187,7 @@ if __name__ == "__main__":
     #### IGNORE THE REST OF THE SCRIPT ####
     #### this is for populating the db one by one. (slow) ####
 
-    collection_names ["wiki", "InvertedIndex"]
+    collection_names = ["wiki", "InvertedIndex"]
     collection_name = None                                   #!!!!!! CHANGE THIS TO CONNECT TO DIFF COLLECTION
     
     # connect to db, return db and the collection
