@@ -268,28 +268,38 @@ labels = {'SUPPORTS':0, 'REFUTES':1}
 def encoded_label(label):
     return labels.get(label)
 
-def load_train_json():
+def load_json(json_path):
     # parse train.json file
+    assert json_fname.endswith('.json')
     try:
-        with open("resource_train/train.json", 'r') as handle:
-            train_json = json.load(handle)
+        with open(json_path, 'r') as handle:
+            json_data = json.load(handle)
     except:
         print("Unable to load train.json")
 
-    return train_json
+    return json_data
 
-def parse_train_json(train_json_file):
-    
-    supports_train_json = []
-    refutes_train_json = []
-    for key in tqdm(train_json_file.keys()):
-        label = train_json_file.get(key).get('label')
-        if label == Label.SUPPORTS.value:
-            supports_train_json.append(train_json_file.get(key))
-        elif label == Label.REFUTES.value:
-            refutes_train_json.append(train_json_file.get(key))
-        else:
-            continue        # skip NOT ENOUGH INFO
+def parse_json(json_file, separate):
+
+    if not separate:
+        data_array = []
+        for key in tqdm(json_file.keys()):
+            label = json_file.get(key.get('label'))
+            if label == Label.SUPPORTS.value or label == Label.REFUTES.value:
+                data_array.append(json_file.get(key))
+            else:
+                continue
+    else:
+        supports_train_json = []
+        refutes_train_json = []
+        for key in tqdm(json_file.keys()):
+            label = json_file.get(key).get('label')
+            if label == Label.SUPPORTS.value:
+                supports_train_json.append(json_file.get(key))
+            elif label == Label.REFUTES.value:
+                refutes_train_json.append(json_file.get(key))
+            else:
+                continue        # skip NOT ENOUGH INFO
 
     return supports_train_json, refutes_train_json
 
@@ -302,33 +312,30 @@ def save_pickle(obj, name):
 
 import pickle
 if __name__ == '__main__' :
-    # train_claims, train_evidences, train_labels = generate_training_data_from_db(concatenate=False)
-    # with open("train_claims.pkl", 'wb') as handle:
-    #     pickle.dump(train_claims, handle)
-    # with open("train_evidences.pkl", 'wb') as handle:
-    #     pickle.dump(train_evidences, handle)
-    # with open("train_labels.pkl", 'wb') as handle:
-    #     pickle.dump(train_labels, handle)
+    # train_json = load_train_json()
+    # supports_train_json, refutes_train_json = parse_train_json(train_json)
 
-    train_json = load_train_json()
-    supports_train_json, refutes_train_json = parse_train_json(train_json)
-    with open("supports_train_json.pkl", 'wb') as handle:
-        pickle.dump(supports_train_json, handle)
-    with open("refutes_train_json.pkl", 'wb') as handle:
-        pickle.dump(refutes_train_json, handle)
-
-    print("Number of SUPPORTS: {}".format(len(supports_train_json)))
-    print("Number of REFUTES: {}".format(len(refutes_train_json)))
+    # print("Number of SUPPORTS: {}".format(len(supports_train_json)))
+    # print("Number of REFUTES: {}".format(len(refutes_train_json)))
 
     # train_claims, train_evidences, train_labels = generate_training_data_from_db(refutes_train_json, False)
     # save_pickle(train_claims, 'train_claims_refutes.pkl')
     # save_pickle(train_evidences, 'train_evidences_refutes.pkl')
     # save_pickle(train_labels, 'train_labels_refutes.pkl')
 
-    train_claims, train_evidences, train_labels = generate_training_data_from_db(supports_train_json, False, len(refutes_train_json))
-    save_pickle(train_claims, 'train_claims_supports_downsampled.pkl')
-    save_pickle(train_evidences, 'train_evidences_supports_downsampled.pkl')
-    save_pickle(train_labels, 'train_labels_supports_downsampled.pkl')
+    # train_claims, train_evidences, train_labels = generate_training_data_from_db(supports_train_json, False, len(refutes_train_json))
+    # save_pickle(train_claims, 'train_claims_supports_downsampled.pkl')
+    # save_pickle(train_evidences, 'train_evidences_supports_downsampled.pkl')
+    # save_pickle(train_labels, 'train_labels_supports_downsampled.pkl')
+
+
+    ##### DEVELOPMENT SET #####
+    dev_json = load_json('resource_train/devset.json')
+    dev_array = parse_json(dev_json, False)
+    dev_claims, dev_evidences, dev_labels = generate_training_data_from_db(dev_json, False, len(dev_json))
+    save_pickle(dev_claims, 'dev_claims.pkl')
+    save_pickle(dev_evidences, 'dev_evidences.pkl')
+    save_pickle(dev_labels, 'dev_labels.pkl')
 
 
 
