@@ -55,6 +55,52 @@ def create_train_dev_set_lstm(tokenizer, sentences_pair, sim, left_sequence_leng
 
     return train_data_1, train_data_2, labels_train, leaks_train, val_data_1, val_data_2, labels_val, leaks_val
 
+def create_train_dev_from_files_lstm(tokenizer, sentences_pair_train, sim_train, \
+                                sentences_pair_dev,sim_dev,left_sequence_length,\
+                                right_sequence_length):
+    
+    sentences1 = [x[0] for x in sentences_pair_train]
+    sentences2 = [x[1] for x in sentences_pair_train]
+    train_sequences_1 = tokenizer.texts_to_sequences(sentences1)
+    train_sequences_2 = tokenizer.texts_to_sequences(sentences2)
+    leaks = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
+             for x1, x2 in zip(train_sequences_1, train_sequences_2)]
+
+    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=left_sequence_length)
+    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=right_sequence_length)
+    train_labels = np.array(sim_train)
+    leaks = np.array(leaks)
+
+    shuffle_indices = np.random.permutation(np.arange(len(train_labels)))
+    train_data_1_shuffled = train_padded_data_1[shuffle_indices]
+    train_data_2_shuffled = train_padded_data_2[shuffle_indices]
+    train_labels_shuffled = train_labels[shuffle_indices]
+    leaks_shuffled = leaks[shuffle_indices]
+    
+    sentences1_dev = [x[0] for x in sentences_pair_dev]
+    sentences2_dev = [x[1] for x in sentences_pair_dev]
+    dev_sequences_1 = tokenizer.texts_to_sequences(sentences1_dev)
+    dev_sequences_2 = tokenizer.texts_to_sequences(sentences2_dev)
+    leaks_dev = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
+             for x1, x2 in zip(dev_sequences_1, dev_sequences_2)]
+
+    dev_padded_data_1 = pad_sequences(dev_sequences_1, maxlen=left_sequence_length)
+    dev_padded_data_2 = pad_sequences(dev_sequences_2, maxlen=right_sequence_length)
+    dev_labels = np.array(sim_dev)
+    leaks_dev = np.array(leaks_dev)
+
+    shuffle_indices = np.random.permutation(np.arange(len(dev_labels)))
+    dev_data_1_shuffled = dev_padded_data_1[shuffle_indices]
+    dev_data_2_shuffled = dev_padded_data_2[shuffle_indices]
+    dev_labels_shuffled = dev_labels[shuffle_indices]
+    leaks_dev_shuffled = leaks_dev[shuffle_indices]
+
+
+    return train_data_1_shuffled, train_data_2_shuffled, train_labels_shuffled, \
+            leaks_shuffled, dev_data_1_shuffled, dev_data_2_shuffled, dev_labels_shuffled, \
+            leaks_dev_shuffled
+
+
 def create_test_data_lstm(tokenizer, test_sentences_pair, left_sequence_length,right_sequence_length):
     """
     Create training and validation dataset
@@ -83,13 +129,24 @@ def create_test_data_lstm(tokenizer, test_sentences_pair, left_sequence_length,r
 
 
 
-def buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                left_sequence_length,right_sequence_length,num_classes,epoch,batch_size):
+def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
+                embed_dimensions,embedding_matrix,number_lstm_units,rate_drop_lstm, \
+                rate_drop_dense, number_dense_units,left_sequence_length,\
+                right_sequence_length,num_classes,epoch,batch_size):
     
-    train_data_x1, train_data_x2, train_labels, leaks_train,\
-    val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_set_lstm(
-            tokenizer, sentences_pair, sim, left_sequence_length, right_sequence_length,validation_split_ratio=0.1)
+    if sentences_pair_dev == None:
+        train_data_x1, train_data_x2, train_labels, leaks_train,\
+        val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_set_lstm(
+                tokenizer, sentences_pair_train, sim_train, left_sequence_length, \
+                right_sequence_length,validation_split_ratio=0)
+    else:
+       train_data_x1, train_data_x2, train_labels, leaks_train,\
+        val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_from_files_lstm(
+                tokenizer, sentences_pair_train, sim_train, sentences_pair_dev,sim_dev,\
+                left_sequence_length, right_sequence_length)
+  
+    
+    
     if train_data_x1 is None:
         print("++++ !! Failure: Unable to train model ++++")
         return None
@@ -177,9 +234,10 @@ if __name__ == '__main__':
     rate_drop_lstm = 0.17
     rate_drop_dense = 0.15
     number_dense_units = 100
-    model,his = buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+    model,his = buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+                          sim_dev,embed_dimensions,embedding_matrix,number_lstm_units,\
+                          rate_drop_lstm, rate_drop_dense, number_dense_units,\
+                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
     
     fig = plot_acc(his)
     fig.show()

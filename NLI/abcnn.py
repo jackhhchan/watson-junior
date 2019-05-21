@@ -114,6 +114,53 @@ def create_train_dev_set(tokenizer, sentences_pair, sim, left_sequence_length, \
     return train_data_1, train_data_2, labels_train, val_data_1, val_data_2, labels_val
 
 
+def create_train_dev_from_files(tokenizer, sentences_pair_train, sim_train, \
+                                sentences_pair_dev,sim_dev,left_sequence_length,\
+                                right_sequence_length):
+    """
+    train_set & dev_set from 2 different files
+    """
+    sentences1 = [x[0] for x in sentences_pair_train]
+    sentences2 = [x[1] for x in sentences_pair_train]
+    train_sequences_1 = tokenizer.texts_to_sequences(sentences1)
+    train_sequences_2 = tokenizer.texts_to_sequences(sentences2)
+    
+    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=left_sequence_length)
+    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=right_sequence_length)
+
+    train_labels = np.array(sim_train)
+
+    shuffle_indices = np.random.permutation(np.arange(len(train_labels)))
+    train_data_1_shuffled = train_padded_data_1[shuffle_indices]
+    train_data_2_shuffled = train_padded_data_2[shuffle_indices]
+    train_labels_shuffled = train_labels[shuffle_indices]
+
+    sentences1_dev = [x[0] for x in sentences_pair_dev]
+    sentences2_dev = [x[1] for x in sentences_pair_dev]
+    dev_sequences_1 = tokenizer.texts_to_sequences(sentences1_dev)
+    dev_sequences_2 = tokenizer.texts_to_sequences(sentences2_dev)
+    
+    dev_padded_data_1 = pad_sequences(dev_sequences_1, maxlen=left_sequence_length)
+    dev_padded_data_2 = pad_sequences(dev_sequences_2, maxlen=right_sequence_length)
+
+    dev_labels = np.array(sim_dev)
+
+    shuffle_indices = np.random.permutation(np.arange(len(dev_labels)))
+    dev_data_1_shuffled = dev_padded_data_1[shuffle_indices]
+    dev_data_2_shuffled = dev_padded_data_2[shuffle_indices]
+    dev_labels_shuffled = dev_labels[shuffle_indices]
+    
+#    dev_idx = max(1, int(len(train_labels_shuffled) * validation_split_ratio))
+#
+#
+#    train_data_1, val_data_1 = train_data_1_shuffled[:-dev_idx], train_data_1_shuffled[-dev_idx:]
+#    train_data_2, val_data_2 = train_data_2_shuffled[:-dev_idx], train_data_2_shuffled[-dev_idx:]
+#    labels_train, labels_val = train_labels_shuffled[:-dev_idx], train_labels_shuffled[-dev_idx:]
+
+    return train_data_1_shuffled, train_data_2_shuffled, train_labels_shuffled, \
+            dev_data_1_shuffled, dev_data_2_shuffled, dev_labels_shuffled
+
+
 def create_test_data(tokenizer, test_sentences_pair, left_sequence_length, right_sequence_length):
     test_sentences1 = [x[0] for x in test_sentences_pair]
     test_sentences2 = [x[1] for x in test_sentences_pair]

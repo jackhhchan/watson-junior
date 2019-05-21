@@ -8,7 +8,7 @@ Created on Sat May 18 16:58:14 2019
 
 run model
 """
-from NLI.esim import buildESIM, plot
+from NLI.esim import buildESIM
 from NLI.normalLSTM import buildLSTM
 from NLI.abcnn import word_embed_meta_data, create_test_data
 from utils import load_pickle, save_pickle
@@ -129,30 +129,40 @@ if __name__ == '__main__':
     #"""      
     tokenizer, embedding_matrix = word_embed_meta_data(claims+evidences,mode = "Glove")
     # return the embedding_matrix for sentences.
-    sentences_pair = [(x1, x2) for x1, x2 in zip(claims, evidences)]
+    # only for the training set
     
+    
+#    """
+#    model hyperparameters
+#    """
     left_sequence_length = 32   # max length of claims
     right_sequence_length = 64     # max length of evidences
     num_samples = len(claims)
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
-    epoch = 1
+    epoch = 50
     # batch_size = 1024
     batch_size = 512
+#    
+#    """
+#    prepare dataset
+#    """
+    sentences_pair_train = [(x1, x2) for x1, x2 in zip(claims, evidences)]
+    sim_train = keras.utils.to_categorical(labels, num_classes)
+    sentences_pair_dev = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
+    sim_dev = keras.utils.to_categorical(labels_dev, num_classes)
     
-    sim = keras.utils.to_categorical(labels, num_classes)
-            
-    test_sentences_pair = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
-    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
-                                                left_sequence_length, right_sequence_length)
     
+#    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
+#                                                left_sequence_length, right_sequence_length)
+#    
     #"""
     #ESIM 
     #"""        
-    model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+    model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+                          sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
+                          right_sequence_length,num_classes,epoch,batch_size)
     
-#    plot(model, to_file='esim1.png')
 #    test_sentences_pair = [(x1, x2) for x1, x2 in zip(sampled_file.claim[:10], sampled_file.evidences[:10])]
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
 #                                                left_sequence_length, right_sequence_length)
@@ -165,13 +175,13 @@ if __name__ == '__main__':
 #    model = load_model('/Users/loretta/watson-junior/trained_model/ESIM/1558325833.h5',\
 #                       custom_objects={'DotProductAttention':DotProductAttention})
 
-    pred = model.predict([test_claim,test_evidence])
-    pred = np.argmax(pred,axis=1)
-    print('mean_squared_error: '+mean_squared_error(pred,labels_dev))
-    print('f1_score: '+f1_score(pred,labels_dev))
-    print("confusion_matrix: ")
-    print(confusion_matrix(pred,labels_dev))
-    print("=============================")
+#    pred = model.predict([test_claim,test_evidence])
+#    pred = np.argmax(pred,axis=1)
+#    print('mean_squared_error: '+mean_squared_error(pred,labels_dev))
+#    print('f1_score: '+f1_score(pred,labels_dev))
+#    print("confusion_matrix: ")
+#    print(confusion_matrix(pred,labels_dev))
+#    print("=============================")
 
     
     #"""
@@ -181,16 +191,17 @@ if __name__ == '__main__':
     rate_drop_lstm = 0.17
     rate_drop_dense = 0.15
     number_dense_units = 100
-    model,his = buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+    model,his = buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+                          sim_dev,embed_dimensions,embedding_matrix,number_lstm_units,\
+                          rate_drop_lstm, rate_drop_dense, number_dense_units,\
+                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
 #    plot(model,'normalLSTM.png')
     name = 'LSTM_'+str(int(time.time())) + '.png'
     plot_acc(his,name,1)
     
-    pred = model.predict([test_claim,test_evidence])
-    pred = np.argmax(pred,axis=1)
-    print('mean_squared_error: '+ str(mean_squared_error(pred,labels_dev)))
-    print('f1_score: '+str(f1_score(pred,labels_dev)))
-    print("confusion_matrix: ")
-    print(confusion_matrix(pred,labels_dev))
+#    pred = model.predict([test_claim,test_evidence])
+#    pred = np.argmax(pred,axis=1)
+#    print('mean_squared_error: '+ str(mean_squared_error(pred,labels_dev)))
+#    print('f1_score: '+str(f1_score(pred,labels_dev)))
+#    print("confusion_matrix: ")
+#    print(confusion_matrix(pred,labels_dev))

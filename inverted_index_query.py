@@ -42,7 +42,7 @@ def query_reformulation(query):
     # TODO
     pass
 
-
+import json
 if __name__ == '__main__':
     inverted_index = load_pickle(INVERTED_INDEX_FNAME)
     page_ids_idx_dict = load_pickle(PAGE_IDS_IDX_DICT_FNAME)
@@ -52,6 +52,11 @@ if __name__ == '__main__':
     # for term in tqdm(inverted_index.keys()):
     #     postings = [(page_idx, tfidf) for (page_idx, tfidf) in inverted_index[term].items()]
     #     tuple_inverted_index[term] = postings
+
+    # save_pickle(tuple_inverted_index, 'tuple_inverted_index.pkl')
+
+    # save inverted index into json file
+
 
     # save_pickle(tuple_inverted_index, 'tuple_inverted_index.pkl')
 

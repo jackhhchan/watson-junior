@@ -24,7 +24,8 @@ import json
 from keras.layers import LSTM, Bidirectional, GlobalAveragePooling1D, Input,\
       concatenate, Lambda, subtract, multiply, Dense, TimeDistributed, Embedding
 from NLI.attention import DotProductAttention
-from NLI.abcnn import word_embed_meta_data, create_train_dev_set,create_test_data
+from NLI.abcnn import word_embed_meta_data, create_train_dev_set,create_test_data,\
+    create_train_dev_from_files
 from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
 
 
@@ -35,8 +36,9 @@ def plot(*args, **kwargs):
 
 
 
-def buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                  left_sequence_length,right_sequence_length,num_classes,epoch,batch_size):
+def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
+              embed_dimensions,embedding_matrix,left_sequence_length,right_sequence_length,\
+              num_classes,epoch,batch_size):
     
     input_premise = Input(shape=(left_sequence_length,))
     input_hypothesis = Input(shape=(right_sequence_length,))
@@ -46,10 +48,17 @@ def buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
 #    premise_embed = embedding(input_premise)
 #    hypothesis_embed = embedding(input_hypothesis)
     
-    train_data_x1, train_data_x2, train_labels, \
-    val_data_x1, val_data_x2, val_labels  = create_train_dev_set(
-            tokenizer, sentences_pair, sim, left_sequence_length, right_sequence_length, \
-            validation_split_ratio=0)
+    if sentences_pair_dev == None:
+        train_data_x1, train_data_x2, train_labels, \
+        val_data_x1, val_data_x2, val_labels  = create_train_dev_set(
+                tokenizer, sentences_pair_train, sim_train, left_sequence_length, right_sequence_length, \
+                validation_split_ratio=0)
+    else:
+        train_data_x1, train_data_x2, train_labels, \
+        val_data_x1, val_data_x2, val_labels  = create_train_dev_from_files(
+                tokenizer, sentences_pair_train, sim_train, sentences_pair_dev, \
+                sim_dev,left_sequence_length, right_sequence_length)
+    
     nb_words = len(tokenizer.word_index) + 1
     emb_layer = Embedding(nb_words, embed_dimensions,
 #                          input_length=max_len,
@@ -179,9 +188,13 @@ if __name__ == '__main__':
     
     sim = keras.utils.to_categorical(sampled_file.labels, num_classes)
                  
-    model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
-                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
-    
+#    model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
+#                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+#
+    model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+                          sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
+                          right_sequence_length,num_classes,epoch,batch_size)
+
     his = his.history
     
 #    import matplotlib.pyplot as plt
