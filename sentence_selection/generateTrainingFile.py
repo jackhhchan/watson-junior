@@ -12,7 +12,6 @@ from tqdm import tqdm
 # import pandas as pd
 # import numpy as np
 
-import mongodb_query    
 #from watson_junior.utils.utils import load_file
 #from watson_junior.utils.wiki_parser import parse_raw_line
 
