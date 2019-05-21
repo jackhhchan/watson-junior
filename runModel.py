@@ -20,7 +20,7 @@ import pickle
 from tqdm import tqdm
 
 #define folder directory
-mask_dir = 'resource/training_data/'
+mask_dir = 'training_data/'
 claims_supports = mask_dir + 'train_claims_supports_downsampled.pkl'
 claims_refutes = mask_dir + 'train_claims_refutes.pkl'
 evidences_supports = mask_dir + 'train_evidences_supports_downsampled.pkl'
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     num_samples = len(claims)
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
-    epoch = 1
+    epoch = 50
     # batch_size = 1024
     batch_size = 512
     
@@ -129,7 +129,8 @@ if __name__ == '__main__':
             
     #"""
     #ESIM 
-    #"""        
+    #"""
+    print("[INFO] Training ESIM neural network...")        
     model,his = buildESIM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
                           left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
     
@@ -145,6 +146,8 @@ if __name__ == '__main__':
     #"""
     #siamese LSTM
     #"""
+
+    print("[INFO] Training LSTM neural network...")
     number_lstm_units = 50
     rate_drop_lstm = 0.17
     rate_drop_dense = 0.15
