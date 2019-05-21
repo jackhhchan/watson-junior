@@ -147,7 +147,7 @@ def load_pickle(name):
 def save_json(obj, name):
     assert name.endswith('.json')
     with open(name, 'w') as handle:
-        json.dump(obj, name)
+        json.dump(obj, handle)
 
 
 ###########################################
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     inverted_index = load_pickle(INVERTED_INDEX_FNAME)
 
     json_dump_inverted_index(inverted_index)
-    return
+    quit()
 
     #### IGNORE THE REST OF THE SCRIPT ####
     #### this is for populating the db one by one. (slow) ####
