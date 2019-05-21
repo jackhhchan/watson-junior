@@ -6,16 +6,12 @@ PAGE_IDS_IDX_DICT_FNAME = "page_ids_idx_dict_normalized_proper_fixed.pkl"
 claims = [
     "Nikolaj Coster Waldau worked with the Fox Broadcasting Company",
     "Roman Atwood is a content creator",
-    "Nikolaj Coster Waldau Fox Broadcasting Company",
-    "Nikolaj Coster Waldau",
+    "Nikolaj Coster-Waldau Fox Broadcasting Company",
+    "Nikolaj Coster-Waldau",
     "Fox Broadcasting Company"
 ]
 
-def query(claim, output={}):
-
-    inverted_index = pickle.load(open(INVERTED_INDEX_FNAME, 'rb'))
-    page_ids_idx_dict = pickle.load(open(PAGE_IDS_IDX_DICT_FNAME, 'rb'))
-    
+def query(inverted_index, page_ids_idx_dict, claim, output={}):
     claim = claim.lower().split()
 
     for word in claim:
@@ -39,12 +35,15 @@ def query_reformulation(query):
 
 
 if __name__ == '__main__':
+    inverted_index = pickle.load(open(INVERTED_INDEX_FNAME, 'rb'))
+    page_ids_idx_dict = pickle.load(open(PAGE_IDS_IDX_DICT_FNAME, 'rb'))
+
     claims = [claims[3], claims[4]]
 
     final_output = {}
     for claim in claims:
         print("claim: {}".format(claim))
-        final_output.update(query(claim, final_output))
+        final_output.update(query(inverted_index, page_ids_idx_dict, claim, final_output))
 
     final_output = sorted_dict(final_output)
 

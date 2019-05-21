@@ -233,23 +233,21 @@ def generate_training_data_from_db(train_json, concatenate):
 
                 train_claims.append(claim)          # these two appends must be after token, for db check
                 train_labels.append(label)
-
-                if idx%1000 == 0:
-                    name = 'refutes_' + str(file_idx) + '.pkl'
-                    save_pickle(train_claims, 'claims_'+name)
-                    save_pickle(train_labels, 'labels_'+name)
-                    save_pickle(train_evidences, 'evidences_'+name)
                     
 
 
     return train_claims, train_evidences, train_labels
+
+                    
         
 
 def get_tokens(evidence, collection):
     page_id = evidence[0]
     passage_idx = evidence[1]
     doc = mongodb_query.query(collection=collection, page_id=page_id, passage_idx=passage_idx)
-    if doc is None: return None
+    
+    if doc is None: 
+        return None
 
     tokens = doc.get('tokens')
     assert tokens is not None
@@ -297,7 +295,7 @@ def parse_train_json(train_json_file):
 def save_pickle(obj, name):
     assert name.endswith('.pkl')
     with open(name, 'wb') as handle:
-        pickle.dump(obj, name)
+        pickle.dump(obj, handle)
 
 
 import pickle
@@ -320,8 +318,15 @@ if __name__ == '__main__' :
     print("Number of SUPPORTS: {}".format(len(supports_train_json)))
     print("Number of REFUTES: {}".format(len(refutes_train_json)))
 
-    generate_training_data_from_db(supports_train_json, False)
+    # train_claims, train_evidences, train_labels = generate_training_data_from_db(refutes_train_json, False)
+    # save_pickle(train_claims, 'train_claims_refutes.pkl')
+    # save_pickle(train_evidences, 'train_evidences_refutes.pkl')
+    # save_pickle(train_labels, 'train_labels_refutes.pkl')
 
+    train_claims, train_evidences, train_labels = generate_training_data_from_db(supports_train_json, False)
+    save_pickle(train_claims, 'train_claims_supports.pkl')
+    save_pickle(train_evidences, 'train_evidences_supports.pkl')
+    save_pickle(train_labels, 'train_labels_supports.pkl')
 
 
 

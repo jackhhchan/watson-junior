@@ -5,6 +5,9 @@ This module contains a list of helper functions to be used by watson-junior
 """
 from enum import Enum
 
+from nltk.tokenize import word_tokenize
+
+
 class encoding(Enum):
     UTF8 = "UTF-8"
 
