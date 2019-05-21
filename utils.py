@@ -6,6 +6,7 @@ This module contains a list of helper functions to be used by watson-junior
 from enum import Enum
 
 from nltk.tokenize import word_tokenize
+import pickle
 
 
 class encoding(Enum):
@@ -30,3 +31,17 @@ def extract_tokens(passage):
     """ Extract lower case tokens from the passage """
 
     return [token.lower() for token in passage]
+
+
+def save_pickle(obj, name):
+    assert name.endswith('.pkl')
+    with open(name, 'wb') as handle:
+        pickle.dump(obj, handle)
+
+
+def load_pickle(name):
+    assert name.endswith('.pkl')
+    with open(name, 'rb') as handle:
+        data = pickle.load(handle)
+
+    return data

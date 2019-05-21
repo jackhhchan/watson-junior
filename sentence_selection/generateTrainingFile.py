@@ -186,7 +186,7 @@ class JSONField(Enum):
     evidence = 'evidence'
     label = 'label'
 
-def generate_training_data_from_db(train_json, concatenate):
+def generate_training_data_from_db(train_json, concatenate, threshold):
     """ Pull tokens from DB based on train.json script
     Arguments:
     ----------
@@ -233,9 +233,11 @@ def generate_training_data_from_db(train_json, concatenate):
 
                 train_claims.append(claim)          # these two appends must be after token, for db check
                 train_labels.append(label)
-                    
+        
+        if idx >= threshold:            # threshold for downsampling
+            break    
 
-
+    print("[INFO] complete.")
     return train_claims, train_evidences, train_labels
 
                     
@@ -323,10 +325,10 @@ if __name__ == '__main__' :
     # save_pickle(train_evidences, 'train_evidences_refutes.pkl')
     # save_pickle(train_labels, 'train_labels_refutes.pkl')
 
-    train_claims, train_evidences, train_labels = generate_training_data_from_db(supports_train_json, False)
-    save_pickle(train_claims, 'train_claims_supports.pkl')
-    save_pickle(train_evidences, 'train_evidences_supports.pkl')
-    save_pickle(train_labels, 'train_labels_supports.pkl')
+    train_claims, train_evidences, train_labels = generate_training_data_from_db(supports_train_json, False, len(refutes_train_json))
+    save_pickle(train_claims, 'train_claims_supports_downsampled.pkl')
+    save_pickle(train_evidences, 'train_evidences_supports_downsampled.pkl')
+    save_pickle(train_labels, 'train_labels_supports_downsampled.pkl')
 
 
 
