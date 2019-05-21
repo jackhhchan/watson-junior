@@ -23,7 +23,7 @@ from keras.preprocessing.sequence import pad_sequences
 import numpy as np
 
 
-def create_train_dev_set(tokenizer, sentences_pair, sim, max_len, validation_split_ratio=0.1):
+def create_train_dev_set_lstm(tokenizer, sentences_pair, sim, left_sequence_length,right_sequence_length, validation_split_ratio=0.1):
     sentences1 = [x[0] for x in sentences_pair]
     sentences2 = [x[1] for x in sentences_pair]
     train_sequences_1 = tokenizer.texts_to_sequences(sentences1)
@@ -31,8 +31,8 @@ def create_train_dev_set(tokenizer, sentences_pair, sim, max_len, validation_spl
     leaks = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
              for x1, x2 in zip(train_sequences_1, train_sequences_2)]
 
-    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=max_len)
-    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=max_len)
+    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=left_sequence_length)
+    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=right_sequence_length)
     train_labels = np.array(sim)
     leaks = np.array(leaks)
 
@@ -55,7 +55,7 @@ def create_train_dev_set(tokenizer, sentences_pair, sim, max_len, validation_spl
 
     return train_data_1, train_data_2, labels_train, leaks_train, val_data_1, val_data_2, labels_val, leaks_val
 
-def create_test_data(tokenizer, test_sentences_pair, max_sequence_length):
+def create_test_data_lstm(tokenizer, test_sentences_pair, left_sequence_length,right_sequence_length):
     """
     Create training and validation dataset
     Args:
@@ -76,8 +76,8 @@ def create_test_data(tokenizer, test_sentences_pair, max_sequence_length):
                   for x1, x2 in zip(test_sequences_1, test_sequences_2)]
 
     leaks_test = np.array(leaks_test)
-    test_data_1 = pad_sequences(test_sequences_1, maxlen=max_sequence_length)
-    test_data_2 = pad_sequences(test_sequences_2, maxlen=max_sequence_length)
+    test_data_1 = pad_sequences(test_sequences_1, maxlen=left_sequence_length)
+    test_data_2 = pad_sequences(test_sequences_2, maxlen=right_sequence_length)
 
     return test_data_1, test_data_2, leaks_test
 
@@ -85,11 +85,11 @@ def create_test_data(tokenizer, test_sentences_pair, max_sequence_length):
 
 def buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
                 number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                max_len,num_classes,epoch,batch_size):
+                left_sequence_length,right_sequence_length,num_classes,epoch,batch_size):
     
     train_data_x1, train_data_x2, train_labels, leaks_train,\
-    val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_set(
-            tokenizer, sentences_pair, sim, max_len, validation_split_ratio=0.1)
+    val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_set_lstm(
+            tokenizer, sentences_pair, sim, left_sequence_length, right_sequence_length,validation_split_ratio=0.1)
     if train_data_x1 is None:
         print("++++ !! Failure: Unable to train model ++++")
         return None
@@ -99,18 +99,19 @@ def buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
     # Creating word embedding layer
     embedding_layer = Embedding(nb_words, embed_dimensions, 
                                     weights=[embedding_matrix],
-                                input_length=max_len, trainable=False)
+                                    trainable=False)
+#                                    mask_zero=True)
 
     # Creating LSTM Encoder
     lstm_layer = Bidirectional(LSTM(number_lstm_units, dropout=rate_drop_lstm, recurrent_dropout=rate_drop_lstm))
 
     # Creating LSTM Encoder layer for First Sentence
-    sequence_1_input = Input(shape=(max_len,), dtype='int32')
+    sequence_1_input = Input(shape=(left_sequence_length,), dtype='int32')
     embedded_sequences_1 = embedding_layer(sequence_1_input)
     x1 = lstm_layer(embedded_sequences_1)
 
     # Creating LSTM Encoder layer for Second Sentence
-    sequence_2_input = Input(shape=(max_len,), dtype='int32')
+    sequence_2_input = Input(shape=(right_sequence_length,), dtype='int32')
     embedded_sequences_2 = embedding_layer(sequence_2_input)
     x2 = lstm_layer(embedded_sequences_2)
 
@@ -121,10 +122,10 @@ def buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
     # Merging two LSTM encodes vectors from sentences to
     # pass it to dense layer applying dropout and batch normalisation
     merged = concatenate([x1, x2, leaks_dense])
-    merged = BatchNormalization()(merged)
+#    merged = BatchNormalization()(merged)
     merged = Dropout(rate_drop_dense)(merged)
     merged = Dense(number_dense_units, activation='relu')(merged)
-    merged = BatchNormalization()(merged)
+#    merged = BatchNormalization()(merged)
     merged = Dropout(rate_drop_dense)(merged)
 #        preds = Dense(num_classes, activation='sigmoid')(merged)
 #        merged = Dense(self.number_dense_units, activation=self.activation_function,kernel_regularizer=regularizers.l2(0.0001))(merged)
@@ -160,3 +161,40 @@ def buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
     
     
     return model,his
+
+def plot_acc(his):
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    plt.plot(his.history['acc'], 'r:')
+    plt.plot(his.history['val_acc'], 'g-')
+    return fig
+
+if __name__ == '__main__':
+#    """
+#    for loretta to test only :)
+#    """
+    number_lstm_units = 50
+    rate_drop_lstm = 0.17
+    rate_drop_dense = 0.15
+    number_dense_units = 100
+    model,his = buildLSTM(tokenizer,sentences_pair,sim,embed_dimensions,embedding_matrix,\
+                number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
+                left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+    
+    fig = plot_acc(his)
+    fig.show()
+    
+#    model = load_model('/Users/loretta/watson-junior/trained_model/LSTM/1558324381.h5')
+    
+    test_file = training_file.sample(n=1000)
+#    test_file.labels.value_counts()
+    test_sentences_pair = [(x1, x2) for x1, x2 in zip(test_file.claim, test_file.evidences)]
+    test_claim,test_evidence,test_leaks = create_test_data_lstm(tokenizer, test_sentences_pair, \
+                                                left_sequence_length, right_sequence_length)
+    pred = model.predict([test_claim,test_evidence,test_leaks])
+    
+    
+    from sklearn.metrics import mean_squared_error,confusion_matrix,f1_score
+    pred = np.argmax(pred,axis=1)
+    f1_score(pred,test_file.labels)
+#    0.7307692307692308

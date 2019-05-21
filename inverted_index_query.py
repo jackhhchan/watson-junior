@@ -20,12 +20,16 @@ def query(inverted_index, page_ids_idx_dict, claim, output={}):
 
     for word in claim:
         print("{}".format(word))
-        page_indices = inverted_index[word]
-        for page_idx in page_indices:
-            page_id = page_ids_idx_dict.get(page_idx)
-            output[page_id] = output.get(page_id, 0) + inverted_index[word][page_idx]
+        try:
+            page_indices = inverted_index[word]
+            for page_idx in page_indices:
+                page_id = page_ids_idx_dict.get(page_idx)
+                output[page_id] = output.get(page_id, 0) + inverted_index[word][page_idx]
+        except:
+            print(word+' is not in the inverted index')
 
     return output
+
 
 def sorted_dict(dictionary):
     """ Sort dictionary based on value and return in tuple format (key, value) """

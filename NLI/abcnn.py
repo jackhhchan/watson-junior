@@ -25,7 +25,7 @@ from keras.callbacks import EarlyStopping,ModelCheckpoint
 import time
 import os
 import json
-from sentence_selection.generateTrainingFile import getPage_index,readOneFile
+#from sentence_selection.generateTrainingFile import getPage_index,readOneFile
 
 
 def get_vector(documents,mode):
@@ -64,9 +64,9 @@ def create_embedding_matrix(tokenizer, word_vectors,mode):
             if embedding_vector is not None:
                 embedding_matrix[i] = embedding_vector
         except:
-            if embedding_vector is not None:
-                embedding_matrix[i] = np.zeros(embedding_dim)
-                print(word+' is not in vocabulary')
+#            if embedding_vector is not None:
+            embedding_matrix[i] = np.zeros(embedding_dim)
+            print(word+' is not in vocabulary')
     print('Null word embeddings: %d' % np.sum(np.sum(embedding_matrix, axis=1) == 0))
 #    gc.collect()
     return embedding_matrix
@@ -87,16 +87,17 @@ def word_embed_meta_data(documents,mode):
     return tokenizer, embedding_matrix
 
 
-def create_train_dev_set(tokenizer, sentences_pair, is_similar, max_sequence_length, validation_split_ratio):
+def create_train_dev_set(tokenizer, sentences_pair, sim, left_sequence_length, \
+                         right_sequence_length, validation_split_ratio):
     sentences1 = [x[0] for x in sentences_pair]
     sentences2 = [x[1] for x in sentences_pair]
     train_sequences_1 = tokenizer.texts_to_sequences(sentences1)
     train_sequences_2 = tokenizer.texts_to_sequences(sentences2)
     
-    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=max_sequence_length)
-    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=max_sequence_length)
+    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=left_sequence_length)
+    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=right_sequence_length)
 
-    train_labels = np.array(is_similar)
+    train_labels = np.array(sim)
 
     shuffle_indices = np.random.permutation(np.arange(len(train_labels)))
     train_data_1_shuffled = train_padded_data_1[shuffle_indices]
@@ -113,15 +114,15 @@ def create_train_dev_set(tokenizer, sentences_pair, is_similar, max_sequence_len
     return train_data_1, train_data_2, labels_train, val_data_1, val_data_2, labels_val
 
 
-def create_test_data(tokenizer, test_sentences_pair, max_sequence_length):
+def create_test_data(tokenizer, test_sentences_pair, left_sequence_length, right_sequence_length):
     test_sentences1 = [x[0] for x in test_sentences_pair]
     test_sentences2 = [x[1] for x in test_sentences_pair]
 
     test_sequences_1 = tokenizer.texts_to_sequences(test_sentences1)
     test_sequences_2 = tokenizer.texts_to_sequences(test_sentences2)
     
-    test_data_1 = pad_sequences(test_sequences_1, maxlen=max_sequence_length)
-    test_data_2 = pad_sequences(test_sequences_2, maxlen=max_sequence_length)
+    test_data_1 = pad_sequences(test_sequences_1, maxlen=left_sequence_length)
+    test_data_2 = pad_sequences(test_sequences_2, maxlen=right_sequence_length)
 
     return test_data_1, test_data_2
 
@@ -196,9 +197,9 @@ def ABCNN_w2v(
     right_input = Input(shape=(right_seq_len,))
     train_data_x1, train_data_x2, train_labels, \
         val_data_x1, val_data_x2, val_labels  = create_train_dev_set(
-                tokenizer, sentences_pair, sim, left_seq_len, validation_split_ratio=0.1)
+                tokenizer, sentences_pair, sim, left_seq_len, right_seq_len,validation_split_ratio=0.1)
     nb_words = len(tokenizer.word_index) + 1
-    emb_layer = Embedding(nb_words, embed_dimensions,input_length=left_seq_len,
+    emb_layer = Embedding(nb_words, embed_dimensions,
                           weights=[embedding_matrix],
                           trainable=False)
     left_embed = emb_layer(left_input)
