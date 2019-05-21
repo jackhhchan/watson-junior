@@ -33,6 +33,9 @@ evidences_supports = mask_dir + 'train_evidences_supports_downsampled.pkl'
 evidences_refutes = mask_dir + 'train_evidences_refutes.pkl'
 labels_supports = mask_dir + 'train_labels_supports_downsampled.pkl'
 labels_refutes = mask_dir + 'train_labels_refutes.pkl'
+dev_claims = mask_dir + 'dev_claims.pkl'
+dev_evidences = mask_dir + 'dev_evidences.pkl'
+dev_labels = mask_dir + 'dev_labels.pkl'
 
 def plot_acc(his,name,index):
     fig = plt.figure(index)
@@ -74,6 +77,10 @@ if __name__ == '__main__':
         evidences += load_pickle(item)
     for item in [labels_supports,labels_refutes]:
         labels += load_pickle(item)
+    
+    claims_dev = load_pickle(dev_claims)
+    evidences_dev = load_pickle(dev_evidences)
+    labels_dev = load_pickle(dev_labels)
     
 #        label_transfer = {'SUPPORTS':0,'REFUTES':1}
 #        label_v2 = []
@@ -135,7 +142,7 @@ if __name__ == '__main__':
     
     sim = keras.utils.to_categorical(labels, num_classes)
             
-    test_sentences_pair = [(x1, x2) for x1, x2 in zip(claims[:5], evidences[:5])]
+    test_sentences_pair = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
     test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
                                                 left_sequence_length, right_sequence_length)
     
@@ -151,7 +158,7 @@ if __name__ == '__main__':
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    name = 'ESIM'+str(int(time.time())) + '.png'
+    name = 'ESIM_'+str(int(time.time())) + '.png'
     plot_acc(his,name,0)
 
     
@@ -162,7 +169,7 @@ if __name__ == '__main__':
     pred = np.argmax(pred,axis=1)
     print('mean_squared_error: '+mean_squared_error(pred,labels_dev))
     print('f1_score: '+f1_score(pred,labels_dev))
-    print("confusion_matrix:")
+    print("confusion_matrix: ")
     print(confusion_matrix(pred,labels_dev))
     print("=============================")
 
@@ -178,5 +185,12 @@ if __name__ == '__main__':
                 number_lstm_units,rate_drop_lstm, rate_drop_dense, number_dense_units,\
                 left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
 #    plot(model,'normalLSTM.png')
-    name = 'LSTM'+str(int(time.time())) + '.png'
+    name = 'LSTM_'+str(int(time.time())) + '.png'
     plot_acc(his,name,1)
+    
+    pred = model.predict([test_claim,test_evidence])
+    pred = np.argmax(pred,axis=1)
+    print('mean_squared_error: '+ str(mean_squared_error(pred,labels_dev)))
+    print('f1_score: '+str(f1_score(pred,labels_dev)))
+    print("confusion_matrix: ")
+    print(confusion_matrix(pred,labels_dev))
