@@ -270,7 +270,7 @@ def encoded_label(label):
 
 def load_json(json_path):
     # parse train.json file
-    assert json_fname.endswith('.json')
+    assert json_path.endswith('.json')
     try:
         with open(json_path, 'r') as handle:
             json_data = json.load(handle)
@@ -282,13 +282,14 @@ def load_json(json_path):
 def parse_json(json_file, separate):
 
     if not separate:
-        data_array = []
+        dev_json = []
         for key in tqdm(json_file.keys()):
-            label = json_file.get(key.get('label'))
+            label = json_file.get(key).get('label')
             if label == Label.SUPPORTS.value or label == Label.REFUTES.value:
-                data_array.append(json_file.get(key))
+                dev_json.append(json_file.get(key))
             else:
                 continue
+        return dev_json
     else:
         supports_train_json = []
         refutes_train_json = []
@@ -332,7 +333,7 @@ if __name__ == '__main__' :
     ##### DEVELOPMENT SET #####
     dev_json = load_json('resource_train/devset.json')
     dev_array = parse_json(dev_json, False)
-    dev_claims, dev_evidences, dev_labels = generate_training_data_from_db(dev_json, False, len(dev_json))
+    dev_claims, dev_evidences, dev_labels = generate_training_data_from_db(dev_array, False, len(dev_array))
     save_pickle(dev_claims, 'dev_claims.pkl')
     save_pickle(dev_evidences, 'dev_evidences.pkl')
     save_pickle(dev_labels, 'dev_labels.pkl')
