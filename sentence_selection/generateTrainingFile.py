@@ -224,12 +224,12 @@ def generate_training_data_from_db(train_json, concatenate, threshold):
             train_claims.append(claim)
             train_labels.append(label)
             concatenated_tokens = []
-            [concatenated_tokens.extend(get_tokens(evidence, mycol)) for evidence in evidences]
+            [concatenated_tokens.extend(get_tokens_from_db(evidence, mycol)) for evidence in evidences]
             train_evidences.append(concatenated_tokens)        
         else:
             # evidences tokens are not concatenated
             for evidence in evidences:
-                tokens = get_tokens(evidence, mycol)
+                tokens = get_tokens_from_db(evidence, mycol)
                 if tokens == None:
                     continue
                 train_evidences.append(tokens)
@@ -246,7 +246,7 @@ def generate_training_data_from_db(train_json, concatenate, threshold):
                     
         
 
-def get_tokens(evidence, collection):
+def get_tokens_from_db(evidence, collection):
     page_id = evidence[0]
     passage_idx = evidence[1]
     doc = mongodb_query.query(collection=collection, page_id=page_id, passage_idx=passage_idx)
@@ -285,14 +285,14 @@ def load_json(json_path):
 def parse_json(json_file, separate):
 
     if not separate:
-        dev_json = []
+        dev_jsons = []
         for key in tqdm(json_file.keys()):
             label = json_file.get(key).get('label')
             if label == Label.SUPPORTS.value or label == Label.REFUTES.value:
-                dev_json.append(json_file.get(key))
+                dev_jsons.append(json_file.get(key))
             else:
                 continue
-        return dev_json
+        return dev_jsons
     else:
         supports_train_json = []
         refutes_train_json = []
@@ -346,6 +346,13 @@ def save_pickle(obj, name):
     with open(name, 'wb') as handle:
         pickle.dump(obj, handle)
 
+def load_pickle(name):
+    assert name.endswith('.pkl')
+    with open(name, 'rb') as handle:
+        data = pickle.load(handle)
+
+    return data
+
 
 if __name__ == '__main__' :
     # train_json = load_train_json()
@@ -366,15 +373,15 @@ if __name__ == '__main__' :
 
 
     ##### DEVELOPMENT SET #####
-    dev_json = load_json('resource_train/devset.json')
-    dev_array = parse_json(dev_json, False)
-    dev_claims, dev_evidences, dev_labels = generate_training_data_from_db(dev_array, False, len(dev_array))
-    save_pickle(dev_claims, 'dev_claims.pkl')
-    save_pickle(dev_evidences, 'dev_evidences.pkl')
-    save_pickle(dev_labels, 'dev_labels.pkl')
+    # dev_json = load_json('resource_train/devset.json')
+    # dev_array = parse_json(dev_json, False)
+    # dev_claims, dev_evidences, dev_labels = generate_training_data_from_db(dev_array, False, len(dev_array))
+    # save_pickle(dev_claims, 'dev_claims.pkl')
+    # save_pickle(dev_evidences, 'dev_evidences.pkl')
+    # save_pickle(dev_labels, 'dev_labels.pkl')
 
-
-    {"RELEVANT": 0, "IRRELEVANT": 1}
+    ###### SENTENCE SELECTION SET #######
+    sentence_selection_label_encoding = {"RELEVANT": 0, "IRRELEVANT": 1}
     ######
     # get train array after parsing train.json
     # for each row, 
@@ -390,4 +397,45 @@ if __name__ == '__main__' :
     #       append irrelevant passage tokens to train_evidences
     #       append claim into train_claims
     #       append label 1 to train_labels
+
+    page_ids_idx_dict = load_pickle("page_ids_idx_dict_normalized_proper_fixed.pkl")
+
+    train_json = load_json('resource_train/train.json')
+    train_array = parse_json(json_file=train_json, separate=False)  # don't the array to relevant and irrelevant
+
+    train_claims = []
+    train_evidences = []
+    train_labels = []
+
+    mydb, mycol = mongodb_query._connected_db(host="localhost",port="27017")       # throws exception
+    print("[INFO] collections in db: {}".format(mydb.list_collection_names()))
+
+    # data is each datapoint for each claim
+    for data in train_array:
+        relevant_page_ids = []
+        claim = data.get(JSONField.claim.value)
+        relevant_evidences = data.get(JSONField.evidence.value)
+        for evidence in relevant_evidences:
+            train_claims.append(claim)
+            train_evidences.append(get_tokens_from_db(evidence, mycol))
+            train_labels.append(sentence_selection_label_encoding.get('RELEVANT'))
+            relevant_page_ids.append(evidence[0])       # keep page_ids in the evidences
+
+        # get as many irrelevant evidences as there are relevant evidences for each claim
+        irrelevant_page_ids = get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, len(relevant_evidences))
+        for irrelevant_page_id in irrelevant_page_ids:
+            irrelevant_passage_tokens = get_irrelevant_passage(irrelevant_page_id, mycol)
+
+            train_evidences.append(irrelevant_passage_tokens)
+            train_claims.append(claim)
+            train_labels.append(sentence_selection_label_encoding.get('IRRELEVANT'))
+
+    folder_name = 'training_data'
+    save_pickle(train_claims, '{}}/sentence_selection_train_claims.pkl'.format(folder_name))
+    save_pickle(train_evidences, '{}/sentence_selection_train_evidences.pkl'.format(folder_name))
+    save_pickle(train_labels, '{}/sentence_selection_train_labels.pkl'.format(folder_name))
+    
+            
+
+
 
