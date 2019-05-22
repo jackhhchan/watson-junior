@@ -151,26 +151,30 @@ def save_json(obj, name):
 
 
 ###########################################
-def json_dump_inverted_index(inverted_index):
+def json_dump_inverted_index(inverted_index, page_ids_idx_dict):
     # split the inverted index and save it into 100 parts
     file_idx = 0
-    json_file = {}
-    f_name = "inverted_index_json_{}.json".format(file_idx)
+    json_file = []
 
     for idx, (term, postings) in tqdm(enumerate(inverted_index.items())):
         if not term.isalpha(): continue     # skip if not alpha
 
         for (page_idx, tfidf)  in postings.items():
             page_id = page_ids_idx_dict.get(page_idx)
+            json_file[term].appe
+
             doc_json = inverted_index_doc_formatted(term, page_id, tfidf)
-            json_file.update(doc_json)
+            json_file.append(doc_json)
 
 
-        if idx+1%1000:
+        if idx+1%3==0:
+            f_name = "inverted_index_json_{}.json".format(file_idx)
             save_json(json_file, f_name)
+
             file_idx += 1
-            json_file = {}
+            json_file = []
     
+    f_name = "inverted_index_json_{}.json".format(file_idx)
     save_json(json_file, f_name)
 
 
@@ -179,9 +183,11 @@ if __name__ == "__main__":
 
     # SPLIT DUMP INVERTED INDEX TO MULTIPLE JSON FILES TO BE IMPORTED TO MONGODB
     INVERTED_INDEX_FNAME = "inverted_index_tf_normalized_proper_fixed.pkl"
+    PAGE_IDS_IDX_DICT_FNAME = "page_ids_idx_dict_normalized_proper_fixed.pkl"
     inverted_index = load_pickle(INVERTED_INDEX_FNAME)
+    page_ids_idx_dict = load_pickle(PAGE_IDS_IDX_DICT_FNAME)
 
-    json_dump_inverted_index(inverted_index)
+    json_dump_inverted_index(inverted_index, page_ids_idx_dict)
     quit()
 
     #### IGNORE THE REST OF THE SCRIPT ####

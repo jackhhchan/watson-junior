@@ -26,7 +26,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #define folder directory
-mask_dir = 'resource/training_data/'
+# mask_dir = 'resource/training_data/'
+mask_dir = 'training_data/'
+
 claims_supports = mask_dir + 'train_claims_supports_downsampled.pkl'
 claims_refutes = mask_dir + 'train_claims_refutes.pkl'
 evidences_supports = mask_dir + 'train_evidences_supports_downsampled.pkl'

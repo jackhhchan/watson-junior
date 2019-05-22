@@ -26,7 +26,7 @@ from keras.layers import LSTM, Bidirectional, GlobalAveragePooling1D, Input,\
 from NLI.attention import DotProductAttention
 from NLI.abcnn import word_embed_meta_data, create_train_dev_set,create_test_data,\
     create_train_dev_from_files
-from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
+# from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
 
 
 def plot(*args, **kwargs):
