@@ -39,11 +39,18 @@ dev_labels = mask_dir + 'dev_labels.pkl'
 
 def plot_acc(his,name,index):
     fig = plt.figure(index)
-    plt.plot(his.history['acc'], 'r:')
-    plt.plot(his.history['val_acc'], 'g-')
-    plt.plot(his.history['loss'], 'r:')
-    plt.plot(his.history['val_loss'],'g-')
+    fig.suptitle(name)
+    plt.subplot(211)
+    plt.plot(his.history['acc'], 'r:',label='acc')
+    plt.plot(his.history['val_acc'], 'g-',label='val_acc')
+    legend = plt.legend(loc='lower right')
+    plt.subplot(212)
+    plt.plot(his.history['loss'], 'r:',label = 'loss')
+    plt.plot(his.history['val_loss'],'g-',label = 'val_loss')
+    legend = plt.legend(loc='upper right')
     plt.savefig(name+".png")
+    
+
 
 if __name__ == '__main__':
 #    with open('resource/train.json') as data:
@@ -106,20 +113,39 @@ if __name__ == '__main__':
 #    training_file = pd.read_csv('resource/training_file_v3.csv')
 #    training_file.labels.value_counts()
 #      
-#    new_claims = []
-#    new_evidences = []
-#    new_labels = []
-#    evd = []
-#    for c,e,l in zip(claims,evidences,labels):
-#        if not c in new_claims and not evd == []:
-#            new_claims.append(c)
-#            new_labels.append(l)
-#            new_evidences.append(' '.join(evd))
-#            evd = []
-#            evd.append(e)
-#        else:
-#            evd.append(e)
+    new_claims = []
+    new_evidences = []
+    new_labels = []
+    evd = []
+    for c,e,l in zip(claims,evidences,labels):
+        if not c in new_claims:
+            new_claims.append(c)
+            new_labels.append(l)
+            new_evidences.append(' '.join(evd))
+            evd = []
+            evd.append(e)
+        else:
+            evd.append(e)
         
+    new_evidences.append(' '.join(evd))
+    new_evidences.pop(0)
+    
+    new_claims_dev = []
+    new_evidences_dev = []
+    new_labels_dev = []
+    evd_dev = []
+    for c,e,l in zip(claims_dev,evidences_dev,labels_dev):
+        if not c in new_claims_dev:
+            new_claims_dev.append(c)
+            new_labels_dev.append(l)
+            new_evidences_dev.append(' '.join(evd_dev))
+            evd_dev = []
+            evd_dev.append(e)
+        else:
+            evd_dev.append(e)
+        
+    new_evidences_dev.append(' '.join(evd_dev))
+    new_evidences_dev.pop(0)
     
         
     
@@ -147,10 +173,10 @@ if __name__ == '__main__':
 #    """
 #    prepare dataset
 #    """
-    sentences_pair_train = [(x1, x2) for x1, x2 in zip(claims, evidences)]
-    sim_train = keras.utils.to_categorical(labels, num_classes)
-    sentences_pair_dev = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
-    sim_dev = keras.utils.to_categorical(labels_dev, num_classes)
+    sentences_pair_train = [(x1, x2) for x1, x2 in zip(new_claims, new_evidences)]
+    sim_train = keras.utils.to_categorical(new_labels, num_classes)
+    sentences_pair_dev = [(x1, x2) for x1, x2 in zip(new_claims_dev, new_evidences_dev)]
+    sim_dev = keras.utils.to_categorical(new_labels_dev, num_classes)
     
     
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
@@ -168,7 +194,7 @@ if __name__ == '__main__':
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    name = 'ESIM_'+str(int(time.time())) + '.png'
+    name = 'ESIM_'+str(int(time.time()))
     plot_acc(his,name,0)
 
     
@@ -196,7 +222,7 @@ if __name__ == '__main__':
                           rate_drop_lstm, rate_drop_dense, number_dense_units,\
                           left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
 #    plot(model,'normalLSTM.png')
-    name = 'LSTM_'+str(int(time.time())) + '.png'
+    name = 'LSTM_'+str(int(time.time()))
     plot_acc(his,name,1)
     
 #    pred = model.predict([test_claim,test_evidence])
