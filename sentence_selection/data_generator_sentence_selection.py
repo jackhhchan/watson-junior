@@ -39,6 +39,7 @@ class JSONField(Enum):
 
 
 def main():
+    """" main method"""
     train_json = utils.load_json('train.json')
     train_array = parse_json(json_file=train_json)
 
@@ -118,7 +119,7 @@ def parse_json(json_file):
     
 
 ####################################################################
-############### TRAINING DATA FOR SENTENCE SELECTION ###############
+###################### GETTING IRRELEVANT DATA #####################
 ####################################################################
 
 def get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, number_of_irrelevant):
@@ -168,44 +169,4 @@ def get_irrelevant_passage(relevant_page_id, query_object):
 
 
 if __name__ == '__main__' :
-    ###### SENTENCE SELECTION SET #######
-    sentence_selection_label_encoding = {"RELEVANT": 0, "IRRELEVANT": 1}
-    ######
-    page_ids_idx_dict = load_pickle("page_ids_idx_dict_normalized_proper_fixed.pkl")
-
-    train_json = load_json('resource_train/train.json')
-    train_array = parse_json(json_file=train_json, separate=False)  # don't the array to relevant and irrelevant
-
-    train_claims = []
-    train_evidences = []
-    train_labels = []
-
-    mydb, mycol = mongodb_query._connected_db(host="localhost",port="27017")       # throws exception
-    print("[INFO] collections in db: {}".format(mydb.list_collection_names()))
-
-    # data is each datapoint for each claim
-    for data in train_array:
-        relevant_page_ids = []
-        claim = data.get(JSONField.claim.value)
-        relevant_evidences = data.get(JSONField.evidence.value)
-        for evidence in relevant_evidences:
-            train_claims.append(claim)
-            train_evidences.append(get_tokens_from_db(evidence, mycol))
-            train_labels.append(sentence_selection_label_encoding.get('RELEVANT'))
-            relevant_page_ids.append(evidence[0])       # keep page_ids in the evidences
-
-        # get as many irrelevant evidences as there are relevant evidences for each claim
-        irrelevant_page_ids = get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, len(relevant_evidences))
-        for irrelevant_page_id in irrelevant_page_ids:
-            irrelevant_passage_tokens = get_irrelevant_passage(irrelevant_page_id, mycol)
-
-            train_evidences.append(irrelevant_passage_tokens)
-            train_claims.append(claim)
-            train_labels.append(sentence_selection_label_encoding.get('IRRELEVANT'))
-
-
-    
-            
-
-
-
+    main()
