@@ -4,10 +4,11 @@ This module contains a list of helper functions to be used by watson-junior
 
 """
 from enum import Enum
+import os
 
-from nltk.tokenize import word_tokenize
 import pickle
-
+from datetime import datetime
+from nltk.tokenize import word_tokenize
 
 class encoding(Enum):
     UTF8 = "UTF-8"
@@ -45,3 +46,29 @@ def load_pickle(name):
         data = pickle.load(handle)
 
     return data
+
+def append_json(name, function):
+    with open(name, 'a') as handle:
+        function(handle)
+
+def load_json(json_path):
+    # parse train.json file
+    assert json_path.endswith('.json')
+    try:
+        with open(json_path, 'r') as handle:
+            json_data = json.load(handle)
+    except:
+        print("Unable to load {}.".format(json_path))
+
+    return json_data
+
+
+def append_logger(string, mode):
+    """ Append to logger in logs directory"""
+    folder_dir = "logs"
+    if not os.path.isdir(folder_dir):
+        os.makedirs(folder_dir)
+
+    with open("{}/logs.txt".format(folder_dir), 'a') as handle:
+        string = "{}  -  {}".format(datetime.now().isoformat(), string)
+        handle.write(string)
