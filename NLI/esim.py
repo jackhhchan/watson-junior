@@ -24,15 +24,10 @@ import json
 from keras.layers import LSTM, Bidirectional, GlobalAveragePooling1D, Input,\
       concatenate, Lambda, subtract, multiply, Dense, TimeDistributed, Embedding
 from NLI.attention import DotProductAttention
-from NLI.abcnn import word_embed_meta_data, create_train_dev_set,create_test_data,\
+from NLI.prepare_set import word_embed_meta_data, create_train_dev_set,create_test_data,\
     create_train_dev_from_files
+from utils import save_pickle
 # from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
-
-
-def plot(*args, **kwargs):
-
-    from keras.utils import plot_model as plt
-    plt(*args, **kwargs)
 
 
 
@@ -49,10 +44,11 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
 #    hypothesis_embed = embedding(input_hypothesis)
     
     if sentences_pair_dev == None:
+        # if there's no development set, use part of the training set to validate
         train_data_x1, train_data_x2, train_labels, \
         val_data_x1, val_data_x2, val_labels  = create_train_dev_set(
-                tokenizer, sentences_pair_train, sim_train, left_sequence_length, right_sequence_length, \
-                validation_split_ratio=0)
+                tokenizer, sentences_pair_train, sim_train, left_sequence_length,\
+                right_sequence_length, validation_split_ratio=0.1)
     else:
         train_data_x1, train_data_x2, train_labels, \
         val_data_x1, val_data_x2, val_labels  = create_train_dev_from_files(
@@ -110,14 +106,15 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     model = Model([input_premise, input_hypothesis], output)
     model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
-    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
+    early_stopping = EarlyStopping(monitor='val_acc', patience=8)
 
     checkpoint_dir = './trained_model/ESIM/'
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    bst_model_path = checkpoint_dir + str(int(time.time())) + '.h5'
+    timestamp = str(int(time.time()))
+    bst_model_path = checkpoint_dir + timestamp + '.h5'
 
     model_checkpoint = ModelCheckpoint(bst_model_path, monitor='val_acc', mode='auto',\
                                        save_best_only=True, save_weights_only=False)
@@ -127,6 +124,11 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
               epochs=epoch, batch_size=batch_size, shuffle=False,verbose=1,
               callbacks=[early_stopping,model_checkpoint]
                 )
+    
+    tk_path = checkpoint_dir + timestamp + '_tk.pkl'
+    save_pickle(tokenizer,tk_path)
+    print("[INFO] tokenizer is saved.")
+    
     return model,his
 
 if __name__ == '__main__':
