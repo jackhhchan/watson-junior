@@ -106,16 +106,16 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     model = Model([input_premise, input_hypothesis], output)
     model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
-    early_stopping = EarlyStopping(monitor='val_acc', patience=8)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
 
-    checkpoint_dir = './trained_model/ESIM/'
+    timestamp = str(int(time.time()))
+    checkpoint_dir = './trained_model/ESIM/' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    timestamp = str(int(time.time()))
-    bst_model_path = checkpoint_dir + timestamp + '.h5'
-
+    bst_model_path = checkpoint_dir + '/ESIM_model.h5'
+    
     model_checkpoint = ModelCheckpoint(bst_model_path, monitor='val_acc', mode='auto',\
                                        save_best_only=True, save_weights_only=False)
 
@@ -125,7 +125,7 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
               callbacks=[early_stopping,model_checkpoint]
                 )
     
-    tk_path = checkpoint_dir + timestamp + '_tk.pkl'
+    tk_path = checkpoint_dir + '/ESIM_tokenizer.pkl'
     save_pickle(tokenizer,tk_path)
     print("[INFO] tokenizer is saved.")
     

@@ -200,7 +200,7 @@ if __name__ == '__main__':
     num_classes = 2 # supports, refutes
     embed_dimensions = 300
     epoch = 50
-    # batch_size = 1024
+#    batch_size = 1024
     batch_size = 512
 #    
 #    """
