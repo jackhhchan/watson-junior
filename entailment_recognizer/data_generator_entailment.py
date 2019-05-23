@@ -33,38 +33,67 @@ class JSONField(Enum):
 
 def main():
     """ From loading json file, connecting to db for evidence tokens, to saving as pkl"""
+
+    # get database query object
     wikiQuery = WikiQuery()
 
-    ####### TRAINING SET ########
-    # train_json = utils.load_json('resource/train/train.json')
-    # supports_train_json, refutes_train_json = parse_train_json(train_json)
+    ###### TRAINING SET ########
+    print("[INFO] Generating training data...")
+    train_json = utils.load_json('resource/train/train.json')
+    supports_train_json, refutes_train_json = parse_json(train_json, separate=True)
 
-    # print("Number of SUPPORTS: {}".format(len(supports_train_json)))
-    # print("Number of REFUTES: {}".format(len(refutes_train_json)))
+    print("Number of SUPPORTS: {}".format(len(supports_train_json)))
+    print("Number of REFUTES: {}".format(len(refutes_train_json)))
+    
+    total_train_claims = []
+    total_train_evidences = []
+    total_train_labels = []
+    concatenate = True
+    # SUPPORTS 
+    train_claims, train_evidences, train_labels = generate_data(data_json=refutes_train_json,
+                                                                query_object=wikiQuery,
+                                                                concatenate=concatenate,
+                                                                threshold=None)    # save_pickle(train_claims, 'train_claims_refutes.pkl')
+    utils.save_pickle(train_evidences, 'train_claims_refutes_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(train_evidences, 'train_evidences_refutes_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(train_labels, 'train_labels_refutes_concatenate_{}.pkl'.format(concatenate))
 
-    # train_claims, train_evidences, train_labels = generate_data(json_file=refutes_train_json,
-    #                                                             query_object=wikiQuery,
-    #                                                             concatenate=False,
-    #                                                             threshold=None)    # save_pickle(train_claims, 'train_claims_refutes.pkl')
-    # save_pickle(train_evidences, 'train_evidences_refutes.pkl')
-    # save_pickle(train_labels, 'train_labels_refutes.pkl')
+    total_train_claims.extend(train_claims)
+    total_train_evidences.extend(train_evidences)
+    total_train_labels.extend(train_labels)
 
-    # train_claims, train_evidences, train_labels = generate_data(json_file=supports_train_json,
-    #                                                             query_object=wikiQuery,
-    #                                                             concatenate=False,
-    #                                                             threshold=len(refutes_train_json))    # downsample to the same as refutes
-    # save_pickle(train_claims, 'train_claims_supports_downsampled.pkl')
-    # save_pickle(train_evidences, 'train_evidences_supports_downsampled.pkl')
-    # save_pickle(train_labels, 'train_labels_supports_downsampled.pkl')
+    # REFUTES
+    train_claims, train_evidences, train_labels = generate_data(data_json=supports_train_json,
+                                                                query_object=wikiQuery,
+                                                                concatenate=concatenate,
+                                                                threshold=len(refutes_train_json))    # downsample to the same as refutes
+    utils.save_pickle(train_claims, 'train_claims_supports_downsampled_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(train_evidences, 'train_evidences_supports_downsampled_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(train_labels, 'train_labels_supports_downsampled_concatenate_{}.pkl'.format(concatenate))
+
+    total_train_claims.extend(train_claims)
+    total_train_evidences.extend(train_evidences)
+    total_train_labels.extend(train_labels)
+
+    # Combined
+    utils.save_pickle(total_train_claims, 'train_claims_all_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(total_train_evidences, 'train_evidences_all_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(total_train_labels, 'train_labels_supports__concatenate_{}.pkl'.format(concatenate))
 
 
-    ##### DEVELOPMENT SET #####
-    # dev_json = load_json('resource_train/devset.json')
-    # dev_array = parse_json(dev_json, False)
-    # dev_claims, dev_evidences, dev_labels = generate_data(dev_array, False, len(dev_array))
-    # save_pickle(dev_claims, 'dev_claims.pkl')
-    # save_pickle(dev_evidences, 'dev_evidences.pkl')
-    # save_pickle(dev_labels, 'dev_labels.pkl')
+    #### DEVELOPMENT SET #####
+    print("[INFO] Generating development data...")
+    dev_json = utils.load_json('resource/train/devset.json')
+    dev_array = parse_json(dev_json, False)
+    dev_claims, dev_evidences, dev_labels = generate_data(data_json=dev_array,
+                                                          query_object=wikiQuery,
+                                                          concatenate=concatenate,
+                                                          threshold=None)
+    utils.save_pickle(dev_claims, 'dev_claims_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(dev_evidences, 'dev_evidences_concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(dev_labels, 'dev_labels_concatenate_{}.pkl'.format(concatenate))
+
+    print("[INFO] Complete.")
 
 
 
@@ -127,20 +156,22 @@ def generate_data(data_json, query_object, concatenate, threshold=None):
                         
 
 def get_tokens_from_db(evidence, query_object):
+    """ Returns a single string of concatenated tokens returned from the database """
+
     page_id = evidence[0]
     passage_idx = evidence[1]
     doc = query_object.query(page_id=page_id, passage_idx=passage_idx)
     # returned doc logger
     if doc is None:
         message = "[DB] database returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
-        utils.append_logger(message)
+        utils.log(message)
         return None
 
     # returned tokens logger
     tokens = doc.get('tokens')
     if tokens is None:
         message = "[DB] tokens returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
-        utils.append_logger(message)
+        utils.log(message)
 
     # cocatenate the split tokens to a single string
     tokens_string = ''
@@ -151,7 +182,7 @@ def get_tokens_from_db(evidence, query_object):
 
 
 def parse_json(json_file, separate):
-
+    """ Returns a processed array of dictionaries by parsing the raw json file"""
     if not separate:
         dev_jsons = []
         for key in tqdm(json_file.keys()):

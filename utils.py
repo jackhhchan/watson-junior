@@ -14,7 +14,6 @@ class encoding(Enum):
     UTF8 = "UTF-8"
 
 
-
 def load_file(f_path, encoding=encoding.UTF8.name):
     """ Load text file from path and return raw array of split strings"""
 
@@ -33,12 +32,11 @@ def extract_tokens(passage):
 
     return [token.lower() for token in passage]
 
-
+########## PICKLE ########## 
 def save_pickle(obj, name):
     assert name.endswith('.pkl')
     with open(name, 'wb') as handle:
         pickle.dump(obj, handle)
-
 
 def load_pickle(name):
     assert name.endswith('.pkl')
@@ -47,6 +45,8 @@ def load_pickle(name):
 
     return data
 
+
+########## JSON ##########
 def append_json(name, function):
     with open(name, 'a') as handle:
         function(handle)
@@ -63,12 +63,18 @@ def load_json(json_path):
     return json_data
 
 
-def append_logger(string):
+
+########## LOGGING ##########
+def log(string):
     """ Append to logger in logs directory"""
     folder_dir = "logs"
     if not os.path.isdir(folder_dir):
         os.makedirs(folder_dir)
 
     with open("{}/logs.txt".format(folder_dir), 'a') as handle:
-        string = "{}  -  {}".format(datetime.now().isoformat(), string)
+        string = "{}  -  {}\n".format(get_timestamp(), string)
         handle.write(string)
+
+def get_timestamp():
+    """ Returns timestamp with format e.g.'2019-05-24T00:30:02.438162'"""
+    return datetime.now().isoformat()

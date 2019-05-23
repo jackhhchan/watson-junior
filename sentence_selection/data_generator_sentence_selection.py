@@ -40,10 +40,13 @@ class JSONField(Enum):
 
 def main():
     """" main method"""
-    train_json = utils.load_json('sentence_selection/train.json')
+    # load and parse json file
+    train_json = utils.load_json('resource/train/train.json')
     train_array = parse_json(json_file=train_json)
 
+    # connect to db and create query object
     wiki_query = WikiQuery()
+    
     train_claims, train_evidences, train_labels = generate_data(train_array, wiki_query)
 
     utils.save_pickle(train_claims, 'sentence_selection_train_claims.pkl')
@@ -97,14 +100,14 @@ def get_tokens_from_db(evidence, query_object):
     # returned doc logger
     if doc is None:
         message = "[DB] database returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
-        utils.append_logger(message)
+        utils.log(message)
         return None
 
     # returned tokens logger
     tokens = doc.get('tokens')
     if tokens is None:
         message = "[DB] tokens returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
-        utils.append_logger(message)
+        utils.log(message)
 
     # cocatenate the split tokens to a single string
     tokens_string = ''
@@ -160,14 +163,14 @@ def get_irrelevant_passage(relevant_page_id, query_object):
     # returned doc logger
     if doc is None:
         message = "[DB] database returned None for page_id: {}".format(relevant_page_id)
-        utils.append_logger(message)
+        utils.log(message)
         return None
 
     # returned tokens logger
     tokens = doc.get('tokens')
     if tokens is None:
         message = "[DB] tokens returned None for page_id: {}".format(relevant_page_id)
-        utils.append_logger(message)
+        utils.log(message)
 
     # cocatenate the split tokens to a single string
     tokens_string = ''
