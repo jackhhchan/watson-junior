@@ -374,7 +374,7 @@ if __name__ == '__main__' :
     save_pickle(dev_labels, 'dev_labels.pkl')
 
 
-    {"RELEVANT": 0, "IRRELEVANT": 1}
+    labels = {"RELEVANT": 0, "IRRELEVANT": 1}
     ######
     # get train array after parsing train.json
     # for each row, 
@@ -390,4 +390,21 @@ if __name__ == '__main__' :
     #       append irrelevant passage tokens to train_evidences
     #       append claim into train_claims
     #       append label 1 to train_labels
+
+    json_data = load_json(json_path='resource_train/train.json')
+    train_array = parse_json(json_data, False)
+
+    train_evidences = []
+    train_claims = []
+    train_labels = []
+    for data in train_array:
+        evidences = data[JSONField.evidence.value]
+        claim = data[JSONField.claim.value]
+        label = data[JSONField.label.value]
+        for evidence in evidences:
+            train_evidences.append(evidence)
+            train_claims.append(claim)
+            train_labels.append(label)
+            
+
 
