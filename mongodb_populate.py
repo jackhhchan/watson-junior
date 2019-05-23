@@ -153,29 +153,23 @@ def save_json(obj, name):
 ###########################################
 def json_dump_inverted_index(inverted_index, page_ids_idx_dict):
     # split the inverted index and save it into 100 parts
-    file_idx = 0
     json_file = []
+    folder_name = "inverted_index_json_files"
 
     for idx, (term, postings) in tqdm(enumerate(inverted_index.items())):
         if not term.isalpha(): continue     # skip if not alpha
-
+        
+        print("idx: {}, term: {}".format(idx, term))
         for (page_idx, tfidf)  in postings.items():
             page_id = page_ids_idx_dict.get(page_idx)
-            json_file[term].appe
 
             doc_json = inverted_index_doc_formatted(term, page_id, tfidf)
             json_file.append(doc_json)
 
+        f_name = "{}/{}.json".format(folder_name, term)
+        save_json(json_file, f_name)
 
-        if idx+1%3==0:
-            f_name = "inverted_index_json_{}.json".format(file_idx)
-            save_json(json_file, f_name)
-
-            file_idx += 1
-            json_file = []
-    
-    f_name = "inverted_index_json_{}.json".format(file_idx)
-    save_json(json_file, f_name)
+        json_file = []
 
 
 
