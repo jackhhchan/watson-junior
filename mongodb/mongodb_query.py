@@ -50,9 +50,9 @@ class WikiQuery(object):
                 })
 
     # used for sentence_selection
-    def query_page_id_only(self, collection, page_id):
+    def query_page_id_only(self, page_id):
         """ Returns the a single json file with the matching page_id picked from the first doc"""
-        return collection.find_one({
+        return self.col.find_one({
             self.WikiField.page_id.value: page_id
             })
 
@@ -115,9 +115,9 @@ def connected(host, port=27017):
 def get_database(client, db_name):
     """ Returns the database of the connected client """
     if db_name in client.database_names():
-        print("{} found".format(db_name))
+        print("[DB] {} found".format(db_name))
     else:
-        print("{} not found, it can be instantiated by inserting a doc".format(db_name))
+        print("[DB] {} not found, it can be instantiated by inserting a doc".format(db_name))
 
     db_name = str(db_name)
     db = client[db_name]

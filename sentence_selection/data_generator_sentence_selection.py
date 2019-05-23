@@ -40,16 +40,15 @@ class JSONField(Enum):
 
 def main():
     """" main method"""
-    train_json = utils.load_json('train.json')
+    train_json = utils.load_json('sentence_selection/train.json')
     train_array = parse_json(json_file=train_json)
 
     wiki_query = WikiQuery()
     train_claims, train_evidences, train_labels = generate_data(train_array, wiki_query)
 
-    folder_name = 'training_data'
-    utils.save_pickle(train_claims, '{}/sentence_selection_train_claims.pkl'.format(folder_name))
-    utils.save_pickle(train_evidences, '{}/sentence_selection_train_evidences.pkl'.format(folder_name))
-    utils.save_pickle(train_labels, '{}/sentence_selection_train_labels.pkl'.format(folder_name))
+    utils.save_pickle(train_claims, 'sentence_selection_train_claims.pkl')
+    utils.save_pickle(train_evidences, 'sentence_selection_train_evidences.pkl')
+    utils.save_pickle(train_labels, 'sentence_selection_train_labels.pkl')
 
 
 def generate_data(json_array, query_object):
@@ -58,24 +57,33 @@ def generate_data(json_array, query_object):
     train_labels = []
 
     page_ids_idx_dict = utils.load_pickle('page_ids_idx_dict_normalized_proper_fixed.pkl')
-    for data in json_array:
+    for data in tqdm(json_array):
+        claim = data.get(JSONField.claim.value)
+
         relevant_page_ids = []
         relevant_evidences = data.get(JSONField.evidence.value)
+        ## append data for label: 'RELEVANT'
         for relevant_evidence in relevant_evidences:
+            token_string = get_tokens_from_db(relevant_evidence, query_object)
+            if token_string is None:                                # IMPORTANT: this handles query returning None
+                continue
+            train_evidences.append(token_string)
+            
             train_claims.append(claim)
-            train_evidences.append(get_tokens_from_db(relevant_evidence, query_object))
             train_labels.append(Label.encode(Label.RELEVANT.value))
             
-            relevant_page_ids.append(evidence[0])       # keep page_ids in the evidences
+            relevant_page_ids.append(relevant_evidence[0])       # keep page_ids in the evidences
     
         # get as many irrelevant evidences as there are relevant evidences for each claim
-        irrelevant_page_ids = get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, len(relevant_evidences))
-        assert len(irrelevant_page_ids) == len(relevant_evidence)
+        irrelevant_page_ids = get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, len(relevant_page_ids))
+        assert len(irrelevant_page_ids) == len(relevant_page_ids)
         for irrelevant_page_id in irrelevant_page_ids:
-            irrelevant_passage_string = get_irrelevant_passage(irrelevant_page_id, mycol)
+            irrelevant_passage_string = get_irrelevant_passage(irrelevant_page_id, query_object)
+            if irrelevant_passage_string is None:                   # IMPORTANT: this handles query returning None
+                continue
+            train_evidences.append(irrelevant_passage_string)
 
             train_claims.append(claim)
-            train_evidences.append(irrelevant_passage_string)
             train_labels.append(Label.encode(Label.IRRELEVANT.value))
 
     return train_claims, train_evidences, train_labels
@@ -126,6 +134,8 @@ def get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, number_of_irre
     """ Get irrelevant evidences for training data """
 
     irrelevant_page_ids = []
+    if number_of_irrelevant == 0:
+        return irrelevant_page_ids
     # generate random number
     max_page_ids_idx = len(page_ids_idx_dict) - 1
     idx = 0
@@ -145,7 +155,7 @@ def get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, number_of_irre
 def get_irrelevant_passage(relevant_page_id, query_object):
     """ Pulls a passage from the database for a single page id"""
     # pull from database a passage from each relevant page id
-    doc = query_object.query_page_id_only(collection=mycol, page_id=relevant_page_id)
+    doc = query_object.query_page_id_only(page_id=relevant_page_id)
 
     # returned doc logger
     if doc is None:

@@ -7,8 +7,8 @@ from enum import Enum
 import os
 
 import pickle
+import json
 from datetime import datetime
-from nltk.tokenize import word_tokenize
 
 class encoding(Enum):
     UTF8 = "UTF-8"
@@ -58,12 +58,12 @@ def load_json(json_path):
         with open(json_path, 'r') as handle:
             json_data = json.load(handle)
     except:
-        print("Unable to load {}.".format(json_path))
+        print("Unable to load {}".format(json_path))
 
     return json_data
 
 
-def append_logger(string, mode):
+def append_logger(string):
     """ Append to logger in logs directory"""
     folder_dir = "logs"
     if not os.path.isdir(folder_dir):
