@@ -4,15 +4,15 @@ This module contains a list of helper functions to be used by watson-junior
 
 """
 from enum import Enum
+import os
 
-from nltk.tokenize import word_tokenize
 import pickle
 import re
-
+import json
+from datetime import datetime
 
 class encoding(Enum):
     UTF8 = "UTF-8"
-
 
 
 def load_file(f_path, encoding=encoding.UTF8.name):
@@ -38,12 +38,11 @@ def extract_tokens(passage):
 
     return tokens
 
-
+########## PICKLE ########## 
 def save_pickle(obj, name):
     assert name.endswith('.pkl')
     with open(name, 'wb') as handle:
         pickle.dump(obj, handle)
-
 
 def load_pickle(name):
     assert name.endswith('.pkl')
@@ -51,3 +50,37 @@ def load_pickle(name):
         data = pickle.load(handle)
 
     return data
+
+
+########## JSON ##########
+def append_json(name, function):
+    with open(name, 'a') as handle:
+        function(handle)
+
+def load_json(json_path):
+    # parse train.json file
+    assert json_path.endswith('.json')
+    try:
+        with open(json_path, 'r') as handle:
+            json_data = json.load(handle)
+    except:
+        print("Unable to load {}".format(json_path))
+
+    return json_data
+
+
+
+########## LOGGING ##########
+def log(string):
+    """ Append to logger in logs directory"""
+    folder_dir = "logs"
+    if not os.path.isdir(folder_dir):
+        os.makedirs(folder_dir)
+
+    with open("{}/logs.txt".format(folder_dir), 'a') as handle:
+        string = "{}  -  {}\n".format(get_timestamp(), string)
+        handle.write(string)
+
+def get_timestamp():
+    """ Returns timestamp with format e.g.'2019-05-24T00:30:02.438162'"""
+    return datetime.now().isoformat()

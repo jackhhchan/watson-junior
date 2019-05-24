@@ -108,5 +108,3 @@ query(inverted_index, page_ids_idx_dict,'good', final_output)
         doc = wikipedia.search(np)
         predicted_pages.extend(doc)
     predicted_pages = list(set(predicted_pages))
-    
-    

@@ -21,113 +21,9 @@ import gc
 import os
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
-
-
-def create_train_dev_set_lstm(tokenizer, sentences_pair, sim, left_sequence_length,right_sequence_length, validation_split_ratio=0.1):
-    sentences1 = [x[0] for x in sentences_pair]
-    sentences2 = [x[1] for x in sentences_pair]
-    train_sequences_1 = tokenizer.texts_to_sequences(sentences1)
-    train_sequences_2 = tokenizer.texts_to_sequences(sentences2)
-    leaks = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
-             for x1, x2 in zip(train_sequences_1, train_sequences_2)]
-
-    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=left_sequence_length)
-    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=right_sequence_length)
-    train_labels = np.array(sim)
-    leaks = np.array(leaks)
-
-    shuffle_indices = np.random.permutation(np.arange(len(train_labels)))
-    train_data_1_shuffled = train_padded_data_1[shuffle_indices]
-    train_data_2_shuffled = train_padded_data_2[shuffle_indices]
-    train_labels_shuffled = train_labels[shuffle_indices]
-    leaks_shuffled = leaks[shuffle_indices]
-
-    dev_idx = max(1, int(len(train_labels_shuffled) * validation_split_ratio))
-
-    del train_padded_data_1
-    del train_padded_data_2
-    gc.collect()
-
-    train_data_1, val_data_1 = train_data_1_shuffled[:-dev_idx], train_data_1_shuffled[-dev_idx:]
-    train_data_2, val_data_2 = train_data_2_shuffled[:-dev_idx], train_data_2_shuffled[-dev_idx:]
-    labels_train, labels_val = train_labels_shuffled[:-dev_idx], train_labels_shuffled[-dev_idx:]
-    leaks_train, leaks_val = leaks_shuffled[:-dev_idx], leaks_shuffled[-dev_idx:]
-
-    return train_data_1, train_data_2, labels_train, leaks_train, val_data_1, val_data_2, labels_val, leaks_val
-
-def create_train_dev_from_files_lstm(tokenizer, sentences_pair_train, sim_train, \
-                                sentences_pair_dev,sim_dev,left_sequence_length,\
-                                right_sequence_length):
-    
-    sentences1 = [x[0] for x in sentences_pair_train]
-    sentences2 = [x[1] for x in sentences_pair_train]
-    train_sequences_1 = tokenizer.texts_to_sequences(sentences1)
-    train_sequences_2 = tokenizer.texts_to_sequences(sentences2)
-    leaks = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
-             for x1, x2 in zip(train_sequences_1, train_sequences_2)]
-
-    train_padded_data_1 = pad_sequences(train_sequences_1, maxlen=left_sequence_length)
-    train_padded_data_2 = pad_sequences(train_sequences_2, maxlen=right_sequence_length)
-    train_labels = np.array(sim_train)
-    leaks = np.array(leaks)
-
-    shuffle_indices = np.random.permutation(np.arange(len(train_labels)))
-    train_data_1_shuffled = train_padded_data_1[shuffle_indices]
-    train_data_2_shuffled = train_padded_data_2[shuffle_indices]
-    train_labels_shuffled = train_labels[shuffle_indices]
-    leaks_shuffled = leaks[shuffle_indices]
-    
-    sentences1_dev = [x[0] for x in sentences_pair_dev]
-    sentences2_dev = [x[1] for x in sentences_pair_dev]
-    dev_sequences_1 = tokenizer.texts_to_sequences(sentences1_dev)
-    dev_sequences_2 = tokenizer.texts_to_sequences(sentences2_dev)
-    leaks_dev = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
-             for x1, x2 in zip(dev_sequences_1, dev_sequences_2)]
-
-    dev_padded_data_1 = pad_sequences(dev_sequences_1, maxlen=left_sequence_length)
-    dev_padded_data_2 = pad_sequences(dev_sequences_2, maxlen=right_sequence_length)
-    dev_labels = np.array(sim_dev)
-    leaks_dev = np.array(leaks_dev)
-
-    shuffle_indices = np.random.permutation(np.arange(len(dev_labels)))
-    dev_data_1_shuffled = dev_padded_data_1[shuffle_indices]
-    dev_data_2_shuffled = dev_padded_data_2[shuffle_indices]
-    dev_labels_shuffled = dev_labels[shuffle_indices]
-    leaks_dev_shuffled = leaks_dev[shuffle_indices]
-
-
-    return train_data_1_shuffled, train_data_2_shuffled, train_labels_shuffled, \
-            leaks_shuffled, dev_data_1_shuffled, dev_data_2_shuffled, dev_labels_shuffled, \
-            leaks_dev_shuffled
-
-
-def create_test_data_lstm(tokenizer, test_sentences_pair, left_sequence_length,right_sequence_length):
-    """
-    Create training and validation dataset
-    Args:
-        tokenizer (keras.preprocessing.text.Tokenizer): keras tokenizer object
-        test_sentences_pair (list): list of tuple of sentences pairs
-        max_sequence_length (int): max sequence length of sentences to apply padding
-
-    Returns:
-        test_data_1 (list): list of input features for training set from sentences1
-        test_data_2 (list): list of input features for training set from sentences2
-    """
-    test_sentences1 = [x[0] for x in test_sentences_pair]
-    test_sentences2 = [x[1] for x in test_sentences_pair]
-
-    test_sequences_1 = tokenizer.texts_to_sequences(test_sentences1)
-    test_sequences_2 = tokenizer.texts_to_sequences(test_sentences2)
-    leaks_test = [[len(set(x1)), len(set(x2)), len(set(x1).intersection(x2))]
-                  for x1, x2 in zip(test_sequences_1, test_sequences_2)]
-
-    leaks_test = np.array(leaks_test)
-    test_data_1 = pad_sequences(test_sequences_1, maxlen=left_sequence_length)
-    test_data_2 = pad_sequences(test_sequences_2, maxlen=right_sequence_length)
-
-    return test_data_1, test_data_2, leaks_test
-
-
+from NLI.prepare_set import create_train_dev_set_lstm, create_train_dev_from_files_lstm, \
+    create_original_train_dev_from_files_lstm, create_test_data_lstm
+from utils import save_pickle
 
 def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
                 embed_dimensions,embedding_matrix,number_lstm_units,rate_drop_lstm, \
@@ -199,14 +95,14 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
 #    STAMP = 'lstm_%d_%d_%.2f_%.2f' % (self.number_lstm_units, self.number_dense_units, self.rate_drop_lstm, self.rate_drop_dense)
+    timestamp = str(int(time.time()))
 
-    checkpoint_dir = './trained_model/LSTM/'
+    checkpoint_dir = './trained_model/LSTM/' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    bst_model_path = checkpoint_dir + str(int(time.time())) + '.h5'
-
+    bst_model_path = checkpoint_dir + '/LSTM_model.h5'
     model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=False)
 
 #    tensorboard = TensorBoard(log_dir=checkpoint_dir + "logs/{}".format(time.time()))
@@ -216,15 +112,27 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
               epochs=epoch, batch_size=batch_size, shuffle=False,verbose=1,
               callbacks=[early_stopping,model_checkpoint])
     
+    tk_path = checkpoint_dir + '/LSTM_tokenizer.pkl'
+    save_pickle(tokenizer,tk_path)
+    print("[INFO] tokenizer is saved.")
+    
     
     return model,his
 
-def plot_acc(his):
-    import matplotlib.pyplot as plt
-    fig = plt.figure()
-    plt.plot(his.history['acc'], 'r:')
-    plt.plot(his.history['val_acc'], 'g-')
-    return fig
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
 #    """
