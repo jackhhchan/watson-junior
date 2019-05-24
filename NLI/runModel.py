@@ -24,6 +24,7 @@ import time
 from sklearn.metrics import mean_squared_error,confusion_matrix,f1_score
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 #define folder directory
 # mask_dir = 'resource/training_data/'
