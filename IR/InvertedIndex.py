@@ -15,6 +15,12 @@ class InvertedIndex(object):
 
 
     def get_ranked_page_ids(self, raw_claim, tfidf=False):
+        """ 
+        Returns a list of ranked page ids given claim
+        Args:
+        raw_claim   -- (Str) claim in a single string format
+        tfidf       -- (Bool) Set True to return the tfidf as well. (default: False)
+        """
         assert type(tfidf) == bool, "tfidf argument if True also returns the tfidf"
         page_ids_tfidf = self.get_page_ids_tfidf(raw_claim)
         ranked_page_ids_tfidf = self.ranked_page_ids_tfidf(page_ids_tfidf)      # array of dicts in order

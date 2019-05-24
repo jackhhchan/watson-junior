@@ -2,6 +2,7 @@ from enum import Enum
 
 import os
 import pymongo
+from pymongo.errors import ConnectionFailure
 
 
 """ 
@@ -104,11 +105,15 @@ def connected(host, port=27017):
     print("[DB] Connecting to {} at port {}...".format(host, port))
     try:
         client = pymongo.MongoClient(connected_data_format)
-        print("[DB] Connected.")
     except:
         print("[DB] Unable to connect.")
         quit()
-    
+    try:
+        # The ismaster command is cheap and does not require auth.
+        client.admin.command('ismaster')
+        print("[DB] Connected.")
+    except ConnectionFailure:
+        print("Server not available")
     
     return client
 
