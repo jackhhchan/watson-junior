@@ -7,14 +7,30 @@ Created on Sun May 12 21:19:18 2019
 """
 
 from allennlp.predictors import Predictor
-# import wikipedia
-import time
+
+import utils
+
 
 
 predictor = Predictor.from_path(
             "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo-constituency-parser-2018.03.14.tar.gz")
 #https://allennlp.org/models
 #constituency parse
+
+def get_NER_tokens(raw_claim):
+    """ Returns a list of Noun Phrase using AllenNLP Named Entity Recognizer"""
+
+    KOI = 'hierplane_tree'      # key of interest
+    nested_KOI = 'root'
+
+    NER_tokens = []
+    predicted_dict = predictor.predict(raw_claim)
+    NER_tokens.append(predicted_dict[KOI][nested_KOI])
+    
+    return NER_tokens
+
+
+##### HELPER FUNCTIONS ######
 
 def get_NP(tree, nps):
     """

@@ -10,11 +10,14 @@ test_json_path = "resource/test/test-unlabelled.json"
 
 ###### PARAMS TO CHANGE ######
 # Inverted Index
-page_ids_threshold = 20
+page_ids_threshold = 20             # only return this many page ids from inverted index
 
 # Passage Selection
+confidence_threshold = None
+passage_ids_threshold = None        # gets thresholded to 6 in score.py anyway
 
-# 
+# Entailment Recognizer
+confidence_threshold = None         # maybe?
 
 
 def main():

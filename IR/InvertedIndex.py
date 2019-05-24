@@ -5,14 +5,22 @@ from collections import OrderedDict
 import pickle
 import json
 from tqdm import tqdm
+from nltk.corpus import stopwords
+
+import nltk
+nltk.download("stopwords")
 
 import utils
+from NER import get_NER_tokens
 from mongodb.mongodb_query import InvertedIndexQuery
 
 class InvertedIndex(object):
     def __init__(self):
         self.db_query = InvertedIndexQuery()
-
+    
+    #########################
+    #### RANKED PAGE IDS ####
+    #########################
 
     def get_ranked_page_ids(self, raw_claim, tfidf=False):
         """ 
@@ -30,7 +38,6 @@ class InvertedIndex(object):
         else:
             ranked_page_ids = [page_id for page_id_tfidf in ranked_page_ids_tfidf for page_id in page_ids_tfidf.keys()]
             return ranked_page_ids
-
 
 
     def get_page_ids_tfidf(self, raw_claim):
@@ -51,10 +58,39 @@ class InvertedIndex(object):
     def ranked_page_ids_tfidf(self, page_ids_tfidf):
         return utils.sorted_dict(page_ids_tfidf)
 
+    ##############################
+    ##### QUERY REFORMULATION ####
+    ##############################
 
-    def query_reformulation(self, query):
-        """ reformulates the query, NER or Query Expansion"""
-        # TODO
+    def query_reformulation(self, raw_claim):
+        """ Reformulates the query, NER & (Query Expansion //TODO) """
+        raw_claim = raw_claim.lower()
+        
+        # named entities linking
+        NER_tokens = self.get_named_entities(raw_claim)
+
+        # handle remove stop words
+        tokens_without_stopwords = self.removed_stop_words(NER_tokens)
+
+        ## TODO -- QUERY EXPANSION
+        
+        processed_claim_tokens = tokens_without_stopwords
+        return processed_claim_tokens
+
+    def get_named_entities(self, raw_claim):
+        """ Returns the named entities outputted by the AllenNLP NER"""
+        NER_tokens = get_NER_tokens(raw_claim)
+        if len(NER_tokens) <= 0:
+            message = "Nothing returned from NER for claim: {}".format(raw_claim)
+            utils.log(message)
+
+        return NER_tokens
+    
+    def removed_stop_words(self, tokens):
+        stop_words = stopwords.words('english')
+        removed = [token for token in tokens if token not in stop_words]
+        return removed
+
 
 
 
