@@ -62,7 +62,7 @@ class WikiQuery(object):
                 })
         else:
             return self.col.find({
-                self.wikiField.page_id.value: page_id
+                self.WikiField.page_id.value: page_id
             })
 
 class InvertedIndexQuery(object):

@@ -96,9 +96,12 @@ def get_timestamp():
 def get_time():
     return time.time()
 
-def get_elapsed_time(function):
+def get_elapsed_time_in(function):
     """ Return elapsed time of completing the function"""
     start = time.time()
     function()
     end = time.time()
+    return "{} seconds elapsed".format(end-start)
+
+def get_elapsed_time(start, end):
     return "{} seconds elapsed".format(end-start)

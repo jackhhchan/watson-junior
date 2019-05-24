@@ -40,7 +40,7 @@ def main():
     wikiQuery = WikiQuery()
 
     ###### TRAINING SET ########
-    print("[INFO] Parsing json doc for training data...")
+    print("[INFO] Parsing json doc for training...")
     train_json = utils.load_json('resource/train/train.json')
     supports_train_json, refutes_train_json = parse_json(train_json, separate=True)
 
