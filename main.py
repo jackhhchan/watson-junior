@@ -4,6 +4,7 @@ Run this to run watson-junior
 """
 import utils
 from IR.InvertedIndex import InvertedIndex
+from data_generators.data_generator_sentence_selection import get_passages_from_db
 
 ###### PATHS ######
 test_json_path = "resource/test/test-unlabelled.json"
@@ -75,8 +76,17 @@ def process_ranked_page_ids(ranked_page_ids, threshold):
             print("[INFO - Main] Returned page_ids: {}, thresholded to {}".format(length, threshold))
             return ranked_page_ids[:threshold-1]
 
+# Formatter to be passed to Passage Selection
+def get_passage_selection_data(raw_claim, page_ids):
+    """ Returns passage selection data in the format to be fed to its NN"""
+    train_claims = []
+    train_evidences = []
 
-            
+    # TODO
+
+
+    return train_claims, train_evidences
+
 
 #### PASSAGE SELECTION ####
 

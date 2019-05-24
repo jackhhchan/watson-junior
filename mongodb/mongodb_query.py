@@ -51,10 +51,18 @@ class WikiQuery(object):
                 })
 
     # used for sentence_selection
-    def query_page_id_only(self, page_id):
-        """ Returns the a single json file with the matching page_id picked from the first doc"""
-        return self.col.find_one({
-            self.WikiField.page_id.value: page_id
+    def query_page_id_only(self, page_id, single):
+        """ Returns the a json with the matching page_id picked from the first doc
+        Args:
+        single -- if True, returns only 1 passage.
+        """
+        if single:
+            return self.col.find_one({
+                self.WikiField.page_id.value: page_id
+                })
+        else:
+            return self.col.find({
+                self.wikiField.page_id.value: page_id
             })
 
 class InvertedIndexQuery(object):
