@@ -7,6 +7,7 @@ from enum import Enum
 
 from nltk.tokenize import word_tokenize
 import pickle
+import re
 
 
 class encoding(Enum):
@@ -29,8 +30,13 @@ def load_file(f_path, encoding=encoding.UTF8.name):
 
 def extract_tokens(passage):
     """ Extract lower case tokens from the passage """
+    tokens = []
+    for token in passage:
+        token_s = re.split("-|\\s", token.lower())              # split up tokens that are hyphenated, may return a list
+        token_s = [t for t in token_s if t.isalnum()]           # keep only if token is alphanumerical
+        tokens.extend(token_s)
 
-    return [token.lower() for token in passage]
+    return tokens
 
 
 def save_pickle(obj, name):

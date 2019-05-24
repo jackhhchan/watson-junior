@@ -337,7 +337,15 @@ def get_irrelevant_passage(relevant_page_id, mycol):
     # pull from database a passage from each relevant page id
     doc = mongodb_query.query_page_id_only(collection=mycol, page_id=relevant_page_id)
 
-    return doc.get(WikiField.tokens.value)
+    tokens = doc.get(WikiField.tokens.value)
+    assert tokens is not None
+
+    tokens_string = ''
+    for token in tokens:
+        tokens_string = tokens_string + token + ' '
+        
+    return tokens_string
+
 
 
 
@@ -400,7 +408,9 @@ if __name__ == '__main__' :
 
     page_ids_idx_dict = load_pickle("page_ids_idx_dict_normalized_proper_fixed.pkl")
 
-    train_json = load_json('resource_train/train.json')
+    json_path = 'resource_train/train.json'
+    print("[INFO] Loading from {}...".format(json_path))
+    train_json = load_json(json_path)
     train_array = parse_json(json_file=train_json, separate=False)  # don't the array to relevant and irrelevant
 
     train_claims = []
@@ -411,7 +421,7 @@ if __name__ == '__main__' :
     print("[INFO] collections in db: {}".format(mydb.list_collection_names()))
 
     # data is each datapoint for each claim
-    for data in train_array:
+    for data in tqdm(train_array):
         relevant_page_ids = []
         claim = data.get(JSONField.claim.value)
         relevant_evidences = data.get(JSONField.evidence.value)
@@ -431,7 +441,7 @@ if __name__ == '__main__' :
             train_labels.append(sentence_selection_label_encoding.get('IRRELEVANT'))
 
     folder_name = 'training_data'
-    save_pickle(train_claims, '{}}/sentence_selection_train_claims.pkl'.format(folder_name))
+    save_pickle(train_claims, '{}/sentence_selection_train_claims.pkl'.format(folder_name))
     save_pickle(train_evidences, '{}/sentence_selection_train_evidences.pkl'.format(folder_name))
     save_pickle(train_labels, '{}/sentence_selection_train_labels.pkl'.format(folder_name))
     

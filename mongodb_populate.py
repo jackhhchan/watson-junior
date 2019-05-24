@@ -144,10 +144,11 @@ def load_pickle(name):
 
     return data
 
-def save_json(obj, name):
+def save_json(obj, name, mode='w'):
     assert name.endswith('.json')
-    with open(name, 'w') as handle:
+    with open(name, mode) as handle:
         json.dump(obj, handle)
+
 
 
 ###########################################
