@@ -33,7 +33,7 @@ from utils import save_pickle
 
 def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
               embed_dimensions,embedding_matrix,left_sequence_length,right_sequence_length,\
-              num_classes,epoch,batch_size):
+              num_classes,epoch,batch_size,mode):
     
     input_premise = Input(shape=(left_sequence_length,))
     input_hypothesis = Input(shape=(right_sequence_length,))

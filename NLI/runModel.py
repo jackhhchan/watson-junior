@@ -8,6 +8,8 @@ Created on Sat May 18 16:58:14 2019
 
 run model
 """
+import sys
+sys.path.append(sys.path[0] + '/..')
 from NLI.esim import buildESIM
 from NLI.normalLSTM import buildLSTM
 from NLI.abcnn import word_embed_meta_data, create_test_data
@@ -29,7 +31,7 @@ from NLI.train import get_training_data
 
 #define folder directory
 # mask_dir = 'resource/training_data/'
-MASK_DIR = 'training_data/'
+MASK_DIR = 'resource/training_data/24-5-19/sentence_selection/'
 
 #============STAGE 2================
 #=====SENTENCE SELECTION============
