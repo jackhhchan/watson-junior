@@ -73,11 +73,11 @@ class InvertedIndexQuery(object):
         db = get_database(client, self.db_name)
         self.col = get_collection(db, self.col_name)
     
-    def get_postings(self, collection, term, verbose=False):
+    def get_postings(self, term, verbose=False):
         """ Return all postings from the term """
-        postings = collection.find(filter={self.InvertedIndexField.term.value: term})
+        postings = self.col.find(filter={self.InvertedIndexField.term.value: term})
         if verbose:
-            print("[DB] term: {}, {} postings returned".format(term, len(postings)))
+            print("[DB] term: {} with {} postings returned".format(term, postings.count()))
         return postings
 
 ####################################

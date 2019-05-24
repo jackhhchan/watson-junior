@@ -1,9 +1,11 @@
+import sys
+sys.path.append(sys.path[0] + '/..')
 import os
 from tqdm import tqdm
 
 import utils
-from InvertedIndex import Page
-from InvertedIndex import Passage
+from IR.InvertedIndex import Page
+from IR.InvertedIndex import Passage
 
 #### PATHS ####
 FOLDER_NAME = "resource"            # CHANGE TO NAME OF FOLDER CONTAINING WIKI TEXT FILES

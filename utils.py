@@ -9,6 +9,7 @@ import os
 import pickle
 import re
 import json
+import time
 from datetime import datetime
 
 class encoding(Enum):
@@ -84,3 +85,13 @@ def log(string):
 def get_timestamp():
     """ Returns timestamp with format e.g.'2019-05-24T00:30:02.438162'"""
     return datetime.now().isoformat()
+
+def get_time():
+    return time.time()
+
+def get_elapsed_time(function):
+    """ Return elapsed time of completing the function"""
+    start = time.time()
+    function()
+    end = time.time()
+    return "{} seconds".format(end-start)

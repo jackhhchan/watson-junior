@@ -10,9 +10,7 @@ from tqdm import tqdm
 import utils
 from mongodb.mongodb_query import WikiQuery
 
-#############################################################
-######## Generate Training Data pulled from MongoDB #########
-#############################################################
+
 
 class Label(Enum):
     RELEVANT = 'RELEVANT'
@@ -37,6 +35,10 @@ class JSONField(Enum):
     evidence = 'evidence'
     label = 'label'
 
+
+#############################################################
+######## Generate Training Data pulled from MongoDB #########
+#############################################################
 
 def main():
     """" main method"""
