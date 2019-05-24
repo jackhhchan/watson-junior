@@ -25,8 +25,8 @@ def get_NER_tokens(raw_claim):
 
     NER_tokens = []
     predicted_dict = predictor.predict(raw_claim)
-    NER_tokens.append(predicted_dict[KOI][nested_KOI])
-    
+    NER_tokens.append(get_NP(predicted_dict[KOI][nested_KOI], []))
+
     return NER_tokens
 
 

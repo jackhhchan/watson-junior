@@ -256,6 +256,7 @@ resource/wiki-txt-files/wiki-107\.txt
 resource/wiki-txt-files/wiki-108\.txt
 
 resource/wiki-txt-files/wiki-109\.txt
+<<<<<<< HEAD
 esim1.png
 inverted_index_tf_normalized_proper_fixed.pkl
 LSTM.png
@@ -397,3 +398,7 @@ resource/wiki_files/wiki-109.txt
 trained_model/ESIM/ESIM_model.h5
 trained_model/ESIM/ESIM_tokenizer.pkl
 w2v/gensim_glove_vectors.txt
+=======
+
+*.pkl
+>>>>>>> f1d689150c6a7424fd28f73056b2bfd192a6088c

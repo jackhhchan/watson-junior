@@ -1,6 +1,6 @@
 import sys
 sys.path.append(sys.path[0] + '/..')
-from collections import OrderedDict
+import re
 
 import pickle
 import json
@@ -11,12 +11,13 @@ import nltk
 nltk.download("stopwords")
 
 import utils
-from NER import get_NER_tokens
+from IR.NER import get_NER_tokens
 from mongodb.mongodb_query import InvertedIndexQuery
 
 class InvertedIndex(object):
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.db_query = InvertedIndexQuery()
+        self.verbose = verbose
     
     #########################
     #### RANKED PAGE IDS ####
@@ -30,23 +31,25 @@ class InvertedIndex(object):
         tfidf       -- (Bool) Set True to return the tfidf as well. (default: False)
         """
         assert type(tfidf) == bool, "tfidf argument if True also returns the tfidf"
-        page_ids_tfidf = self.get_page_ids_tfidf(raw_claim)
+
+        claim_terms = self.query_reformulated(raw_claim)
+        page_ids_tfidf = self.get_page_ids_tfidf(claim_terms)
         ranked_page_ids_tfidf = self.ranked_page_ids_tfidf(page_ids_tfidf)      # array of dicts in order
 
         if tfidf:
             return ranked_page_ids_tfidf
         else:
-            ranked_page_ids = [page_id for page_id_tfidf in ranked_page_ids_tfidf for page_id in page_ids_tfidf.keys()]
+            ranked_page_ids = [page_id for (page_id, tfidf) in ranked_page_ids_tfidf]
             return ranked_page_ids
 
 
-    def get_page_ids_tfidf(self, raw_claim):
+    def get_page_ids_tfidf(self, claim_terms):
         output ={}
+        if self.verbose:
+            print("[INFO - InvIdx] Query: {}".format(claim_terms))
+            print("[INFO - InvIdx] Number of tokens in claim: {}".format(len(claim_terms)))
 
-        claim = raw_claim.lower().split()
-        print("[INFO] Number of tokens in claim: {}".format(len(claim)))
-
-        for term in claim:
+        for term in claim_terms:
             postings = self.db_query.get_postings(term=term, verbose=True)
             for posting in postings:
                 page_id = posting.get(self.db_query.InvertedIndexField.page_id.value)
@@ -62,34 +65,43 @@ class InvertedIndex(object):
     ##### QUERY REFORMULATION ####
     ##############################
 
-    def query_reformulation(self, raw_claim):
+    def query_reformulated(self, raw_claim):
         """ Reformulates the query, NER & (Query Expansion //TODO) """
         raw_claim = raw_claim.lower()
         
         # named entities linking
-        NER_tokens = self.get_named_entities(raw_claim)
+        tokens = self.get_named_entities(raw_claim)
+        tokens = self.remove_duplicates(tokens)      # NER sometimes return duplicates
 
         # handle remove stop words
-        tokens_without_stopwords = self.removed_stop_words(NER_tokens)
+        tokens = self.removed_stop_words(tokens)
 
         ## TODO -- QUERY EXPANSION
-        
-        processed_claim_tokens = tokens_without_stopwords
+
+        processed_claim_tokens = tokens
         return processed_claim_tokens
 
     def get_named_entities(self, raw_claim):
         """ Returns the named entities outputted by the AllenNLP NER"""
-        NER_tokens = get_NER_tokens(raw_claim)
-        if len(NER_tokens) <= 0:
+        raw_NER_tokens = get_NER_tokens(raw_claim)[0]
+        if len(raw_NER_tokens) <= 0:
             message = "Nothing returned from NER for claim: {}".format(raw_claim)
             utils.log(message)
-
+        # further split raw token strings returned from NER
+        NER_tokens = utils.extract_processed_tokens(raw_NER_tokens)
         return NER_tokens
     
     def removed_stop_words(self, tokens):
         stop_words = stopwords.words('english')
         removed = [token for token in tokens if token not in stop_words]
         return removed
+
+    def remove_duplicates(self, tokens):
+        unique = []
+        for token in tokens:
+            if token not in unique:
+                unique.append(token)
+        return unique
 
 
 

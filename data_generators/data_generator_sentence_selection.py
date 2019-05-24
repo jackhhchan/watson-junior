@@ -10,7 +10,9 @@ from tqdm import tqdm
 import utils
 from mongodb.mongodb_query import WikiQuery
 
-
+# PATHS #
+data_json_path = 'resource/train/devset.json'           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
+page_ids_idx_dict_path = 'page_ids_idx_dict_normalized_proper_fixed.pkl'        # This is REQUIRED to convert page idx to page id
 
 class Label(Enum):
     RELEVANT = 'RELEVANT'
@@ -43,7 +45,7 @@ class JSONField(Enum):
 def main():
     """" main method"""
     # load and parse json file
-    train_json = utils.load_json('resource/train/train.json')
+    train_json = utils.load_json(data_json_path)
     train_array = parse_json(json_file=train_json)
 
     # connect to db and create query object
@@ -61,7 +63,7 @@ def generate_data(json_array, query_object):
     train_evidences = []
     train_labels = []
 
-    page_ids_idx_dict = utils.load_pickle('page_ids_idx_dict_normalized_proper_fixed.pkl')
+    page_ids_idx_dict = utils.load_pickle(page_ids_idx_dict_path)
     for data in tqdm(json_array):
         claim = data.get(JSONField.claim.value)
 
@@ -69,7 +71,7 @@ def generate_data(json_array, query_object):
         relevant_evidences = data.get(JSONField.evidence.value)
         ## append data for label: 'RELEVANT'
         for relevant_evidence in relevant_evidences:
-            token_string = get_tokens_from_db(relevant_evidence, query_object)
+            token_string = get_tokens_string_from_db(relevant_evidence, query_object)
             if token_string is None:                                # IMPORTANT: this handles query returning None
                 continue
             train_evidences.append(token_string)
@@ -95,7 +97,7 @@ def generate_data(json_array, query_object):
         
 
 
-def get_tokens_from_db(evidence, query_object):
+def get_tokens_string_from_db(evidence, query_object):
     page_id = evidence[0]
     passage_idx = evidence[1]
     doc = query_object.query(page_id=page_id, passage_idx=passage_idx)
@@ -105,19 +107,31 @@ def get_tokens_from_db(evidence, query_object):
         utils.log(message)
         return None
 
+    tokens = get_tokens(doc)
+    # cocatenate the split tokens to a single string
+    tokens_string = cocatenate(tokens)
+
+    return tokens_string
+
+def get_tokens(doc):
     # returned tokens logger
     tokens = doc.get('tokens')
     if tokens is None:
         message = "[DB] tokens returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
         utils.log(message)
+    
+    return tokens
 
-    # cocatenate the split tokens to a single string
+def cocatenate(tokens):
     tokens_string = ''
     for token in tokens:
         tokens_string = tokens_string + token + ' '
         
     return tokens_string
 
+
+
+##### JSON #####
 def parse_json(json_file):
     """ Returns an array of train identifier dictionaries"""
     json_array = []
@@ -160,7 +174,7 @@ def get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, number_of_irre
 def get_irrelevant_passage(relevant_page_id, query_object):
     """ Pulls a passage from the database for a single page id"""
     # pull from database a passage from each relevant page id
-    doc = query_object.query_page_id_only(page_id=relevant_page_id)
+    doc = query_object.query_page_id_only(page_id=relevant_page_id, single=True)
 
     # returned doc logger
     if doc is None:
@@ -185,3 +199,21 @@ def get_irrelevant_passage(relevant_page_id, query_object):
 
 if __name__ == '__main__' :
     main()
+
+
+########################################
+########### Watson-Junior ##############
+############## main.py #################
+#########################################
+
+def get_passages_from_db(page_id, concatenate_tokens):
+    wiki_query = WikiQuery()
+
+    passages_dict = wiki_query.query_page_id_only(page_id=page_id, single=False)
+    tokens = passages_dict.get(WikiQuery.WikiField.tokens.value)
+    passage_idx = passages_dict.get(WikiQuery.WikiField.passage_idx.value)
+
+    if concatenate_tokens:
+        tokens = cocatenate(tokens)     # technically tokens_string
+
+    return passage_idx, tokens

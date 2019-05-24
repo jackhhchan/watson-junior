@@ -51,7 +51,7 @@ def parse_raw_line(raw_line):
     """
     page_id = raw_line[0]
     passage_idx = raw_line[1]
-    tokens = utils.extract_tokens(raw_line[2:])
+    tokens = utils.extract_processed_tokens(raw_line[2:])
 
     return page_id, passage_idx, tokens
 
