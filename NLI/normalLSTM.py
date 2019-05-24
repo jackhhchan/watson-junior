@@ -28,13 +28,13 @@ from utils import save_pickle
 def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
                 embed_dimensions,embedding_matrix,number_lstm_units,rate_drop_lstm, \
                 rate_drop_dense, number_dense_units,left_sequence_length,\
-                right_sequence_length,num_classes,epoch,batch_size):
+                right_sequence_length,num_classes,epoch,batch_size,mode):
     
     if sentences_pair_dev == None:
         train_data_x1, train_data_x2, train_labels, leaks_train,\
         val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_set_lstm(
                 tokenizer, sentences_pair_train, sim_train, left_sequence_length, \
-                right_sequence_length,validation_split_ratio=0)
+                right_sequence_length,validation_split_ratio=0.1)
     else:
        train_data_x1, train_data_x2, train_labels, leaks_train,\
         val_data_x1, val_data_x2, val_labels, leaks_val  = create_train_dev_from_files_lstm(
@@ -84,13 +84,21 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
 #        merged = Dense(self.number_dense_units, activation=self.activation_function,kernel_regularizer=regularizers.l2(0.0001))(merged)
 #        merged = BatchNormalization()(merged)
 #        merged = Dropout(self.rate_drop_dense)(merged)
-
-    preds = Dense(output_dim=num_classes, activation='softmax')(merged)
-#        model.summary()
-
+    if mode == 'regression':
+        preds = Dense(output_dim=1)(merged)
+        print("[INFO] builidng a regression model now...")
     
+    else:
+        preds = Dense(output_dim=num_classes, activation='softmax')(merged)
+
+
     model = Model(inputs=[sequence_1_input, sequence_2_input, leaks_input], outputs=preds)
-    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['acc'])
+    
+    if mode == 'regression':
+        model.compile(loss='mse',optimizer='adam',metrics=['mse'])
+    else:
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+        
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
@@ -142,10 +150,11 @@ if __name__ == '__main__':
     rate_drop_lstm = 0.17
     rate_drop_dense = 0.15
     number_dense_units = 100
-    model,his = buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
-                          sim_dev,embed_dimensions,embedding_matrix,number_lstm_units,\
+    model,his = buildLSTM(tokenizer,sentences_pair_train[:1000],labels[:1000],sentences_pair_dev[:200],\
+                          labels_dev[:200],embed_dimensions,embedding_matrix,number_lstm_units,\
                           rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                          left_sequence_length,right_sequence_length,num_classes,epoch,batch_size)
+                          left_sequence_length,right_sequence_length,num_classes,epoch,\
+                          batch_size,mode='regression')
     
     fig = plot_acc(his)
     fig.show()
