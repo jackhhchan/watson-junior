@@ -86,7 +86,7 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
 #        merged = Dropout(self.rate_drop_dense)(merged)
     if mode == 'regression':
         preds = Dense(output_dim=1)(merged)
-        print("[INFO] builidng a regression model now...")
+        # print("[INFO] builidng a regression model now...")
     
     else:
         preds = Dense(output_dim=num_classes, activation='softmax')(merged)
@@ -95,7 +95,7 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     model = Model(inputs=[sequence_1_input, sequence_2_input, leaks_input], outputs=preds)
     
     if mode == 'regression':
-        model.compile(loss='mse',optimizer='adam',metrics=['mse'])
+        model.compile(loss='mse',optimizer='adam',metrics=['mae'])
     else:
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
         
@@ -105,13 +105,14 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
 #    STAMP = 'lstm_%d_%d_%.2f_%.2f' % (self.number_lstm_units, self.number_dense_units, self.rate_drop_lstm, self.rate_drop_dense)
     timestamp = str(int(time.time()))
 
-    checkpoint_dir = './trained_model/LSTM/' + timestamp
+    checkpoint_dir = './trained_model/LSTM/classifications' + timestamp if not mode=='regression' \
+        else './trained_model/LSTM/regression/' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
     bst_model_path = checkpoint_dir + '/LSTM_model.h5'
-    model_checkpoint = ModelCheckpoint(bst_model_path, save_best_only=True, save_weights_only=False)
+    model_checkpoint = ModelCheckpoint(bst_model_path, monitor='val_loss', save_best_only=True, save_weights_only=False)
 
 #    tensorboard = TensorBoard(log_dir=checkpoint_dir + "logs/{}".format(time.time()))
 

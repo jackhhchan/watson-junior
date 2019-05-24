@@ -53,7 +53,7 @@ dev_labels = MASK_DIR + 'dev_labels.pkl'
 
 
 
-def plot_acc(his,fig_dir,index):
+def plot_acc(his,fig_dir,index,items):
     """
     :param his: the output of a training model
     :param fig_dir: the directory to store the image
@@ -66,13 +66,13 @@ def plot_acc(his,fig_dir,index):
     #either be 'ESIM_{timestamp}' or 'LSTM_{timestamp}'
     fig.suptitle(name)
     plt.subplot(211)
-    plt.plot(his.history['acc'], 'r:',label='acc')
-    plt.plot(his.history['val_acc'], 'g-',label='val_acc')
-    legend = plt.legend(loc='lower right')
+    plt.plot(his.history[items[0]], 'r:',label=items[0])
+    plt.plot(his.history[items[1]], 'g-',label=items[1])
+    legend = plt.legend(loc='best')
     plt.subplot(212)
-    plt.plot(his.history['loss'], 'r:',label = 'loss')
-    plt.plot(his.history['val_loss'],'g-',label = 'val_loss')
-    legend = plt.legend(loc='upper right')
+    plt.plot(his.history[items[2]], 'r:',label =items[2])
+    plt.plot(his.history[items[3]],'g-',label =items[3])
+    legend = plt.legend(loc='best')
     plt.savefig(fig_dir+'/'+name+".png")
 
 
@@ -121,6 +121,8 @@ if __name__ == '__main__':
 #    """
     sentences_pair_train = [(x1, x2) for x1, x2 in zip(claims, evidences)]
     sim_train = keras.utils.to_categorical(labels, num_classes) if not mode == 'regression' else labels
+    sentences_pair_dev = None
+    sim_dev = None
 
     if isDev:
         claims_dev, evidences_dev, labels_dev = get_training_data(claims_path=dev_claims,
@@ -129,6 +131,8 @@ if __name__ == '__main__':
         sentences_pair_dev = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
         sim_dev = keras.utils.to_categorical(labels_dev, num_classes) if not mode == 'regression' else labels_dev
     
+    items = ['acc','val_acc','loss','val_loss'] if not mode == 'regression' else \
+            ['mean_absolute_error','val_mean_absolute_error','loss','val_loss']
     
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
 #                                                left_sequence_length, right_sequence_length)
@@ -145,7 +149,7 @@ if __name__ == '__main__':
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    plot_acc(his,'figure/ESIM',0)
+    plot_acc(his,'figure/ESIM',0,items)
 
     
 #    model = load_model('/Users/loretta/watson-junior/trained_model/ESIM/1558325833.h5',\
@@ -173,7 +177,7 @@ if __name__ == '__main__':
                           left_sequence_length,right_sequence_length,num_classes,\
                           epoch,batch_size,mode)
 #    plot(model,'normalLSTM.png')
-    plot_acc(his,'figure/LSTM',1)
+    plot_acc(his,'figure/LSTM',1,items)
     
 #    pred = model.predict([test_claim,test_evidence])
 #    pred = np.argmax(pred,axis=1)
