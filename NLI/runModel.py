@@ -89,11 +89,11 @@ if __name__ == '__main__':
     evidences = []
     labels = []
 
-    for item in [claims_supports,claims_refutes]:
+    for item in [claims_supports, claims_refutes]:
         claims += load_pickle(item) 
-    for item in [evidences_supports,evidences_refutes]:
+    for item in [evidences_supports, evidences_refutes]:
         evidences += load_pickle(item)
-    for item in [labels_supports,labels_refutes]:
+    for item in [labels_supports, labels_refutes]:
         labels += load_pickle(item)
     
     claims_dev = load_pickle(dev_claims)

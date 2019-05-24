@@ -131,6 +131,12 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     
     return model,his
 
+
+
+
+
+    
+
 if __name__ == '__main__':
     """
     loretta's playgournd

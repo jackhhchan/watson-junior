@@ -17,7 +17,7 @@ import gc
 import pickle
 from tqdm import tqdm
 
-import wiki_parser
+from IR import wiki_parser
 
 #### CHANGE THIS FOR A DIFFERENT SAVE FILE NAME
 INVERTED_INDEX_FNAME = "inverted_index_tokenised.pkl"
