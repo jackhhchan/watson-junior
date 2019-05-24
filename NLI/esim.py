@@ -110,22 +110,24 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     model = Model([input_premise, input_hypothesis], output)
     
     if mode == 'regression':
-        model.compile(loss='mse', metrics=['mse'], optimizer='adam')
+        model.compile(loss='mse', metrics=['mae'], optimizer='adam')
         
     else:
         model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
-    early_stopping = EarlyStopping(monitor='val_loss', patience=8)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
     timestamp = str(int(time.time()))
-    checkpoint_dir = './trained_model/ESIM/' + timestamp
+
+    checkpoint_dir = './trained_model/ESIM/classification' + timestamp if not mode=='regression' \
+        else './trained_model/ESIM/regression/' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
     bst_model_path = checkpoint_dir + '/ESIM_model.h5'
     
-    model_checkpoint = ModelCheckpoint(bst_model_path, monitor='val_acc', mode='auto',\
+    model_checkpoint = ModelCheckpoint(bst_model_path, monitor='val_loss', mode='auto',\
                                        save_best_only=True, save_weights_only=False)
 
     his = model.fit([train_data_x1, train_data_x2], train_labels,
