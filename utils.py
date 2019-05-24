@@ -90,8 +90,8 @@ def log(string):
         handle.write(string)
 
 def get_timestamp():
-    """ Returns timestamp with format e.g.'2019-05-24T00:30:02.438162'"""
-    return datetime.now().isoformat()
+    """ Returns timestamp with format e.g.'25-05-2019--01-02-14'"""
+    return datetime.now().strftime("%d-%m-%Y--%H-%M-%S")
 
 def get_time():
     return time.time()

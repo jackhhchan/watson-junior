@@ -15,7 +15,7 @@ json_path = "resource/train/devset.json"                    # dev set
 
 ###### PARAMS TO CHANGE ######
 # Inverted Index
-page_ids_threshold = 20             # only return this many page ids from inverted index
+page_ids_threshold = 15             # only return this many page ids from inverted index
 verbose = True
 
 # Passage Selection
