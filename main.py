@@ -83,6 +83,7 @@ def get_passage_selection_data(raw_claim, page_ids):
     train_evidences = []
 
     # TODO
+    print()
 
 
     return train_claims, train_evidences
