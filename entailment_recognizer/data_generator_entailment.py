@@ -78,7 +78,7 @@ def main():
     # Combined
     utils.save_pickle(total_train_claims, 'train_claims_all_concatenate_{}.pkl'.format(concatenate))
     utils.save_pickle(total_train_evidences, 'train_evidences_all_concatenate_{}.pkl'.format(concatenate))
-    utils.save_pickle(total_train_labels, 'train_labels_supports__concatenate_{}.pkl'.format(concatenate))
+    utils.save_pickle(total_train_labels, 'train_labels_all__concatenate_{}.pkl'.format(concatenate))
 
 
     #### DEVELOPMENT SET #####
