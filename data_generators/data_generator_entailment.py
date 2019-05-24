@@ -6,6 +6,8 @@ from tqdm import tqdm
 import utils
 from mongodb.mongodb_query import WikiQuery
 
+concatenate = True
+
 class Label(Enum):
     SUPPORTS = 'SUPPORTS'
     REFUTES = 'REFUTES'
@@ -38,7 +40,7 @@ def main():
     wikiQuery = WikiQuery()
 
     ###### TRAINING SET ########
-    print("[INFO] Generating training data...")
+    print("[INFO] Parsing json doc for training data...")
     train_json = utils.load_json('resource/train/train.json')
     supports_train_json, refutes_train_json = parse_json(train_json, separate=True)
 
@@ -48,16 +50,12 @@ def main():
     total_train_claims = []
     total_train_evidences = []
     total_train_labels = []
-    concatenate = True
     # SUPPORTS 
+    print("[INFO] Generating data for training...")
     train_claims, train_evidences, train_labels = generate_data(data_json=refutes_train_json,
                                                                 query_object=wikiQuery,
                                                                 concatenate=concatenate,
                                                                 threshold=None)    # save_pickle(train_claims, 'train_claims_refutes.pkl')
-    utils.save_pickle(train_evidences, 'train_claims_refutes_concatenate_{}.pkl'.format(concatenate))
-    utils.save_pickle(train_evidences, 'train_evidences_refutes_concatenate_{}.pkl'.format(concatenate))
-    utils.save_pickle(train_labels, 'train_labels_refutes_concatenate_{}.pkl'.format(concatenate))
-
     total_train_claims.extend(train_claims)
     total_train_evidences.extend(train_evidences)
     total_train_labels.extend(train_labels)
@@ -67,28 +65,28 @@ def main():
                                                                 query_object=wikiQuery,
                                                                 concatenate=concatenate,
                                                                 threshold=len(refutes_train_json))    # downsample to the same as refutes
-    utils.save_pickle(train_claims, 'train_claims_supports_downsampled_concatenate_{}.pkl'.format(concatenate))
-    utils.save_pickle(train_evidences, 'train_evidences_supports_downsampled_concatenate_{}.pkl'.format(concatenate))
-    utils.save_pickle(train_labels, 'train_labels_supports_downsampled_concatenate_{}.pkl'.format(concatenate))
-
     total_train_claims.extend(train_claims)
     total_train_evidences.extend(train_evidences)
     total_train_labels.extend(train_labels)
 
     # Combined
+    print("[INFO] Saving training data to pickle file...")
     utils.save_pickle(total_train_claims, 'train_claims_all_concatenate_{}.pkl'.format(concatenate))
     utils.save_pickle(total_train_evidences, 'train_evidences_all_concatenate_{}.pkl'.format(concatenate))
     utils.save_pickle(total_train_labels, 'train_labels_all__concatenate_{}.pkl'.format(concatenate))
 
 
     #### DEVELOPMENT SET #####
-    print("[INFO] Generating development data...")
+    print("[INFO] Parsing json doc for development data...")
     dev_json = utils.load_json('resource/train/devset.json')
     dev_array = parse_json(dev_json, False)
+    print("[INFO] Generating data for development...")
     dev_claims, dev_evidences, dev_labels = generate_data(data_json=dev_array,
                                                           query_object=wikiQuery,
                                                           concatenate=concatenate,
                                                           threshold=None)
+
+    print("[INFO] Saving development data to pickle file...")
     utils.save_pickle(dev_claims, 'dev_claims_concatenate_{}.pkl'.format(concatenate))
     utils.save_pickle(dev_evidences, 'dev_evidences_concatenate_{}.pkl'.format(concatenate))
     utils.save_pickle(dev_labels, 'dev_labels_concatenate_{}.pkl'.format(concatenate))
@@ -123,7 +121,7 @@ def generate_data(data_json, query_object, concatenate, threshold=None):
     train_evidences = []
     train_labels = []
 
-    print("[INFO] Extracting training data from db...")
+    print("[INFO] Extracting data from db...")
     for idx, data in tqdm(enumerate(data_json)):
         label = data[JSONField.label.value]
         claim = data[JSONField.claim.value]
@@ -134,11 +132,18 @@ def generate_data(data_json, query_object, concatenate, threshold=None):
         label = Label.encode(label)                # encode label, SUPPORTS=0, REFUTES=1
         if concatenate:
             # evidences tokens are concatenated
+            concatenated_tokens_string = ""
+            for evidence in evidences:
+                tokens_string = get_tokens_from_db(evidence, query_object)
+                if tokens_string is None: 
+                    continue
+                concatenated_tokens_string = concatenated_tokens_string + " " + tokens_string
+            if len(concatenated_tokens_string) <= 0: continue
+            train_evidences.append(concatenated_tokens_string.strip())   
+
             train_claims.append(claim)
             train_labels.append(label)
-            concatenated_tokens = []
-            [concatenated_tokens.extend([get_tokens_from_db(evidence, query_object) for evidence in evidences])]
-            train_evidences.append(concatenated_tokens)        
+     
         else:
             # evidences tokens are not concatenated
             for evidence in evidences:
@@ -172,6 +177,7 @@ def get_tokens_from_db(evidence, query_object):
     if tokens is None:
         message = "[DB] tokens returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
         utils.log(message)
+        return None
 
     # cocatenate the split tokens to a single string
     tokens_string = ''
