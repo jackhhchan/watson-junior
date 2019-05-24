@@ -29,7 +29,7 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     return raw_lines
 
 
-def extract_tokens(passage):
+def extract_processed_tokens(passage):
     """ Extract lower case tokens from the passage """
     tokens = []
     for token in passage:

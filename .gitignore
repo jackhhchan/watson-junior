@@ -256,3 +256,5 @@ resource/wiki-txt-files/wiki-107\.txt
 resource/wiki-txt-files/wiki-108\.txt
 
 resource/wiki-txt-files/wiki-109\.txt
+
+*.pkl

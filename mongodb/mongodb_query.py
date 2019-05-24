@@ -78,7 +78,7 @@ class InvertedIndexQuery(object):
         """ Return all postings from the term """
         postings = self.col.find(filter={self.InvertedIndexField.term.value: term})
         if verbose:
-            print("[DB] term: {} with {} postings returned".format(term, postings.count()))
+            print("[DB] Term: {}; Postings returned: {}".format(term, postings.count()))
         return postings
 
 ####################################

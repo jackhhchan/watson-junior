@@ -13,3 +13,10 @@ data_generator_entailment_recognizer.py
 	-- generates data for entailment recognizer  neural network pulled fom database.
 
 
+
+Third-party modules
+* allennlp
+* nltk
+* pymongo
+
+

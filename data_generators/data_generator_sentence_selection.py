@@ -10,7 +10,9 @@ from tqdm import tqdm
 import utils
 from mongodb.mongodb_query import WikiQuery
 
-
+# PATHS #
+data_json_path = 'resource/train/devset.json'           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
+page_ids_idx_dict_path = 'page_ids_idx_dict_normalized_proper_fixed.pkl'        # This is REQUIRED to convert page idx to page id
 
 class Label(Enum):
     RELEVANT = 'RELEVANT'
@@ -43,7 +45,7 @@ class JSONField(Enum):
 def main():
     """" main method"""
     # load and parse json file
-    train_json = utils.load_json('resource/train/train.json')
+    train_json = utils.load_json(data_json_path)
     train_array = parse_json(json_file=train_json)
 
     # connect to db and create query object
@@ -61,7 +63,7 @@ def generate_data(json_array, query_object):
     train_evidences = []
     train_labels = []
 
-    page_ids_idx_dict = utils.load_pickle('page_ids_idx_dict_normalized_proper_fixed.pkl')
+    page_ids_idx_dict = utils.load_pickle(page_ids_idx_dict_path)
     for data in tqdm(json_array):
         claim = data.get(JSONField.claim.value)
 
