@@ -104,11 +104,12 @@ def connected(host, port=27017):
     print("[DB] Connecting to {} at port {}...".format(host, port))
     try:
         client = pymongo.MongoClient(connected_data_format)
+        print("[DB] Connected.")
     except:
         print("[DB] Unable to connect.")
         quit()
     
-    print("[DB] Connected.")
+    
     return client
 
 

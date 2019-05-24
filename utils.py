@@ -39,6 +39,13 @@ def extract_tokens(passage):
 
     return tokens
 
+########## USEFUL FUNCTIONS #########
+def sorted_dict(dictionary):
+    """ Return array of sorted dictionary based on value and return in tuple format (key, value) """
+    sorted_dictionary = sorted(dictionary.items(), key=lambda kv:kv[1], reverse=True)
+    return sorted_dictionary
+
+
 ########## PICKLE ########## 
 def save_pickle(obj, name):
     assert name.endswith('.pkl')
@@ -94,4 +101,4 @@ def get_elapsed_time(function):
     start = time.time()
     function()
     end = time.time()
-    return "{} seconds".format(end-start)
+    return "{} seconds elapsed".format(end-start)
