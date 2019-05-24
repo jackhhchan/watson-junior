@@ -101,10 +101,19 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     inference_compose = concatenate([premise_avg, premise_max, hypothesis_avg, hypothesis_max])
 
     dense = Dense(units=300, activation='tanh')(inference_compose)
-    output = Dense(num_classes, activation='softmax')(dense)
+    if mode == 'regression':
+        output = Dense(1)(dense)
+
+    else:
+        output = Dense(num_classes, activation='softmax')(dense)
 
     model = Model([input_premise, input_hypothesis], output)
-    model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
+    
+    if mode == 'regression':
+        model.compile(loss='mse', metrics=['mse'], optimizer='adam')
+        
+    else:
+        model.compile(loss='categorical_crossentropy', metrics=['acc'], optimizer='adam')
     
     early_stopping = EarlyStopping(monitor='val_loss', patience=8)
 

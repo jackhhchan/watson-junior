@@ -11,7 +11,9 @@ RUN THIS SCRIPT
 import math
 import os
 import sys
+import json
 import gc
+import time
 # gc.set_debug(gc.DEBUG_LEAK)
 
 import pickle
@@ -22,7 +24,7 @@ from IR import wiki_parser
 #### CHANGE THIS FOR A DIFFERENT SAVE FILE NAME
 INVERTED_INDEX_FNAME = "inverted_index_tokenised.pkl"
 PAGE_IDS_IDX_DICT_FNAME = "page_ids_idx_dict_tokenised.pkl"
-DOC_TERM_FREQS_FNAME = 'doc_term_freqs.pkl'
+DOC_TERM_FREQS_FNAME = 'doc_term_freqs_tokenised.pkl'
 # INVERTED_INDEX_FNAME = "mock-inv-index.pkl"
 
 
@@ -44,19 +46,19 @@ def inverted_index_builder():
 
     inverted_index_object = InvertedIndex()
 
-    # construct doc-term-freqs by portions
-    for idx, wiki_folder in enumerate(folders):
-        folder_path = "{}/{}".format(folders_name, wiki_folder)
+    # # construct doc-term-freqs by portions
+    # for idx, wiki_folder in enumerate(folders):
+    #     folder_path = "{}/{}".format(folders_name, wiki_folder)
 
-        print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
-        pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values()) 
+    #     print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
+    #     pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values()) 
 
-        # build up doc term freqs and page collection
-        print("[INFO] Building {}/{} of the doc term freqs...".format(idx + 1, num_folders))
-        inverted_index_object.parse_pages(pages_collection)
+    #     # build up doc term freqs and page collection
+    #     print("[INFO] Building {}/{} of the doc term freqs...".format(idx + 1, num_folders))
+    #     inverted_index_object.parse_pages(pages_collection)
 
-    with open(DOC_TERM_FREQS_FNAME, 'wb') as handle:
-        pickle.dump(inverted_index_object.doc_term_freqs, handle)
+    # with open(DOC_TERM_FREQS_FNAME, 'wb') as handle:
+    #     pickle.dump(inverted_index_object.doc_term_freqs, handle)
 
     with open(DOC_TERM_FREQS_FNAME, 'rb') as handle:
         doc_term_freqs = pickle.load(handle)
@@ -108,6 +110,7 @@ class InvertedIndex(object):
                 df_t = self.doc_term_freqs.get(term)
                 tfidf = self.compute_tfidf(tf, df_t, N)
 
+                # posting = {page_idx: tfidf}
                 posting = {page_idx: tfidf}
 
                 # update inverted_index
@@ -181,10 +184,30 @@ class Passage(object):
 
 
 if __name__ == "__main__":
-    inverted_index, page_ids_idx_dict = inverted_index_builder()
-    # term = inverted_index.test_term
-    # print("Term: {}, postings list: {}".format(term, inv_idx[term]))
-    with open(INVERTED_INDEX_FNAME, 'wb') as inv_handle:
-        pickle.dump(inverted_index, inv_handle)                     # dump inverted index
-    with open(PAGE_IDS_IDX_DICT_FNAME, 'wb') as page_ids_idx_dict_handle:
-        pickle.dump(page_ids_idx_dict, page_ids_idx_dict_handle)    # dump page id idx dict
+    # inverted_index, page_ids_idx_dict = inverted_index_builder()
+    # # # term = inverted_index.test_term
+    # # # print("Term: {}, postings list: {}".format(term, inv_idx[term]))
+    # with open(INVERTED_INDEX_FNAME, 'wb') as inv_handle:
+    #     pickle.dump(inverted_index, inv_handle)                     # dump inverted index
+    # with open(PAGE_IDS_IDX_DICT_FNAME, 'wb') as page_ids_idx_dict_handle:
+    #     pickle.dump(page_ids_idx_dict, page_ids_idx_dict_handle)    # dump page id idx dict
+
+    with open(INVERTED_INDEX_FNAME, 'rb') as inv_handle:
+        inverted_index = pickle.load(inv_handle)                     # dump inverted index
+    with open(PAGE_IDS_IDX_DICT_FNAME, 'rb') as page_ids_idx_dict_handle:
+        page_ids_idx_dict = pickle.load(page_ids_idx_dict_handle)    # dump page id idx dict
+
+
+    json_handle = open("inverted_index_fixed.json", "a")
+    for (term, postings) in tqdm(inverted_index.items()):
+        print("Number of postings: {}".format(len(postings.items())))
+
+        for (page_idx, tfidf) in tqdm(postings.items()):
+            page_id = page_ids_idx_dict.get(page_idx)
+            doc = {"term": term, 'page_id': page_id, 'tfidf': tfidf}
+            json.dump(doc, json_handle)
+
+        
+        json_handle.flush()
+
+    json_handle.close()
