@@ -10,10 +10,11 @@ import pickle
 from tqdm import tqdm
 
 import utils
-from mongodb.mongodb_query import WikiQuery
+from mongodb.mongodb_query import WikiQuery, WikiIdxQuery
 
 # PATHS #
-data_json_path = 'resource/train/train.json'           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
+data_name = 'train'
+data_json_path = 'resource/train/{}.json'.format(data_name)           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
 page_ids_idx_dict_path = 'page_ids_idx_dict_normalized_proper_fixed.pkl'        # This is REQUIRED to convert page idx to page id
 
 class Label(Enum):
@@ -51,14 +52,14 @@ def main():
     train_array = parse_json(json_file=train_json)
 
     # connect to db and create query object
-    wiki_query = WikiQuery()
+    wiki_query = WikiIdxQuery()
     
     # train_claims, train_evidences, train_labels = generate_data(train_array, wiki_query)
     train_claims, train_evidences, train_labels = generate_data_from_same_page_ids(train_array, wiki_query)
 
-    utils.save_pickle(train_claims, 'sentence_selection_train_claims.pkl')
-    utils.save_pickle(train_evidences, 'sentence_selection_train_evidences.pkl')
-    utils.save_pickle(train_labels, 'sentence_selection_train_labels.pkl')
+    utils.save_pickle(train_claims, 'sentence_selection_{}_claims.pkl'.format(data_name))
+    utils.save_pickle(train_evidences, 'sentence_selection_{}_evidences.pkl'.format(data_name))
+    utils.save_pickle(train_labels, 'sentence_selection_{}_labels.pkl'.format(data_name))
 
 
 def generate_data(json_array, query_object):
@@ -128,7 +129,7 @@ def generate_data_from_same_page_ids(json_array, query_object):
         
         for page_id, passage_indices in relevant_dict.items():
             appended = passage_indices.copy()
-            for _ in range(math.ceil(len(appended)*1.5)):
+            for _ in range(math.ceil(len(appended)*5)):
                 irrelevant_passage_string, appended = get_irrelevant_passage_same_page_id(page_id, 
                                                                                           appended, 
                                                                                           query_object)
@@ -180,6 +181,7 @@ def cocatenate(tokens):
 ##### JSON #####
 def parse_json(json_file):
     """ Returns an array of train identifier dictionaries"""
+    print("[INFO - DataGen] Parsing json file...")
     json_array = []
     for key in tqdm(json_file.keys()):
         label = json_file.get(key).get('label')
@@ -271,7 +273,7 @@ if __name__ == '__main__' :
 ############## main.py #################
 ########################################
 
-def get_passages_from_db(page_id, query_object, output_string):
+def get_passages_from_db(page_id, query_object, output_string=True):
     """ Returns passage_indices, tokens_string_list from db"""
     passage_indices = []
     tokens_string_list = []

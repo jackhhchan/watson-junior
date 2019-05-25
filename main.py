@@ -16,8 +16,8 @@ import numpy as np
 # from NLI.train import get_training_data
 
 ###### PATHS ######
-json_path = "resource/test/test-unlabelled.json"            # test set
-json_path = "resource/train/devset.json"                    # dev set
+json_file = "devset"                                        # test-unlabelled, devset
+json_path = "resource/test/{}.json".format(json_file)            
 
 ######PRE-TRAINED MODEL######
 PASSAGE_SELECTION_MODEL_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_model.h5'
@@ -30,10 +30,11 @@ ENTAILMENT_RECOGNIZER_TKN_ESIM = 'trained_model/ESIM/NLI/ESIM_tokenizer.pkl'
 ENTAILMENT_RECOGNIZER_MODEL_LSTM = 'trained_model/LSTM/NLI/LSTM_model.h5'
 ENTAILMENT_RECOGNIZER_TKN_LSTM = 'trained_model/LSTM/NLI/LSTM_tokenizer.pkl'
 ###### PARAMS TO CHANGE ######
+verbose = False
 # Inverted Index
 page_ids_threshold = 15             # only return this many page ids from inverted index
-verbose = False
-posting_limit = 1000                # limit to postings returned per term
+inv_index_verbose = False
+posting_limit = 1000                # limit to postings returned per term -- we could be missing a lot of page ids with the same tfidf scores. (1 term)
 
 # Passage Selection
 confidence_threshold = None
@@ -54,7 +55,7 @@ def main():
     ##### PAGE ID RETRIEVAL #####
     # get relevant page_ids from the inverted index
     print("[INFO - Main] Getting ranked page ids from inverted index...")
-    inv_index = InvertedIndex(verbose=verbose)
+    inv_index = InvertedIndex(verbose=inv_index_verbose)
     wiki_query = WikiQuery()
 
     total_test_claims = []
@@ -62,33 +63,29 @@ def main():
     total_test_indices = []
 
     for idx, raw_claim in tqdm(enumerate(raw_claims)):
-        print("[INFO] Claim: {}".format(raw_claim))
-        start = utils.get_time()
+        if verbose:
+            print("[INFO] Claim: {}".format(raw_claim))
         ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit)
-        print(utils.get_elapsed_time(start, utils.get_time()))
+        ranked_page_ids = process_ranked_page_ids(ranked_page_ids, page_ids_threshold, verbose=verbose)
 
-        start = utils.get_time()
-        ranked_page_ids = process_ranked_page_ids(ranked_page_ids, page_ids_threshold)
-        print(utils.get_elapsed_time(start, utils.get_time()))
+        if verbose:
+            print("[INFO] Returned ranked page ids: \n{}".format(ranked_page_ids))
 
-        print("[INFO] Returned ranked page ids: \n{}".format(ranked_page_ids))
-
-        start = utils.get_time()
         test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
                                                                                page_ids=ranked_page_ids, 
                                                                                query_object=wiki_query)
-        print(utils.get_elapsed_time(start, utils.get_time()))
 
         total_test_claims.extend(test_claims)
         total_test_evidences.extend(test_evidences)
         total_test_indices.extend(test_indices)
 
-        if idx >= 49:
+        if idx + 1 >= 500:
             break
 
-    utils.save_pickle(total_test_claims, "test_claims.pkl")
-    utils.save_pickle(total_test_evidences, "test_evidences.pkl")
-    utils.save_pickle(total_test_indices, "test_indices.pkl")
+
+    utils.save_pickle(total_test_claims, "test_{}_claims.pkl".format(json_file))
+    utils.save_pickle(total_test_evidences, "test_{}_evidences.pkl".format(json_file))
+    utils.save_pickle(total_test_indices, "test_{}_indices.pkl".format(json_file))
    
     # format into the proper format to be passed into the passage selection NN
     claims, raw_evidences, page_info = get_training_data(claims_path='resource/test/test_claims.pkl',
@@ -173,17 +170,19 @@ def main():
 
 
 #### DOCUMENT SELECTION ####
-def process_ranked_page_ids(ranked_page_ids, threshold):
+def process_ranked_page_ids(ranked_page_ids, threshold, verbose):
     length = len(ranked_page_ids)
     if length <= 0:
         print("[INFO - Main] No relevant page id returned.")
         return 
     else:
         if length <= threshold:
-            print("[INFO - Main] Returned page_ids: {}".format(length))
+            if verbose:
+                print("[INFO - Main] Returned page_ids: {}".format(length))
             return ranked_page_ids
         else:
-            print("[INFO - Main] Returned page_ids: {}, thresholded to {}".format(length, threshold))
+            if verbose:
+                print("[INFO - Main] Returned page_ids: {}, thresholded to {}".format(length, threshold))
             return ranked_page_ids[:threshold-1]
 
 # Formatter to be passed to Passage Selection

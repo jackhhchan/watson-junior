@@ -50,7 +50,10 @@ class InvertedIndex(object):
             print("[INFO - InvIdx] Number of tokens in claim: {}".format(len(claim_terms)))
 
         for term in claim_terms:
+            start = utils.get_time()
             postings = self.db_query.get_postings(term=term, limit=limit, verbose=self.verbose)
+            print(utils.get_elapsed_time(start, utils.get_time()))
+            print()
             for posting in postings:
                 page_id = posting.get(self.db_query.InvertedIndexField.page_id.value)
                 tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)
