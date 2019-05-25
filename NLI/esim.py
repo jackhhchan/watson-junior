@@ -28,7 +28,8 @@ from NLI.prepare_set import word_embed_meta_data, create_train_dev_set,create_te
     create_train_dev_from_files
 from utils import save_pickle,get_timestamp
 # from sentence_selection.generateTrainingFile import getPage_index,readOneFile      
-
+import pandas as pd
+from keras.utils import plot_model
 
 
 def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
@@ -117,10 +118,10 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     
     early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
-    timestamp = str(int(time.time()))
+    timestamp = get_timestamp()
 
-    checkpoint_dir = './trained_model/ESIM/classification' + timestamp if not mode=='regression' \
-        else './trained_model/ESIM/regression/' + timestamp
+    checkpoint_dir = './trained_model/ESIM/CLF_' + timestamp if not mode=='regression' \
+        else './trained_model/ESIM/REG_' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
@@ -139,6 +140,13 @@ def buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     tk_path = checkpoint_dir + '/ESIM_tokenizer.pkl'
     save_pickle(tokenizer,tk_path)
     print("[INFO] tokenizer is saved.")
+    
+    plot_model(model, to_file=checkpoint_dir+'/structure.png')
+    print("[INFO] model structure has been plotted")
+    
+    tmp = pd.DataFrame(his.history)
+    tmp.to_csv(checkpoint_dir+'/his_log.txt')
+    print("[INFO] history log file is saved")
     
     return model,his
 

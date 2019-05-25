@@ -138,7 +138,7 @@ if __name__ == '__main__':
 #    prepare dataset
 #    """
     sentences_pair_train = [(x1, x2) for x1, x2 in zip(claims, evidences)]
-    sim_train = keras.utils.to_categorical(labels, num_classes) if not mode == 'regression' else labels
+    sim_train = keras.utils.to_categorical(labels, num_classes) if mode == 'classification' else labels
     sentences_pair_dev = None
     sim_dev = None
 
@@ -148,9 +148,9 @@ if __name__ == '__main__':
                                                                   evidences_path=SS_EVIDENCES_DEV,
                                                                   labels_path=SS_LABELS_DEV)
         sentences_pair_dev = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
-        sim_dev = keras.utils.to_categorical(labels_dev, num_classes) if not mode == 'regression' else labels_dev
+        sim_dev = keras.utils.to_categorical(labels_dev, num_classes) if mode == 'classification' else labels_dev
     
-    items = ['acc','val_acc','loss','val_loss'] if not mode == 'regression' else \
+    items = ['acc','val_acc','loss','val_loss'] if mode == 'classification' else \
             ['mean_absolute_error','val_mean_absolute_error','loss','val_loss']
     
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
