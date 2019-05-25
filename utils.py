@@ -30,7 +30,7 @@ def load_file(f_path, encoding=encoding.UTF8.name):
 
 
 def extract_processed_tokens(passage):
-    """ Extract lower case tokens from the passage """
+    """ Returns lower cased tokens with - and \\s split from the passage """
     tokens = []
     for token in passage:
         token_s = re.split("-|\\s", token.lower())              # split up tokens that are hyphenated, may return a list
