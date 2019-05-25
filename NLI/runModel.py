@@ -12,9 +12,12 @@ import sys
 sys.path.append(sys.path[0] + '/..')
 from NLI.esim import buildESIM
 from NLI.normalLSTM import buildLSTM
-from NLI.abcnn import word_embed_meta_data, create_test_data
+from NLI.abcnn import buildABCNN
 from utils import load_pickle, save_pickle
 from NLI.attention import DotProductAttention
+from NLI.prepare_set import word_embed_meta_data, create_train_dev_set,create_test_data,\
+    create_train_dev_from_files
+from NLI.train import get_training_data
 #from sentence_selection.generateTrainingFile import getPage_index,readOneFile   
 import json
 import pandas as pd
@@ -27,10 +30,11 @@ from sklearn.metrics import mean_squared_error,confusion_matrix,f1_score
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from NLI.train import get_training_data
+from utils import get_timestamp
 
 #define folder directory
 # mask_dir = 'resource/training_data/'
+# MASK_DIR = 'resource/training_data/combined_fixed/'
 MASK_DIR = 'resource/training_data/24-5-19/sentence_selection/'
 
 #============STAGE 2================
@@ -40,18 +44,24 @@ SS_CLAIMS = MASK_DIR + 'sentence_selection_train_claims.pkl'
 SS_EVIDENCES = MASK_DIR + 'sentence_selection_train_evidences.pkl'
 SS_LABELS = MASK_DIR + 'sentence_selection_train_labels.pkl'
 
+SS_CLAIMS_DEV = MASK_DIR + 'sentence_selection_dev_claims.pkl'
+SS_EVIDENCES_DEV = MASK_DIR + 'sentence_selection_dev_evidences.pkl'
+SS_LABELS_DEV = MASK_DIR + 'sentence_selection_dev_labels.pkl'
+
 #============STAGE 3================
-claims_supports = MASK_DIR + 'train_claims_supports_downsampled.pkl'
-claims_refutes = MASK_DIR + 'train_claims_refutes.pkl'
-evidences_supports = MASK_DIR + 'train_evidences_supports_downsampled.pkl'
-evidences_refutes = MASK_DIR + 'train_evidences_refutes.pkl'
-labels_supports = MASK_DIR + 'train_labels_supports_downsampled.pkl'
-labels_refutes = MASK_DIR + 'train_labels_refutes.pkl'
-dev_claims = MASK_DIR + 'dev_claims.pkl'
-dev_evidences = MASK_DIR + 'dev_evidences.pkl'
-dev_labels = MASK_DIR + 'dev_labels.pkl'
+# claims_supports = MASK_DIR + 'separated/train_claims_supports_downsampled_concatenate_True.pkl'
+# claims_refutes = MASK_DIR + 'separated/train_claims_refutes_concatenate_True.pkl'
+# evidences_supports = MASK_DIR + 'separated/train_evidences_supports_downsampled_concatenate_True.pkl'
+# evidences_refutes = MASK_DIR + 'separated/train_evidences_refutes_concatenate_True.pkl'
+# labels_supports = MASK_DIR + 'separated/train_labels_supports_downsampled_concatenate_True.pkl'
+# labels_refutes = MASK_DIR + 'separated/train_labels_refutes_concatenate_True.pkl'
+dev_claims = MASK_DIR + 'dev_claims_concatenate_True.pkl'
+dev_evidences = MASK_DIR + 'dev_evidences_concatenate_True.pkl'
+dev_labels = MASK_DIR + 'dev_labels_concatenate_True.pkl'
 
-
+train_claims = MASK_DIR + 'train_claims_all_concatenate_True.pkl'
+train_evidences = MASK_DIR + 'train_evidences_all_concatenate_True.pkl'
+train_labels = MASK_DIR + 'train_labels_all__concatenate_True.pkl'
 
 def plot_acc(his,fig_dir,index,items):
     """
@@ -62,7 +72,7 @@ def plot_acc(his,fig_dir,index,items):
     if not os.path.exists(fig_dir):
         os.makedirs(fig_dir)
     fig = plt.figure(index)
-    name = fig_dir.split('/')[-1] + '_' + str(int(time.time()))
+    name = fig_dir.split('/')[-1] + '_' + get_timestamp()
     #either be 'ESIM_{timestamp}' or 'LSTM_{timestamp}'
     fig.suptitle(name)
     plt.subplot(211)
@@ -84,8 +94,16 @@ if __name__ == '__main__':
     claims, evidences, labels = get_training_data(claims_path=SS_CLAIMS,
                                                   evidences_path=SS_EVIDENCES,
                                                   labels_path=SS_LABELS)
-        
-    
+
+    # claims = []
+    # evidences = []
+    # labels = []   
+    # for item in [claims_supports,claims_refutes]:
+    #     claims += load_pickle(item)
+    # for item in [evidences_supports,evidences_refutes]:
+    #     evidences += load_pickle(item)
+    # for item in [labels_supports,labels_refutes]:
+    #     labels += load_pickle(item)
 
     #"""
     #prepare inputs, word_embedding
@@ -110,10 +128,10 @@ if __name__ == '__main__':
     
 #    ==================
     mode = 'regression' 
-#    mode = 'classification'
+    # mode = 'classification'
 #    regression: sentence selection
 #    classification: Text Entailment Recognition 
-    isDev = False
+    isDev = True
 #    ==================
 #    
 #    """
@@ -125,9 +143,10 @@ if __name__ == '__main__':
     sim_dev = None
 
     if isDev:
-        claims_dev, evidences_dev, labels_dev = get_training_data(claims_path=dev_claims,
-                                                                  evidences_path=dev_evidences,
-                                                                  labels_path=dev_labels)
+        print("[INFO]prepare dev_set...")
+        claims_dev, evidences_dev, labels_dev = get_training_data(claims_path=SS_CLAIMS_DEV,
+                                                                  evidences_path=SS_EVIDENCES_DEV,
+                                                                  labels_path=SS_LABELS_DEV)
         sentences_pair_dev = [(x1, x2) for x1, x2 in zip(claims_dev, evidences_dev)]
         sim_dev = keras.utils.to_categorical(labels_dev, num_classes) if not mode == 'regression' else labels_dev
     
@@ -140,16 +159,16 @@ if __name__ == '__main__':
     #"""
     #ESIM 
     #"""        
-    model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
-                          sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
-                          right_sequence_length,num_classes,epoch,batch_size,mode)
+    # model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+    #                       sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
+    #                       right_sequence_length,num_classes,epoch,batch_size,mode)
     
 #    test_sentences_pair = [(x1, x2) for x1, x2 in zip(sampled_file.claim[:10], sampled_file.evidences[:10])]
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    plot_acc(his,'figure/ESIM',0,items)
+    # plot_acc(his,'figure/ESIM',0,items)
 
     
 #    model = load_model('/Users/loretta/watson-junior/trained_model/ESIM/1558325833.h5',\
@@ -176,6 +195,7 @@ if __name__ == '__main__':
                           rate_drop_lstm, rate_drop_dense, number_dense_units,\
                           left_sequence_length,right_sequence_length,num_classes,\
                           epoch,batch_size,mode)
+
 #    plot(model,'normalLSTM.png')
     plot_acc(his,'figure/LSTM',1,items)
     

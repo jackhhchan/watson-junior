@@ -23,7 +23,10 @@ from keras.preprocessing.sequence import pad_sequences
 import numpy as np
 from NLI.prepare_set import create_train_dev_set_lstm, create_train_dev_from_files_lstm, \
     create_original_train_dev_from_files_lstm, create_test_data_lstm
-from utils import save_pickle
+from utils import save_pickle,get_timestamp
+import pandas as pd
+from keras.utils import plot_model
+
 
 def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_dev,\
                 embed_dimensions,embedding_matrix,number_lstm_units,rate_drop_lstm, \
@@ -75,10 +78,10 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     # Merging two LSTM encodes vectors from sentences to
     # pass it to dense layer applying dropout and batch normalisation
     merged = concatenate([x1, x2, leaks_dense])
-#    merged = BatchNormalization()(merged)
+    # merged = BatchNormalization()(merged)
     merged = Dropout(rate_drop_dense)(merged)
     merged = Dense(number_dense_units, activation='relu')(merged)
-#    merged = BatchNormalization()(merged)
+    merged = BatchNormalization()(merged)
     merged = Dropout(rate_drop_dense)(merged)
 #        preds = Dense(num_classes, activation='sigmoid')(merged)
 #        merged = Dense(self.number_dense_units, activation=self.activation_function,kernel_regularizer=regularizers.l2(0.0001))(merged)
@@ -103,10 +106,11 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
 #    STAMP = 'lstm_%d_%d_%.2f_%.2f' % (self.number_lstm_units, self.number_dense_units, self.rate_drop_lstm, self.rate_drop_dense)
-    timestamp = str(int(time.time()))
+    # timestamp = get_timestamp()
+    timestamp = get_timestamp()
 
-    checkpoint_dir = './trained_model/LSTM/classifications' + timestamp if not mode=='regression' \
-        else './trained_model/LSTM/regression/' + timestamp
+    checkpoint_dir = './trained_model/LSTM/REG_' + timsestamp if not mode=='regression' \
+        else './trained_model/LSTM//CLF_' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
@@ -124,8 +128,19 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     tk_path = checkpoint_dir + '/LSTM_tokenizer.pkl'
     save_pickle(tokenizer,tk_path)
     print("[INFO] tokenizer is saved.")
+
     
+    plot_model(model, to_file=checkpoint_dir+'/structure.png')
+    print("[INFO] model structure has been plotted")
     
+    tmp = pd.DataFrame(his.history)
+    tmp.to_csv(checkpoint_dir+'/his_log.txt')
+    print("[INFO] history log file is saved")
+
+    
+
+
+
     return model,his
 
 
