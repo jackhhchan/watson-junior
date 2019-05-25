@@ -206,14 +206,25 @@ if __name__ == '__main__' :
 ############## main.py #################
 #########################################
 
-def get_passages_from_db(page_id, concatenate_tokens):
-    wiki_query = WikiQuery()
+def get_passages_from_db(page_id, query_object, output_string):
+    """ Returns passage_indices, tokens_string_list from db"""
+    passage_indices = []
+    tokens_string_list = []
 
-    passages_dict = wiki_query.query_page_id_only(page_id=page_id, single=False)
-    tokens = passages_dict.get(WikiQuery.WikiField.tokens.value)
-    passage_idx = passages_dict.get(WikiQuery.WikiField.passage_idx.value)
+    passages_dict = query_object.query_page_id_only(page_id=page_id, single=False)
+    if passages_dict is None:
+        message = "Page id: {} returned None".format(page_id)
+        utils.log(message)
+        return None, None
 
-    if concatenate_tokens:
-        tokens = cocatenate(tokens)     # technically tokens_string
+    for passage in passages_dict:
+        tokens = passage.get(WikiQuery.WikiField.tokens.value)
+        passage_idx = passage.get(WikiQuery.WikiField.passage_idx.value)
 
-    return passage_idx, tokens
+        if output_string:
+            tokens = cocatenate(tokens)     # technically tokens_string
+        
+        passage_indices.append(passage_idx)
+        tokens_string_list.append(tokens)
+
+    return passage_indices, tokens_string_list
