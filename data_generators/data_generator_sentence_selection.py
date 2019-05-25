@@ -204,7 +204,7 @@ if __name__ == '__main__' :
 ########################################
 ########### Watson-Junior ##############
 ############## main.py #################
-#########################################
+########################################
 
 def get_passages_from_db(page_id, query_object, output_string):
     """ Returns passage_indices, tokens_string_list from db"""

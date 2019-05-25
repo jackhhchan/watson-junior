@@ -5,6 +5,7 @@ Created on Sun May 12 21:19:18 2019
 
 @author: loretta
 """
+from enum import Enum
 
 from allennlp.predictors import Predictor
 
@@ -17,17 +18,25 @@ predictor = Predictor.from_path(
 #https://allennlp.org/models
 #constituency parse
 
-def get_NER_tokens(raw_claim):
-    """ Returns a list of Noun Phrase using AllenNLP Named Entity Recognizer"""
-
+class Keys(Enum):
     KOI = 'hierplane_tree'      # key of interest
     nested_KOI = 'root'
 
+
+def get_NER_tokens(string, stacked=False):
+    """ Returns a list of Noun Phrase using AllenNLP Named Entity Recognizer"""
+
     NER_tokens = []
-    predicted_dict = predictor.predict(raw_claim)
-    NER_tokens.append(get_NP(predicted_dict[KOI][nested_KOI], []))
+    predicted_dict = predictor.predict(string)
+    NER_tokens.extend(get_NP(predicted_dict[Keys.KOI.value][Keys.nested_KOI.value], []))
+
+    if stacked:
+        NER_list = [NER_token for NER_token in NER_tokens] 
+        return NER_list
 
     return NER_tokens
+
+
 
 
 ##### HELPER FUNCTIONS ######
