@@ -5,15 +5,15 @@ Run this to run watson-junior
 from tqdm import tqdm
 
 import utils
-from IR.InvertedIndex import InvertedIndex
+# from IR.InvertedIndex import InvertedIndex
 from mongodb.mongodb_query import WikiQuery
 from data_generators.data_generator_sentence_selection import get_passages_from_db
-# from keras import load_model
-# from NLI.attention import DotProductAttention
-# from NLI.prepare_set import create_test_data,create_test_data_lstm
+from keras.models import load_model
+from NLI.attention import DotProductAttention
+from NLI.prepare_set import create_test_data,create_test_data_lstm
 import numpy as np
-# import pandas as pd
-# from NLI.train import get_training_data
+import pandas as pd
+from NLI.train import get_training_data
 
 ###### PATHS ######
 json_path = "resource/test/test-unlabelled.json"            # test set
@@ -22,8 +22,9 @@ json_path = "resource/train/devset.json"                    # dev set
 ######PRE-TRAINED MODEL######
 PASSAGE_SELECTION_MODEL_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_model.h5'
 PASSAGE_SELECTION_TKN_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_tokenizer.pkl'
-PASSAGE_SELECTION_MODEL_LSTM = 'trained_model/LSTM/PassageSelection/LSTM_model.h5'
-PASSAGE_SELECTION_TKN_LSTM = 'trained_model/LSTM/PassageSelection/LSTM_tokenizer.pkl'
+
+PASSAGE_SELECTION_MODEL_LSTM = 'trained_model/LSTM/REG_25-05-2019--22-32-31/LSTM_model.h5'
+PASSAGE_SELECTION_TKN_LSTM = 'trained_model/LSTM/REG_25-05-2019--22-32-31/LSTM_tokenizer.pkl'
 
 ENTAILMENT_RECOGNIZER_MODEL_ESIM = 'trained_model/ESIM/NLI/ESIM_model.h5'
 ENTAILMENT_RECOGNIZER_TKN_ESIM = 'trained_model/ESIM/NLI/ESIM_tokenizer.pkl'
@@ -38,7 +39,7 @@ posting_limit = 1000                # limit to postings returned per term
 # Passage Selection
 confidence_threshold = None
 passage_ids_threshold = None        # gets thresholded to 6 in score.py anyway
-which_model = 'ESIM' #{‘ESIM','LSTM}
+which_model = 'LSTM' #{‘ESIM','LSTM}
 one_sentence_length = 32
 multiple_sentence_length = 64
 
@@ -47,53 +48,53 @@ confidence_threshold = None         # maybe?
 
 
 def main():
-    # Load test claims
-    test_json = utils.load_json(json_path)          
-    raw_claims = parse_test_json(test_json)
+    # # Load test claims
+    # test_json = utils.load_json(json_path)          
+    # raw_claims = parse_test_json(test_json)
 
-    ##### PAGE ID RETRIEVAL #####
-    # get relevant page_ids from the inverted index
-    print("[INFO - Main] Getting ranked page ids from inverted index...")
-    inv_index = InvertedIndex(verbose=verbose)
-    wiki_query = WikiQuery()
+    # ##### PAGE ID RETRIEVAL #####
+    # # get relevant page_ids from the inverted index
+    # print("[INFO - Main] Getting ranked page ids from inverted index...")
+    # inv_index = InvertedIndex(verbose=verbose)
+    # wiki_query = WikiQuery()
 
-    total_test_claims = []
-    total_test_evidences = []
-    total_test_indices = []
+    # total_test_claims = []
+    # total_test_evidences = []
+    # total_test_indices = []
 
-    for idx, raw_claim in tqdm(enumerate(raw_claims)):
-        print("[INFO] Claim: {}".format(raw_claim))
-        start = utils.get_time()
-        ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit)
-        print(utils.get_elapsed_time(start, utils.get_time()))
+    # for idx, raw_claim in tqdm(enumerate(raw_claims)):
+    #     print("[INFO] Claim: {}".format(raw_claim))
+    #     start = utils.get_time()
+    #     ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit)
+    #     print(utils.get_elapsed_time(start, utils.get_time()))
 
-        start = utils.get_time()
-        ranked_page_ids = process_ranked_page_ids(ranked_page_ids, page_ids_threshold)
-        print(utils.get_elapsed_time(start, utils.get_time()))
+    #     start = utils.get_time()
+    #     ranked_page_ids = process_ranked_page_ids(ranked_page_ids, page_ids_threshold)
+    #     print(utils.get_elapsed_time(start, utils.get_time()))
 
-        print("[INFO] Returned ranked page ids: \n{}".format(ranked_page_ids))
+    #     print("[INFO] Returned ranked page ids: \n{}".format(ranked_page_ids))
 
-        start = utils.get_time()
-        test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
-                                                                               page_ids=ranked_page_ids, 
-                                                                               query_object=wiki_query)
-        print(utils.get_elapsed_time(start, utils.get_time()))
+    #     start = utils.get_time()
+    #     test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
+    #                                                                            page_ids=ranked_page_ids, 
+    #                                                                            query_object=wiki_query)
+    #     print(utils.get_elapsed_time(start, utils.get_time()))
 
-        total_test_claims.extend(test_claims)
-        total_test_evidences.extend(test_evidences)
-        total_test_indices.extend(test_indices)
+    #     total_test_claims.extend(test_claims)
+    #     total_test_evidences.extend(test_evidences)
+    #     total_test_indices.extend(test_indices)
 
-        if idx >= 49:
-            break
+    #     if idx >= 49:
+    #         break
 
-    utils.save_pickle(total_test_claims, "test_claims.pkl")
-    utils.save_pickle(total_test_evidences, "test_evidences.pkl")
-    utils.save_pickle(total_test_indices, "test_indices.pkl")
+    # utils.save_pickle(total_test_claims, "test_claims.pkl")
+    # utils.save_pickle(total_test_evidences, "test_evidences.pkl")
+    # utils.save_pickle(total_test_indices, "test_indices.pkl")
    
     # format into the proper format to be passed into the passage selection NN
-    claims, raw_evidences, page_info = get_training_data(claims_path='resource/test/test_claims.pkl',
-                                                         evidences_path='resource/test/test_evidences.pkl',
-                                                         labels_path='resource/test/test_indices.pkl')
+    claims, raw_evidences, page_info = get_training_data(claims_path='resource/training_data/test/test_devset_claims.pkl',
+                                                         evidences_path='resource/training_data/test/test_devset_evidences.pkl',
+                                                         labels_path='resource/training_data/test/test_devset_indices.pkl')
      
     ##### RELEVANT PASSAGE SELECTION #####
 
@@ -122,7 +123,8 @@ def main():
 #    pred = np.where(pred>0.5,1,0) # round up :)
         
     test_set['relevance'] = pred
-    relevant_test_set = test_set[test_set['relevance']<0.1]
+    relevant_test_set = test_set[test_set['relevance']>0.9]
+    relevant_test_set.to_csv('relevant_test_devset_set.csv')
     #manully set the threshold here
 #    tmp = test_set[test_set['claim']=='Andrew Kevin Walker is only Chinese.']
 
@@ -132,42 +134,42 @@ def main():
     # format into the proper format to be passed into the entailment recognizer NN
 
     # pass data into the entailment NN object
-    relevant_test_set_concatenate = concatenate_evidence_df(relevant_test_set)
+#     relevant_test_set_concatenate = concatenate_evidence_df(relevant_test_set)
     
-    sentences_pair = [(x1, x2) for x1, x2 in zip(relevant_test_set_concatenate.claim, \
-                      relevant_test_set_concatenate.evidence)]
+#     sentences_pair = [(x1, x2) for x1, x2 in zip(relevant_test_set_concatenate.claim, \
+#                       relevant_test_set_concatenate.evidence)]
     
 
-    if which_model == 'ESIM':
-        pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_ESIM,\
-                                    tkn_dir=ENTAILMENT_RECOGNIZER_TKN_ESIM,\
-                                    which_model='ESIM',sentences_pair=sentences_pair,\
-                                    left_sequence_length=one_sentence_length,\
-                                    right_sequence_length=multiple_sentence_length)
-    elif which_model == 'LSTM':
-        pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
-                                    tkn_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
-                                    which_model='LSTM',sentences_pair=sentences_pair,\
-                                    left_sequence_length=one_sentence_length,\
-                                    right_sequence_length=multiple_sentence_length)
+#     if which_model == 'ESIM':
+#         pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_ESIM,\
+#                                     tkn_dir=ENTAILMENT_RECOGNIZER_TKN_ESIM,\
+#                                     which_model='ESIM',sentences_pair=sentences_pair,\
+#                                     left_sequence_length=one_sentence_length,\
+#                                     right_sequence_length=multiple_sentence_length)
+#     elif which_model == 'LSTM':
+#         pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
+#                                     tkn_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
+#                                     which_model='LSTM',sentences_pair=sentences_pair,\
+#                                     left_sequence_length=one_sentence_length,\
+#                                     right_sequence_length=multiple_sentence_length)
         
-    else:
-        raise ValueError('Model Type Not Understood:{}'.format(which_model))
+#     else:
+#         raise ValueError('Model Type Not Understood:{}'.format(which_model))
                                 
-    pred = np.argmax(pred,axis=1)
+#     pred = np.argmax(pred,axis=1)
     
-    relevant_test_set_concatenate['label'] = pred
+#     relevant_test_set_concatenate['label'] = pred
     
     
     
-    ##### OUTPUT #####
-    # output format: {id: {'claim':CLAIMS,
-#                           'label': LABEL, 
-    #                       'evidence': [page_id, passage_idx]
-    #                      }}     
-    #                      #NOTE: Max 6 evidences allowed in score.py
+#     ##### OUTPUT #####
+#     # output format: {id: {'claim':CLAIMS,
+# #                           'label': LABEL, 
+#     #                       'evidence': [page_id, passage_idx]
+#     #                      }}     
+#     #                      #NOTE: Max 6 evidences allowed in score.py
 
-    relevant_test_set_concatenate[['claim','evidence','label']].to_json('testoutput.json',orient='index')
+#     relevant_test_set_concatenate[['claim','evidence','label']].to_json('testoutput.json',orient='index')
     
 
 

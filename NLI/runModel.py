@@ -35,7 +35,7 @@ from utils import get_timestamp
 #define folder directory
 # mask_dir = 'resource/training_data/'
 # MASK_DIR = 'resource/training_data/combined_fixed/'
-MASK_DIR = 'resource/training_data/24-5-19/sentence_selection/'
+MASK_DIR = 'resource/training_data/sentence_selection/'
 
 #============STAGE 2================
 #=====SENTENCE SELECTION============
@@ -44,9 +44,9 @@ SS_CLAIMS = MASK_DIR + 'sentence_selection_train_claims.pkl'
 SS_EVIDENCES = MASK_DIR + 'sentence_selection_train_evidences.pkl'
 SS_LABELS = MASK_DIR + 'sentence_selection_train_labels.pkl'
 
-SS_CLAIMS_DEV = MASK_DIR + 'sentence_selection_dev_claims.pkl'
-SS_EVIDENCES_DEV = MASK_DIR + 'sentence_selection_dev_evidences.pkl'
-SS_LABELS_DEV = MASK_DIR + 'sentence_selection_dev_labels.pkl'
+SS_CLAIMS_DEV = MASK_DIR + 'sentence_selection_devset_claims.pkl'
+SS_EVIDENCES_DEV = MASK_DIR + 'sentence_selection_devset_evidences.pkl'
+SS_LABELS_DEV = MASK_DIR + 'sentence_selection_devset_labels.pkl'
 
 #============STAGE 3================
 # claims_supports = MASK_DIR + 'separated/train_claims_supports_downsampled_concatenate_True.pkl'
@@ -196,7 +196,6 @@ if __name__ == '__main__':
                           left_sequence_length,right_sequence_length,num_classes,\
                           epoch,batch_size,mode)
 
-#    plot(model,'normalLSTM.png')
     plot_acc(his,'figure/LSTM',1,items)
     
 #    pred = model.predict([test_claim,test_evidence])
