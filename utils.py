@@ -12,6 +12,8 @@ import json
 import time
 from datetime import datetime
 
+from nltk.stem import PorterStemmer
+
 class encoding(Enum):
     UTF8 = "UTF-8"
 
@@ -30,11 +32,12 @@ def load_file(f_path, encoding=encoding.UTF8.name):
 
 
 def extract_processed_tokens(passage):
-    """ Returns lower cased tokens with - and \\s split from the passage """
+    """ Returns stemmed lower cased tokens with - and \\s split from the passage """
+    ps = PorterStemmer()
     tokens = []
     for token in passage:
         token_s = re.split("-|\\s", token.lower())              # split up tokens that are hyphenated, may return a list
-        token_s = [t for t in token_s if t.isalnum()]           # keep only if token is alphanumerical
+        token_s = [ps.stem(t) for t in token_s if t.isalnum()]           # keep only if token is alphanumerical
         tokens.extend(token_s)
 
     return tokens
@@ -79,13 +82,13 @@ def load_json(json_path):
 
 
 ########## LOGGING ##########
-def log(string):
+def log(string, f_name="logs.txt"):
     """ Append to logger in logs directory"""
     folder_dir = "logs"
     if not os.path.isdir(folder_dir):
         os.makedirs(folder_dir)
 
-    with open("{}/logs.txt".format(folder_dir), 'a') as handle:
+    with open("{}/{}".format(folder_dir, f_name), 'a') as handle:
         string = "{}  -  {}\n".format(get_timestamp(), string)
         handle.write(string)
 

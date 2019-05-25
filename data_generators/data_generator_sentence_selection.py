@@ -283,7 +283,8 @@ def get_passages_from_db(page_id, query_object, output_string=True):
         message = "Page id: {} returned None".format(page_id)
         utils.log(message)
         return None, None
-
+    if passages_dict.count() > 10:
+        print("page id with > passages: {}, number of passages: {}".format(page_id, passages_dict.count()))
     for passage in passages_dict:
         tokens = passage.get(WikiQuery.WikiField.tokens.value)
         passage_idx = passage.get(WikiQuery.WikiField.passage_idx.value)

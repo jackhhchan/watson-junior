@@ -138,8 +138,8 @@ class InvertedIndexQuery(object):
         """ Return cursor of postings from the term """
         if limit is None:
             postings  = self.col.find(filter={self.InvertedIndexField.term.value: term})
-        postings = self.col.find(filter={self.InvertedIndexField.term.value: term}).limit(limit)
-        postings.sort(InvertedIndexQuery.InvertedIndexField.tfidf.value, -1)     # sort descending
+        postings = self.col.find(filter={self.InvertedIndexField.term.value: term})
+        postings.sort(InvertedIndexQuery.InvertedIndexField.tfidf.value, -1).limit(limit)     # sort descending
         if verbose:
             print("[DB] Term: {}; Postings returned: {}".format(term, postings.count()))
         return postings

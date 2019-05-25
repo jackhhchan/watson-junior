@@ -41,6 +41,25 @@ claims = [
 
 json_path = "resource/train/devset.json"
 
+def get_title_entity_match(raw_claim, page_ids_string_dict):
+    """ Returns page ids with exact match"""
+    raw_claim = remove_punctuations(raw_claim, string=True)
+
+    NER_list = get_NER_tokens(raw_claim, stacked=True)
+    NER_list = list(map(lambda string: string.lower(), NER_list))
+
+    matched = set()
+    # try to find exact match
+    for entity in  NER_list:
+        # for token in NER_tokens:
+        page_id = page_ids_string_dict.get(entity)
+        if page_id is not None:          # check if exact match
+            matched.add(page_id)
+    
+    return matched
+
+
+
 def main():
     # claim = claims[0]
     # print(claim)
@@ -77,7 +96,7 @@ def main():
 
     # remove stop words and try to find exact match
 
-main()
+# main()
 
 
 
