@@ -3,6 +3,8 @@ sys.path.append(sys.path[0] + '/..')            # allow parent dir imports
 import os
 import random
 from enum import Enum
+from collections import defaultdict
+import math
 
 import pickle
 from tqdm import tqdm
@@ -11,7 +13,7 @@ import utils
 from mongodb.mongodb_query import WikiQuery
 
 # PATHS #
-data_json_path = 'resource/train/devset.json'           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
+data_json_path = 'resource/train/train.json'           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
 page_ids_idx_dict_path = 'page_ids_idx_dict_normalized_proper_fixed.pkl'        # This is REQUIRED to convert page idx to page id
 
 class Label(Enum):
@@ -25,8 +27,8 @@ class Label(Enum):
     def encode(label):
         assert label in Label.list(), "Label must be {}".format([label for label in Label.list()])
         encoder_dict = {
-            Label.RELEVANT.value : 0,
-            Label.IRRELEVANT.value : 1
+            Label.RELEVANT.value : 1,
+            Label.IRRELEVANT.value : 0
             }
         return encoder_dict.get(label)
 
@@ -51,7 +53,8 @@ def main():
     # connect to db and create query object
     wiki_query = WikiQuery()
     
-    train_claims, train_evidences, train_labels = generate_data(train_array, wiki_query)
+    # train_claims, train_evidences, train_labels = generate_data(train_array, wiki_query)
+    train_claims, train_evidences, train_labels = generate_data_from_same_page_ids(train_array, wiki_query)
 
     utils.save_pickle(train_claims, 'sentence_selection_train_claims.pkl')
     utils.save_pickle(train_evidences, 'sentence_selection_train_evidences.pkl')
@@ -93,8 +96,55 @@ def generate_data(json_array, query_object):
             train_claims.append(claim)
             train_labels.append(Label.encode(Label.IRRELEVANT.value))
 
+
     return train_claims, train_evidences, train_labels
         
+
+def generate_data_from_same_page_ids(json_array, query_object):
+    train_claims = []
+    train_evidences = []
+    train_labels = []
+
+    num_relevant = 0
+    num_irrelevant = 0
+
+    for data in tqdm(json_array):
+        claim = data.get(JSONField.claim.value)
+
+        relevant_dict = defaultdict(list)
+        relevant_evidences = data.get(JSONField.evidence.value)
+        ## append data for label: 'RELEVANT'
+        for relevant_evidence in relevant_evidences:
+            token_string = get_tokens_string_from_db(relevant_evidence, query_object)
+            if token_string is None:                                # IMPORTANT: this handles query returning None
+                continue
+            train_evidences.append(token_string)
+            
+            train_claims.append(claim)
+            train_labels.append(Label.encode(Label.RELEVANT.value))
+            num_relevant += 1
+
+            relevant_dict[relevant_evidence[0]].append(str(relevant_evidence[1]))
+        
+        for page_id, passage_indices in relevant_dict.items():
+            appended = passage_indices.copy()
+            for _ in range(math.ceil(len(appended)*1.5)):
+                irrelevant_passage_string, appended = get_irrelevant_passage_same_page_id(page_id, 
+                                                                                          appended, 
+                                                                                          query_object)
+                if irrelevant_passage_string is None:
+                    continue
+                train_evidences.append(irrelevant_passage_string)
+                
+                train_claims.append(claim)
+                train_labels.append(Label.encode(Label.IRRELEVANT.value))
+                num_irrelevant += 1
+
+
+    print("Number of relevant: {}".format(num_relevant))
+    print("Number of irrelevant: {}".format(num_irrelevant))
+    return train_claims, train_evidences, train_labels
+
 
 
 def get_tokens_string_from_db(evidence, query_object):
@@ -116,10 +166,6 @@ def get_tokens_string_from_db(evidence, query_object):
 def get_tokens(doc):
     # returned tokens logger
     tokens = doc.get('tokens')
-    if tokens is None:
-        message = "[DB] tokens returned None for page_id: {}, passage_idx: {}".format(page_id, passage_idx)
-        utils.log(message)
-    
     return tokens
 
 def cocatenate(tokens):
@@ -170,6 +216,25 @@ def get_irrelevant_page_ids(relevant_page_ids, page_ids_idx_dict, number_of_irre
         idx += 1
     
     return None
+
+def get_irrelevant_passage_same_page_id(page_id, appended, query_object):
+    # return all passage indices
+    # return a random passage index not in appended.
+    cursor = query_object.query_page_id_only(page_id, single=False)
+    if cursor is None:
+        return None, appended
+    for c in cursor:
+        passage_idx = c.get(query_object.WikiField.passage_idx.value)
+        if passage_idx not in appended:
+            irrelevant_passage_tokens = c.get(query_object.WikiField.tokens.value)
+            if irrelevant_passage_tokens is None:
+                return None
+            irrelevant_passage_string = cocatenate(irrelevant_passage_tokens)
+            appended.append(passage_idx)
+            return irrelevant_passage_string, appended
+    return None, appended
+
+
 
 def get_irrelevant_passage(relevant_page_id, query_object):
     """ Pulls a passage from the database for a single page id"""
