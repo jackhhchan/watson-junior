@@ -109,8 +109,8 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     # timestamp = get_timestamp()
     timestamp = get_timestamp()
 
-    checkpoint_dir = './trained_model/LSTM/REG_' + timsestamp if not mode=='regression' \
-        else './trained_model/LSTM//CLF_' + timestamp
+    checkpoint_dir = './trained_model/LSTM/CLF_' + timestamp if not mode=='regression' \
+        else './trained_model/LSTM//REG_' + timestamp
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
