@@ -23,7 +23,7 @@ class InvertedIndex(object):
     #### RANKED PAGE IDS ####
     #########################
 
-    def get_ranked_page_ids(self, raw_claim, tfidf=False):
+    def get_ranked_page_ids(self, raw_claim, posting_limit=None, tfidf=False):
         """ 
         Returns a list of ranked page ids given claim
         Args:
@@ -33,7 +33,7 @@ class InvertedIndex(object):
         assert type(tfidf) == bool, "tfidf argument if True also returns the tfidf"
 
         claim_terms = self.query_reformulated(raw_claim)
-        page_ids_tfidf = self.get_page_ids_tfidf(claim_terms)
+        page_ids_tfidf = self.get_page_ids_tfidf(claim_terms, posting_limit)
         ranked_page_ids_tfidf = self.ranked_page_ids_tfidf(page_ids_tfidf)      # array of dicts in order
 
         if tfidf:
@@ -43,14 +43,14 @@ class InvertedIndex(object):
             return ranked_page_ids
 
 
-    def get_page_ids_tfidf(self, claim_terms):
+    def get_page_ids_tfidf(self, claim_terms, limit):
         output ={}
         if self.verbose:
             print("[INFO - InvIdx] Query: {}".format(claim_terms))
             print("[INFO - InvIdx] Number of tokens in claim: {}".format(len(claim_terms)))
 
         for term in claim_terms:
-            postings = self.db_query.get_postings(term=term, verbose=True)
+            postings = self.db_query.get_postings(term=term, limit=limit, verbose=self.verbose)
             for posting in postings:
                 page_id = posting.get(self.db_query.InvertedIndexField.page_id.value)
                 tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)
@@ -83,13 +83,13 @@ class InvertedIndex(object):
 
     def remove_punctuations(self, raw_claim, string=True):
         """ Returns raw claim with removed punctuations in a string format (unless specified otherwise)"""
-        raw_claim = re.split('-|_|.|,|#|?|*|&|^|%|#|@|!', raw_claim)
+        raw_claim = re.split('-|_|\\s', raw_claim)
         return " ".join(token for token in raw_claim).strip()
 
 
     def get_named_entities(self, raw_claim):
         """ Returns the named entities outputted by the AllenNLP NER"""
-        raw_NER_tokens = get_NER_tokens(raw_claim)[0]
+        raw_NER_tokens = get_NER_tokens(raw_claim)
         if len(raw_NER_tokens) <= 0:
             message = "Nothing returned from NER for claim: {}".format(raw_claim)
             utils.log(message)

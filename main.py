@@ -8,12 +8,12 @@ import utils
 from IR.InvertedIndex import InvertedIndex
 from mongodb.mongodb_query import WikiQuery
 from data_generators.data_generator_sentence_selection import get_passages_from_db
-from keras import load_model
-from NLI.attention import DotProductAttention
-from NLI.prepare_set import create_test_data,create_test_data_lstm
+# from keras import load_model
+# from NLI.attention import DotProductAttention
+# from NLI.prepare_set import create_test_data,create_test_data_lstm
 import numpy as np
-import pandas as pd
-from NLI.train import get_training_data
+# import pandas as pd
+# from NLI.train import get_training_data
 
 ###### PATHS ######
 json_path = "resource/test/test-unlabelled.json"            # test set
@@ -32,7 +32,8 @@ ENTAILMENT_RECOGNIZER_TKN_LSTM = ''
 ###### PARAMS TO CHANGE ######
 # Inverted Index
 page_ids_threshold = 15             # only return this many page ids from inverted index
-verbose = True
+verbose = False
+posting_limit = 1000                # limit to postings returned per term
 
 # Passage Selection
 confidence_threshold = None
@@ -63,7 +64,7 @@ def main():
     for idx, raw_claim in tqdm(enumerate(raw_claims)):
         print("[INFO] Claim: {}".format(raw_claim))
         start = utils.get_time()
-        ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim)
+        ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit)
         print(utils.get_elapsed_time(start, utils.get_time()))
 
         start = utils.get_time()

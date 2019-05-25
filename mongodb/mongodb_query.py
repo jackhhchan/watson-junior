@@ -82,9 +82,13 @@ class InvertedIndexQuery(object):
         db = get_database(client, self.db_name)
         self.col = get_collection(db, self.col_name)
     
-    def get_postings(self, term, verbose=False):
+    def get_postings(self, term, limit=None, verbose=False):
         """ Return all postings from the term """
-        postings = self.col.find(filter={self.InvertedIndexField.term.value: term})
+        if limit is None:
+            postings = self.col.find(filter={self.InvertedIndexField.term.value: term})
+        else:
+            assert type(limit) == int, "[DB] Posting query limit must be an integer."
+            postings = self.col.find(filter={self.InvertedIndexField.term.value: term}).limit(limit)
         if verbose:
             print("[DB] Term: {}; Postings returned: {}".format(term, postings.count()))
         return postings
