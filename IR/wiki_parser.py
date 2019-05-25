@@ -4,8 +4,8 @@ import os
 from tqdm import tqdm
 
 import utils
-from IR.InvertedIndex import Page
-from IR.InvertedIndex import Passage
+from IR.InvertedIndexBuilder import Page
+from IR.InvertedIndexBuilder import Passage
 
 #### PATHS ####
 FOLDER_NAME = "resource"            # CHANGE TO NAME OF FOLDER CONTAINING WIKI TEXT FILES
