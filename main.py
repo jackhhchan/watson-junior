@@ -50,7 +50,7 @@ def main():
     test_json = utils.load_json(json_path)          
     raw_claims = parse_test_json(test_json)
 
-    ##### DOCUMENT SELECTION #####
+    ##### PAGE ID RETRIEVAL #####
     # get relevant page_ids from the inverted index
     print("[INFO - Main] Getting ranked page ids from inverted index...")
     inv_index = InvertedIndex(verbose=verbose)

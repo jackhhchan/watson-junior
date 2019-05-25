@@ -7,8 +7,8 @@ import json
 from tqdm import tqdm
 from nltk.corpus import stopwords
 
-import nltk
-nltk.download("stopwords")
+# import nltk
+# nltk.download("stopwords")
 
 import utils
 from IR.NER import get_NER_tokens
@@ -67,7 +67,7 @@ class InvertedIndex(object):
 
     def query_reformulated(self, raw_claim):
         """ Reformulates the query, NER & (Query Expansion //TODO) """
-        raw_claim = raw_claim.lower()
+        raw_claim = self.remove_punctuations(raw_claim, string=True)        # return in string format
         
         # named entities linking
         tokens = self.get_named_entities(raw_claim)
@@ -80,6 +80,12 @@ class InvertedIndex(object):
 
         processed_claim_tokens = tokens
         return processed_claim_tokens
+
+    def remove_punctuations(self, raw_claim, string=True):
+        """ Returns raw claim with removed punctuations in a string format (unless specified otherwise)"""
+        raw_claim = re.split('-|_|.|,|#|?|*|&|^|%|#|@|!', raw_claim)
+        return " ".join(token for token in raw_claim).strip()
+
 
     def get_named_entities(self, raw_claim):
         """ Returns the named entities outputted by the AllenNLP NER"""
