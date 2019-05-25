@@ -51,10 +51,13 @@ class InvertedIndex(object):
 
         for term in claim_terms:
             postings = self.db_query.get_postings(term=term, limit=limit, verbose=self.verbose)
-            for posting in postings:
+
+            for i, posting in enumerate(postings):
                 page_id = posting.get(self.db_query.InvertedIndexField.page_id.value)
                 tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)
                 output[page_id] = output.get(page_id, 0) + tfidf
+                if i >= limit-1:
+                    break
         
         return output
 
@@ -84,7 +87,7 @@ class InvertedIndex(object):
     def remove_punctuations(self, raw_claim, string=True):
         """ Returns raw claim with removed punctuations in a string format (unless specified otherwise)"""
         raw_claim = re.split('-|_|\\s', raw_claim)
-        return " ".join(token for token in raw_claim).strip()
+        return " ".join(token for token in raw_claim if token.isalnum()).strip()
 
 
     def get_named_entities(self, raw_claim):

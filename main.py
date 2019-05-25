@@ -7,6 +7,9 @@ from tqdm import tqdm
 import utils
 # from IR.InvertedIndex import InvertedIndex
 from mongodb.mongodb_query import WikiQuery
+from IR.InvertedIndex import InvertedIndex
+from IR.entity_linking import get_title_entity_match
+from mongodb.mongodb_query import WikiQuery, WikiIdxQuery
 from data_generators.data_generator_sentence_selection import get_passages_from_db
 from keras.models import load_model
 from NLI.attention import DotProductAttention
@@ -16,8 +19,8 @@ import pandas as pd
 from NLI.train import get_training_data
 
 ###### PATHS ######
-json_path = "resource/test/test-unlabelled.json"            # test set
-json_path = "resource/train/devset.json"                    # dev set
+json_file = "devset"                                        # test-unlabelled, devset
+json_path = "resource/test/{}.json".format(json_file)            
 
 ######PRE-TRAINED MODEL######
 PASSAGE_SELECTION_MODEL_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_model.h5'
@@ -31,10 +34,12 @@ ENTAILMENT_RECOGNIZER_TKN_ESIM = 'trained_model/ESIM/NLI/ESIM_tokenizer.pkl'
 ENTAILMENT_RECOGNIZER_MODEL_LSTM = 'trained_model/LSTM/NLI/LSTM_model.h5'
 ENTAILMENT_RECOGNIZER_TKN_LSTM = 'trained_model/LSTM/NLI/LSTM_tokenizer.pkl'
 ###### PARAMS TO CHANGE ######
+verbose = True
 # Inverted Index
+entity = False                       # use entity title matching
 page_ids_threshold = 15             # only return this many page ids from inverted index
-verbose = False
-posting_limit = 1000                # limit to postings returned per term
+inv_index_verbose = False
+posting_limit = 1000                # limit to postings returned per term -- we could be missing a lot of page ids with the same tfidf scores. (1 term)
 
 # Passage Selection
 confidence_threshold = None
@@ -48,48 +53,80 @@ confidence_threshold = None         # maybe?
 
 
 def main():
-    # # Load test claims
-    # test_json = utils.load_json(json_path)          
-    # raw_claims = parse_test_json(test_json)
+    # Load test claims
+    test_json = utils.load_json(json_path)          
+    raw_claims, page_ids = parse_test_json(test_json, output_page_ids=True)
 
-    # ##### PAGE ID RETRIEVAL #####
-    # # get relevant page_ids from the inverted index
-    # print("[INFO - Main] Getting ranked page ids from inverted index...")
-    # inv_index = InvertedIndex(verbose=verbose)
-    # wiki_query = WikiQuery()
+    ##### PAGE ID RETRIEVAL #####
+    # exact match entity linking
+    page_ids_string_dict = utils.load_pickle("page_ids_string_dict.pkl")
 
-    # total_test_claims = []
-    # total_test_evidences = []
-    # total_test_indices = []
 
-    # for idx, raw_claim in tqdm(enumerate(raw_claims)):
-    #     print("[INFO] Claim: {}".format(raw_claim))
-    #     start = utils.get_time()
-    #     ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit)
-    #     print(utils.get_elapsed_time(start, utils.get_time()))
+    # get relevant page_ids from the inverted index
 
-    #     start = utils.get_time()
-    #     ranked_page_ids = process_ranked_page_ids(ranked_page_ids, page_ids_threshold)
-    #     print(utils.get_elapsed_time(start, utils.get_time()))
+    inv_index = InvertedIndex(verbose=inv_index_verbose)
+    wiki_query = WikiIdxQuery()
 
-    #     print("[INFO] Returned ranked page ids: \n{}".format(ranked_page_ids))
+    total_test_claims = []
+    total_test_evidences = []
+    total_test_indices = []
 
-    #     start = utils.get_time()
-    #     test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
-    #                                                                            page_ids=ranked_page_ids, 
-    #                                                                            query_object=wiki_query)
-    #     print(utils.get_elapsed_time(start, utils.get_time()))
+    total_true_page_ids_length = 0
+    total_true_pos = 0
+    for idx, raw_claim in tqdm(enumerate(raw_claims)):
+        if entity: 
+            print("[INFO - MAIN] Getting exact match entity links")
+            matched = get_title_entity_match(raw_claim, page_ids_string_dict)
 
-    #     total_test_claims.extend(test_claims)
-    #     total_test_evidences.extend(test_evidences)
-    #     total_test_indices.extend(test_indices)
 
-    #     if idx >= 49:
-    #         break
+        print("[INFO - Main] Getting ranked page ids from inverted index...")
+        if verbose:
+            print("[INFO - Main] Claim: \n{}".format(raw_claim))
+        ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit, tfidf=False)        # tfidf nust be false for production
+        ranked_page_ids = set(process_ranked_page_ids(ranked_page_ids, page_ids_threshold, verbose=verbose))
+        if entity:
+            ranked_page_ids = ranked_page_ids.union(matched)
+        
+        true_page_ids_length = len(page_ids[idx])
+        if not true_page_ids_length <= 0:
+            true_pos = 0
+            for page_id in page_ids[idx]:
+                if page_id in ranked_page_ids:
+                    true_pos += 1
 
-    # utils.save_pickle(total_test_claims, "test_claims.pkl")
-    # utils.save_pickle(total_test_evidences, "test_evidences.pkl")
-    # utils.save_pickle(total_test_indices, "test_indices.pkl")
+            percentage = float(true_pos)/float(true_page_ids_length)*100.0
+            print("[DEBUG INFO] {}'%' returned, {}/{}".format(percentage, true_pos, true_page_ids_length))
+            total_true_page_ids_length += true_page_ids_length
+            total_true_pos += true_pos
+            recall = float(total_true_pos)/float(total_true_page_ids_length)*100.0
+
+
+        if verbose:
+            print("[INFO - Main] Returned ranked page ids: \n{}".format(ranked_page_ids))
+
+        test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
+                                                                               page_ids=ranked_page_ids, 
+                                                                               query_object=wiki_query)
+
+        total_test_claims.extend(test_claims)
+        total_test_evidences.extend(test_evidences)
+        total_test_indices.extend(test_indices)
+
+        if idx + 1 >= 500:
+            avg_evidence_per_claim = float(len(test_evidences))/float(idx+1)
+            message = "Entity Linking: {}\n\
+                    Threshold: {}, Recall: {}\n\
+                    Avg evidences per claim: {}\n".format(entity,
+                                                        page_ids_threshold,
+                                                        recall,
+                                                        avg_evidence_per_claim)
+            utils.log(message, "inv_index_log.txt")
+            break
+
+
+    utils.save_pickle(total_test_claims, "test_{}_entity_{}_claims.pkl".format(json_file, entity))
+    utils.save_pickle(total_test_evidences, "test_{}_entity_{}_evidences.pkl".format(json_file, entity))
+    utils.save_pickle(total_test_indices, "test_{}_entity_{}_indices.pkl".format(json_file, entity))
    
     # format into the proper format to be passed into the passage selection NN
     claims, raw_evidences, page_info = get_training_data(claims_path='resource/training_data/test/test_devset_claims.pkl',
@@ -175,17 +212,19 @@ def main():
 
 
 #### DOCUMENT SELECTION ####
-def process_ranked_page_ids(ranked_page_ids, threshold):
+def process_ranked_page_ids(ranked_page_ids, threshold, verbose):
     length = len(ranked_page_ids)
     if length <= 0:
         print("[INFO - Main] No relevant page id returned.")
         return 
     else:
-        if length <= threshold:
-            print("[INFO - Main] Returned page_ids: {}".format(length))
+        if length <= threshold+1:
+            if verbose:
+                print("[INFO - Main] Returned page_ids: {}".format(length))
             return ranked_page_ids
         else:
-            print("[INFO - Main] Returned page_ids: {}, thresholded to {}".format(length, threshold))
+            if verbose:
+                print("[INFO - Main] Returned page_ids: {}, thresholded to {}".format(length, threshold))
             return ranked_page_ids[:threshold-1]
 
 # Formatter to be passed to Passage Selection
@@ -253,11 +292,19 @@ def get_model_prediction(model_dir,tkn_dir,which_model,sentences_pair,left_seque
 
 
 #### JSON  ####
-def parse_test_json(test_json):
+def parse_test_json(test_json, output_page_ids=False):
     """ Returns a list of the json values """
     test_array = []
+    test_page_ids = []
     for test_data in test_json.values():
         test_array.append(test_data.get('claim'))
+        page_ids = set()
+        [page_ids.add(ev[0]) for ev in test_data.get('evidence')]
+        # page_ids = [evidence[0] for evidence in test_data.get('evidence')]
+        test_page_ids.append(page_ids)
+
+    if output_page_ids:
+        return test_array, test_page_ids
 
     return test_array
     
