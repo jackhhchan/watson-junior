@@ -25,10 +25,10 @@ PASSAGE_SELECTION_TKN_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_tokenizer
 PASSAGE_SELECTION_MODEL_LSTM = 'trained_model/LSTM/PassageSelection/LSTM_model.h5'
 PASSAGE_SELECTION_TKN_LSTM = 'trained_model/LSTM/PassageSelection/LSTM_tokenizer.pkl'
 
-ENTAILMENT_RECOGNIZER_MODEL_ESIM = ''
-ENTAILMENT_RECOGNIZER_TKN_ESIM = ''
-ENTAILMENT_RECOGNIZER_MODEL_LSTM = ''
-ENTAILMENT_RECOGNIZER_TKN_LSTM = ''
+ENTAILMENT_RECOGNIZER_MODEL_ESIM = 'trained_model/ESIM/NLI/ESIM_model.h5'
+ENTAILMENT_RECOGNIZER_TKN_ESIM = 'trained_model/ESIM/NLI/ESIM_tokenizer.pkl'
+ENTAILMENT_RECOGNIZER_MODEL_LSTM = 'trained_model/LSTM/NLI/LSTM_model.h5'
+ENTAILMENT_RECOGNIZER_TKN_LSTM = 'trained_model/LSTM/NLI/LSTM_tokenizer.pkl'
 ###### PARAMS TO CHANGE ######
 # Inverted Index
 page_ids_threshold = 15             # only return this many page ids from inverted index
@@ -122,10 +122,10 @@ def main():
         
     test_set['relevance'] = pred
     relevant_test_set = test_set[test_set['relevance']<0.1]
+    #manully set the threshold here
 #    tmp = test_set[test_set['claim']=='Andrew Kevin Walker is only Chinese.']
-    
-#    tmp = test_set.sample(n=100)
-#    new_tmp = concatenate_evidence_df(tmp)
+
+
 
     ##### ENTAILMENT RECOGNIZER #####
     # format into the proper format to be passed into the entailment recognizer NN
@@ -135,17 +135,20 @@ def main():
     
     sentences_pair = [(x1, x2) for x1, x2 in zip(relevant_test_set_concatenate.claim, \
                       relevant_test_set_concatenate.evidence)]
+    
 
     if which_model == 'ESIM':
-        pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_ESIM,tkn_dir=ENTAILMENT_RECOGNIZER_TKN_ESIM,\
-                                which_model='ESIM',sentences_pair=sentences_pair,\
-                                left_sequence_length=one_sentence_length,\
-                                right_sequence_length=multiple_sentence_length)
+        pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_ESIM,\
+                                    tkn_dir=ENTAILMENT_RECOGNIZER_TKN_ESIM,\
+                                    which_model='ESIM',sentences_pair=sentences_pair,\
+                                    left_sequence_length=one_sentence_length,\
+                                    right_sequence_length=multiple_sentence_length)
     elif which_model == 'LSTM':
-        pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,tkn_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
-                                which_model='LSTM',sentences_pair=sentences_pair,\
-                                left_sequence_length=one_sentence_length,\
-                                right_sequence_length=multiple_sentence_length)
+        pred = get_model_prediction(model_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
+                                    tkn_dir=ENTAILMENT_RECOGNIZER_MODEL_LSTM,\
+                                    which_model='LSTM',sentences_pair=sentences_pair,\
+                                    left_sequence_length=one_sentence_length,\
+                                    right_sequence_length=multiple_sentence_length)
         
     else:
         raise ValueError('Model Type Not Understood:{}'.format(which_model))
@@ -157,12 +160,13 @@ def main():
     
     
     ##### OUTPUT #####
-    # output format: {id: {'label': LABEL, 
+    # output format: {id: {'claim':CLAIMS,
+#                           'label': LABEL, 
     #                       'evidence': [page_id, passage_idx]
     #                      }}     
     #                      #NOTE: Max 6 evidences allowed in score.py
 
-    relevant_test_set_concatenate.to_json('testoutput.json',orient='index')
+    relevant_test_set_concatenate[['claim','evidence','label']].to_json('testoutput.json',orient='index')
     
 
 
@@ -214,8 +218,8 @@ def get_model_prediction(model_dir,tkn_dir,which_model,sentences_pair,left_seque
     :param model_dir,tkn_dir: the directory to pre-trained model & tokenizer
     :param which_model, choose between 'ESIM' and 'LSTM
     :param sentences_pair: (claim, evidence) pair
-    :left_sequence_length: the max length of claims, default is 32
-    :right_sequence_length: the max lemgth of evidence. If not concatenate, set to default;
+    :param left_sequence_length: the max length of claims, default is 32
+    :param right_sequence_length: the max lemgth of evidence. If not concatenate, set to default;
                             if evidence is concatenate, the length is 64
     """
     if which_model == 'ESIM':
