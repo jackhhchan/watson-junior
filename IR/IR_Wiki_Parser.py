@@ -70,7 +70,8 @@ def parse_wiki_docs(folder_name, pages, page_id_idx_mapper, page_idx_id_mapper, 
     page_idx_id_mapper = page_idx_id_mapper     # {page_idx: page_id, ...}
     page_idx_iter = int_encode(page_idx_iter)                       # encoded page idx iterator
     completed_files = completed_files
-    for file_name in os.listdir(folder_name):
+    file_names = os.listdir(folder_name)
+    for file_name in file_names:
         tmp = file_name.rstrip('.txt')
         tmp = tmp + '.pkl'
         if tmp in completed_files: continue           # skip to checkpoint
@@ -117,6 +118,8 @@ def parse_wiki_docs(folder_name, pages, page_id_idx_mapper, page_idx_id_mapper, 
         tmp = tmp + '.pkl'
         completed_files.append(tmp)
         save_pickle(completed_files, "{}/{}.pkl".format(CHECKPOINT_FOLDER, COMPLETED_FILES))
+
+        print("[INFO] {}/{} complete.".format(len(completed_files), len(file_names)))
 
     
     return pages, page_id_idx_mapper, page_idx_id_mapper
