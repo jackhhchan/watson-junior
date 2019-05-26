@@ -6982,3 +6982,8 @@
 26-05-2019--00-46-33  -  [DB] database returned None for page_id: Michael_Peña, passage_idx: 0
 26-05-2019--00-46-36  -  [DB] database returned None for page_id: Zlatan_Ibrahimović, passage_idx: 10
 26-05-2019--00-46-39  -  [DB] database returned None for page_id: Chris_Pérez, passage_idx: 0
+26-05-2019--19-52-41  -  Republican is not an integer in page_id James_L._Bentley
+26-05-2019--19-52-41  -  Republican is not an integer in page_id James_L._Bentley
+26-05-2019--19-52-41  -  Republican is not an integer in page_id James_L._Bentley
+26-05-2019--19-52-41  -  Republican is not an integer in page_id James_L._Bentley
+26-05-2019--20-00-18  -  64th is not an integer in page_id List_of_accolades_received_by_The_Artist_-LRB-film-RRB-

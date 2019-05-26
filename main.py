@@ -112,16 +112,13 @@ def main():
         total_test_evidences.extend(test_evidences)
         total_test_indices.extend(test_indices)
 
-        if idx + 1 >= 500:
-            avg_evidence_per_claim = float(len(test_evidences))/float(idx+1)
-            message = "Entity Linking: {}\n\
-                    Threshold: {}, Recall: {}\n\
-                    Avg evidences per claim: {}\n".format(entity,
-                                                        page_ids_threshold,
-                                                        recall,
-                                                        avg_evidence_per_claim)
-            utils.log(message, "inv_index_log.txt")
-            break
+
+    avg_evidence_per_claim = float(len(total_test_evidences))/float(idx+1)
+    message = "Entity Linking: {}\nThreshold: {}, Recall: {}\nAvg evidences per claim: {}\n".format(entity,
+                                                page_ids_threshold,
+                                                recall,
+                                                avg_evidence_per_claim)
+    utils.log(message, "inv_index_log.txt")
 
 
     utils.save_pickle(total_test_claims, "test_{}_entity_{}_claims.pkl".format(json_file, entity))
