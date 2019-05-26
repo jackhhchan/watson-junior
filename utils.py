@@ -13,7 +13,6 @@ import json
 import time
 from datetime import datetime
 
-from nltk.stem import PorterStemmer
 
 class encoding(Enum):
     UTF8 = "UTF-8"
@@ -31,17 +30,6 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     print("[INFO] Extracted {}, len(raw_lines) = {}".format(f_path, len(raw_lines)))
     return raw_lines
 
-
-def extract_processed_tokens(passage):
-    """ Returns stemmed lower cased tokens with - and \\s split from the passage """
-    ps = PorterStemmer()
-    tokens = []
-    for token in passage:
-        token_s = re.split("-|\\s", token.lower())              # split up tokens that are hyphenated, may return a list
-        token_s = [ps.stem(t) for t in token_s if t.isalnum()]           # keep only if token is alphanumerical
-        tokens.extend(token_s)
-
-    return tokens
 
 ########## USEFUL FUNCTIONS #########
 def sorted_dict(dictionary):

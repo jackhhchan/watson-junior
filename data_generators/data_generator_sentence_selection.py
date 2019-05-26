@@ -189,6 +189,7 @@ def parse_json(json_file):
             json_array.append(json_file.get(key))
         else:
             continue
+    print("[INFO] Length of json array: {}".format(len(json_array)))
     return json_array
 
     

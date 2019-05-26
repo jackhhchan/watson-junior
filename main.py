@@ -56,6 +56,7 @@ def main():
     # Load test claims
     test_json = utils.load_json(json_path)          
     raw_claims, page_ids = parse_test_json(test_json, output_page_ids=True)
+    print("[INFO] Number of unique claims: {}".format(len(raw_claims)))
 
     ##### PAGE ID RETRIEVAL #####
     # exact match entity linking

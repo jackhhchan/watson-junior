@@ -11,10 +11,13 @@ from tqdm import tqdm
 
 
 import utils
+from IR.IR_utils import int_encode
 from IR import wiki_parser
 
 # run server --
 # mongod --dbpath /Users/jackchan/downloads/mongodb/data/db
+
+log_file = "mongodb-populate.txt"
 
 class WikiField(Enum):
     """ Field types used in the wiki collection """
@@ -74,7 +77,6 @@ def _connected_db(host, port, col_name):
 def populate_wiki_db(collection, folder_name='resource/wiki-txt-files'):
     """ Populates the database with passages loaded from wiki txt files """
     # loop through files insert each passage
-    # with
     wiki_files = os.listdir(folder_name)
     num_files = len(wiki_files)
     db_page_ids_idx_dict = {}
@@ -86,6 +88,11 @@ def populate_wiki_db(collection, folder_name='resource/wiki-txt-files'):
         for raw_line in tqdm(raw_lines):
 
             page_id, passage_idx, tokens = wiki_parser.parse_raw_line(raw_line)
+            if not type(passage_idx) == int:
+                message = "Page_id {}, Passage_idx {} skipped.".format(page_id, passage_idx)
+                utils.log(message, log_file)
+                continue 
+            passage_idx = passage_idx                    
 
             if db_page_ids_idx_dict.get(page_id) is None:
                 db_page_ids_idx_dict[page_id] = page_idx
