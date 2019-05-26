@@ -1,0 +1,5 @@
+26-05-2019--20-04-10  -  
+Entity Linking: True
+Max Threshold: 10, Recall: 62.54950495049505
+Avg evidences per claim: 161.19336132773446
+
