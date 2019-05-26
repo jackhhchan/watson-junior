@@ -6,6 +6,7 @@ import re
 from tqdm import tqdm
 from nltk.stem import PorterStemmer
 
+# INDEPENDENT MODULE -- only uses utils; but used by InvertedIndex.py
 import utils
 from utils import load_pickle, save_pickle, get_size
 from IR.IR_utils import int_encode
@@ -27,18 +28,20 @@ def main():
     pages = {}
     page_id_idx_mapper = {}
     page_idx_id_mapper = {}
-    page_idx_iter = 0
+    page_idx_iter = 398342
     completed_files = []
     
-    if os.path.exists("{}/{}.pkl".format(CHECKPOINT_FOLDER, COMPLETED_FILES)):
-        completed_files = load_pickle(completed_files)
+    completed_path = "{}/{}.pkl".format(CHECKPOINT_FOLDER, COMPLETED_FILES)
+    if os.path.exists(completed_path):
+        completed_files = load_pickle(completed_path)
         last_file = str(completed_files[-1])
-        pages, page_id_idx_mapper, page_idx_id_mapper = load_checkpoint_array("{}/{}.pkl".format(
+        print("[INFO] Loading checkpoint from {}...".format(last_file))
+        pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter = load_checkpoint_array("{}/{}".format(
                                                                                             CHECKPOINT_FOLDER,
                                                                                             last_file
                                                                                             ))
 
-    # parse all wiki docs
+     # parse all wiki docs
     pages, page_id_idx_mapper, page_idx_id_mapper = parse_wiki_docs(folder_name=FOLDER_NAME,
                                                                     pages=pages,
                                                                     page_id_idx_mapper=page_id_idx_mapper,
@@ -68,6 +71,9 @@ def parse_wiki_docs(folder_name, pages, page_id_idx_mapper, page_idx_id_mapper, 
     page_idx_iter = int_encode(page_idx_iter)                       # encoded page idx iterator
     completed_files = completed_files
     for file_name in os.listdir(folder_name):
+        tmp = file_name.rstrip('.txt')
+        tmp = tmp + '.pkl'
+        if tmp in completed_files: continue           # skip to checkpoint
         # load file
         path = "{}/{}".format(folder_name, file_name)
         raw_lines = utils.load_file(path)
@@ -94,17 +100,23 @@ def parse_wiki_docs(folder_name, pages, page_id_idx_mapper, page_idx_id_mapper, 
             else:
                 pages[cur_page_idx].update({passage_idx: tokens})
 
-        save_array = [pages, page_id_idx_mapper, page_idx_id_mapper]
+        
+        # -- Checkpoint
+        print("[INFO] Writing checkpoint to disk...")
+        save_array = [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
         save_path = "{}/{}.pkl".format(CHECKPOINT_FOLDER,file_name.rstrip('.txt'))
         if not os.path.isdir(CHECKPOINT_FOLDER): os.mkdir(CHECKPOINT_FOLDER)
         save_pickle(save_array, save_path)
 
         message = ("{} successfully parsed, saved to {}\n"
-            "Format: [pages, page_id_idx_mapper, page_idx_id_mapper]").format(file_name, save_path)
+            "Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]").format(file_name, 
+                                                                                             save_path)
         utils.log(message, log_file)
         
-        completed_files.append(file_name)
-        save_pickle(completed_files, "{}/{}.pkl".format(CHECKPOINT_FOLDER, completed_files))
+        tmp =  file_name.rstrip('.txt')
+        tmp = tmp + '.pkl'
+        completed_files.append(tmp)
+        save_pickle(completed_files, "{}/{}.pkl".format(CHECKPOINT_FOLDER, COMPLETED_FILES))
 
     
     return pages, page_id_idx_mapper, page_idx_id_mapper
@@ -165,16 +177,19 @@ def substitute_punctuations(s, sub=' '):
 
 
 
-
+ 
 
 
 def load_checkpoint_array(path):
     checkpoint_array = load_pickle(path)
+    assert len(checkpoint_array) == 4, "{} checkpoint array is not length size 4."
     pages = checkpoint_array[0]
     page_id_idx_mapper = checkpoint_array[1]
     page_idx_id_mapper = checkpoint_array[2]
+    page_idx_iter = checkpoint_array[3]
+    assert len(page_id_idx_mapper) == page_idx_iter, "Page_idx_iter is invalid, check mapper length" # might need to rebuild
 
-    return pages, page_id_idx_mapper, page_idx_id_mapper
+    return pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter
 
 if __name__=="__main__":
     main()

@@ -1,19 +1,17 @@
 import sys
 sys.path.append(sys.path[0] + '/..')
 import os
+
 from tqdm import tqdm
+from nltk.stem import PorterStemmer
 
 import utils
 from IR.InvertedIndexBuilder import Page
 from IR.InvertedIndexBuilder import Passage
 
-#### PATHS ####
-FOLDER_NAME = "resource"            # CHANGE TO NAME OF FOLDER CONTAINING WIKI TEXT FILES
-FOLDER_NAME_DOC_TERM_MATRIX = "resource_doc_term_matrix"
-###################
 
 
-def parse_wiki_docs(folder_name=FOLDER_NAME):
+def parse_wiki_docs(folder_name):
     """ Parse wiki docs and return pages dictionary; {page_id: Page object}
         
         This method loads and parses wiki docs according to their structure. 
@@ -37,7 +35,7 @@ def parse_wiki_docs(folder_name=FOLDER_NAME):
     return pages
             
 
-def parse_raw_line(raw_line):
+def parse_raw_line(raw_line, log_file="wiki-parser.txt"):
     """ Extract page id, passage index and tokens from raw line to build Passage objects 
 
         Returns:
@@ -49,11 +47,47 @@ def parse_raw_line(raw_line):
         tokens
             a list of tokens associated with the passage (lower-cased)
     """
+    raw_line = raw_line.split()
     page_id = raw_line[0]
     passage_idx = raw_line[1]
-    tokens = utils.extract_processed_tokens(raw_line[2:])
+    tokens = preprocess_tokens_list(raw_line[2:])
+
+    try:
+        passage_idx = int(passage_idx)
+    except:
+        message = "Passage idx {} can't be converted to integer in page id {}".format(passage_idx, page_id)
+        utils.log(message, log_file)
+
+    # assert type(passage_idx) == int, "Passage index is not an integer."
 
     return page_id, passage_idx, tokens
+
+def preprocess_tokens_list(tokens_list, stem=False):
+    """ Returns page_id, passage_idx, tokens from raw passage
+        
+        Preprocessing for each token includes
+        - Remove punctuation
+        - Lower casing
+        - Porter Stemming (optional, args: stem)
+    """
+    if stem:
+        ps = PorterStemmer()
+    tokens = []
+    for token in tokens_list:
+        token_s = substitute_punctuations(token).split()      # remove punctuations, may return list
+        if stem:
+            token_s = [ps.stem(t.lower()) for t in token_s]   # lower + stem
+        else:
+            token_s = [t.lower() for t in token_s]            # lower only
+        tokens.extend(token_s)
+
+    return tokens
+
+def substitute_punctuations(s, sub=' '):
+    """ Return string with all puncuations substituted with (default=' ') """
+    return re.sub(r'[^\w\s]',sub,s)
+
+
 
 
 ####                 ####

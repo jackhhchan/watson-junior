@@ -12,6 +12,7 @@ from nltk.corpus import stopwords
 
 import utils
 from IR.NER import get_NER_tokens
+from IR.IR_Wiki_Parser import preprocess_tokens_list
 from mongodb.mongodb_query import InvertedIndexQuery
 
 class InvertedIndex(object):
@@ -70,19 +71,28 @@ class InvertedIndex(object):
 
     def query_reformulated(self, raw_claim):
         """ Reformulates the query, NER & (Query Expansion //TODO) """
-        raw_claim = self.remove_punctuations(raw_claim, string=True)        # return in string format
+        # raw_claim = self.remove_punctuations(raw_claim, string=True)        # return in string format
+
+        tokens_list = self.IR_Builder_formatter(raw_claim)
+        tokens_string = self.concatenate(tokens_list)
         
         # named entities linking
-        tokens = self.get_named_entities(raw_claim)
-        tokens = self.remove_duplicates(tokens)      # NER sometimes return duplicates
+        NER_tokens = self.get_named_entities(tokens_string)
+        tokens = self.remove_duplicates(NER_tokens)         # NER sometimes return duplicates
 
-        # handle remove stop words
+        # handle stop words
         tokens = self.removed_stop_words(tokens)
 
         ## TODO -- QUERY EXPANSION
 
         processed_claim_tokens = tokens
         return processed_claim_tokens
+
+    def IR_Builder_formatter(self, raw_claim):
+        """ Return format used to build the TFIDF"""
+        raw_claim = raw_claim.split()
+        tokens_list = preprocess_tokens_list(raw_claim)
+        return tokens_list
 
     def remove_punctuations(self, raw_claim, string=True):
         """ Returns raw claim with removed punctuations in a string format (unless specified otherwise)"""
@@ -96,8 +106,12 @@ class InvertedIndex(object):
         if len(raw_NER_tokens) <= 0:
             message = "Nothing returned from NER for claim: {}".format(raw_claim)
             utils.log(message)
-        # further split raw token strings returned from NER
-        NER_tokens = utils.extract_processed_tokens(raw_NER_tokens)
+
+        NER_tokens = []
+        for raw_NER_token in raw_NER_tokens:
+            tokens = re.split('\\s', raw_NER_token)
+            [NER_tokens.extend(t) for t in tokens]
+        
         return NER_tokens
     
     def removed_stop_words(self, tokens):
@@ -111,6 +125,14 @@ class InvertedIndex(object):
             if token not in unique:
                 unique.append(token)
         return unique
+    
+    def concatenate(self, tokens_list):
+        tokens_string = ''
+        for token in tokens_list:
+            tokens_string = tokens_string + token + ' '
+            
+        return tokens_string
+
 
 
 
