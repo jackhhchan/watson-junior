@@ -81,7 +81,7 @@ def buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,sim_de
     # merged = BatchNormalization()(merged)
     merged = Dropout(rate_drop_dense)(merged)
     merged = Dense(number_dense_units, activation='relu')(merged)
-    merged = BatchNormalization()(merged)
+    # merged = BatchNormalization()(merged)
     merged = Dropout(rate_drop_dense)(merged)
 #        preds = Dense(num_classes, activation='sigmoid')(merged)
 #        merged = Dense(self.number_dense_units, activation=self.activation_function,kernel_regularizer=regularizers.l2(0.0001))(merged)
