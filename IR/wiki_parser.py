@@ -97,7 +97,7 @@ def substitute_punctuations(s, sub=' '):
 import re
 
 
-def get_page_ids_term_freq_dicts(folder_name=FOLDER_NAME_DOC_TERM_MATRIX):
+def get_page_ids_term_freq_dicts(folder_name):
     """ Parses the wiki docs and extract and process the page-ids only.
         
     

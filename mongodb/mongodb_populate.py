@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 import utils
 from IR.IR_utils import int_encode
-from IR import wiki_parser
+# from IR import wiki_parser
 
 # run server --
 # mongod --dbpath /Users/jackchan/downloads/mongodb/data/db
@@ -86,13 +86,14 @@ def populate_wiki_db(collection, folder_name='resource/wiki-txt-files'):
 
         raw_lines = utils.load_file(path)
         for raw_line in tqdm(raw_lines):
+            
+            # page_id, passage_idx, tokens = wiki_parser.parse_raw_line(raw_line)
 
-            page_id, passage_idx, tokens = wiki_parser.parse_raw_line(raw_line)
+            page_id, passage_idx, tokens_string = extract_info(raw_line)
             if not type(passage_idx) == int:
                 message = "Page_id {}, Passage_idx {} skipped.".format(page_id, passage_idx)
                 utils.log(message, log_file)
-                continue 
-            passage_idx = passage_idx                    
+                continue                   
 
             if db_page_ids_idx_dict.get(page_id) is None:
                 db_page_ids_idx_dict[page_id] = page_idx
@@ -100,13 +101,36 @@ def populate_wiki_db(collection, folder_name='resource/wiki-txt-files'):
             
             db_page_idx = db_page_ids_idx_dict.get(page_id)
 
-            doc_json = wiki_doc_formatted(db_page_idx, passage_idx, tokens)
+            doc_json = wiki_doc_formatted(db_page_idx, passage_idx, tokens_string)
             mycol.insert_one(doc_json)
         
         print("[INFO] {}/{} complete".format(idx+1, num_files))
     
     db_page_ids_idx_dict_reversed = dict((v, k) for k, v in db_page_ids_idx_dict.items())
-    utils.save_pickle(db_page_ids_idx_dict_reversed, 'db_page_ids_idx_dict.pkl')
+    utils.save_pickle(db_page_ids_idx_dict_reversed, 'raw_db_page_ids_idx_dict.pkl')
+
+
+def extract_info(raw_line):
+    raw_line = raw_line.split()
+    page_id = raw_line[0]
+    passage_idx = raw_line[1]
+    tokens_string = concatenate(raw_line[2:])
+
+    try:
+        passage_idx = int(passage_idx)
+    except:
+        message = "Passage idx {} can't be converted to integer in page id {}".format(passage_idx, page_id)
+        utils.log(message, log_file)
+    
+    return page_id, passage_idx, tokens_string
+
+
+def concatenate(tokens):
+    tokens_string = ''
+    for token in tokens:
+        tokens_string = tokens_string + token + ' '
+        
+    return tokens_string
 
 
 
@@ -146,8 +170,8 @@ if __name__ == "__main__":
     #### IGNORE THE REST OF THE SCRIPT ####
     #### this is for populating the db one by one. (slow) ####
 
-    collection_names = ["wiki", "wiki_idx"]
-    collection_name = "wiki_idx"                                   #!!!!!! CHANGE THIS TO CONNECT TO DIFF COLLECTION
+    collection_names = ["wiki", "wiki_idx", "wiki_idx_raw"]
+    collection_name = "wiki_idx_raw"                                   #!!!!!! CHANGE THIS TO CONNECT TO DIFF COLLECTION
     
     # connect to db, return db and the collection
     hosts = ['ubuntu', 'localhost']                                     # available hosts
@@ -155,6 +179,6 @@ if __name__ == "__main__":
     mydb, mycol = _connected_db(host, 27017, collection_name)
     print("Current collections in the database: {}".format(mydb.list_collection_names()))
 
-    if collection_name == "wiki_idx":
+    if collection_name == "wiki_idx_raw":
         # populate the database with wiki txt file passages
         populate_wiki_db(collection=mycol)                                 # COMMENT THIS TO NOT POPULATE DATABASE AGAIN.

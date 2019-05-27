@@ -19,7 +19,7 @@ import pandas as pd
 from NLI.train import get_training_data
 
 ###### PATHS ######
-json_file = "devset"                                        # test-unlabelled, devset
+json_file = "test-unlabelled"                                        # test-unlabelled, devset
 json_path = "resource/test/{}.json".format(json_file)            
 
 ######PRE-TRAINED MODEL######
