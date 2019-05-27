@@ -10,6 +10,7 @@ from collections import Counter
 
 import pymongo
 from nltk.corpus import stopwords
+from tqdm import tqdm
 
 from IR.IR_Wiki_Parser import preprocess_tokens_list
 from IR.IR_utils import int_encode
@@ -63,7 +64,8 @@ doc_term_freqs = {}
 stop_words = stopwords.words('english')
 
 #### BUILD DOC TERM FREQS ####
-for page_idx in unique_page_indices:
+print("[INFO] Building doc term freqs...")
+for page_idx in tqdm(unique_page_indices):
     # pull tokens_string from page_idx
     page_idx_docs = list(wikiIdxRaw.query_page_id_only(page_idx, single=False))
     for doc in page_idx_docs:
@@ -86,7 +88,8 @@ save_pickle(doc_term_freqs, "doc_term_freqs_stemmed.pkl")
 # doc_term_freqs = load_pickle("doc_term_freqs_stemmed.pkl")
 
 # insert all unique terms, then index it.
-for unique_term in counter.keys():
+print("[INFO Inserting all unique terms into the db.")
+for unique_term in tqdm(counter.keys()):
     df_t = doc_term_freqs.get(unique_term)
     InvIdxRawDB.insert(unique_term, df_t)
 
@@ -94,7 +97,7 @@ for unique_term in counter.keys():
 print("PLEASE INDEX THE TERMS IN DB!")
 
 
-for page_idx in unique_page_indices:
+for page_idx in tqdm(unique_page_indices):
     # pull tokens_string from page_idx
     page_idx_docs = list(wikiIdxRaw.query_page_id_only(page_idx, single=False)) # Get tokens_string
     for doc in page_idx_docs:
