@@ -127,8 +127,8 @@ if __name__ == '__main__':
     batch_size = 512
     
 #    ==================
-    mode = 'regression' 
-    # mode = 'classification'
+    # mode = 'regression' 
+    mode = 'classification'
 #    regression: sentence selection
 #    classification: Text Entailment Recognition 
     isDev = True
@@ -159,16 +159,16 @@ if __name__ == '__main__':
     #"""
     #ESIM 
     #"""        
-    # model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
-    #                       sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
-    #                       right_sequence_length,num_classes,epoch,batch_size,mode)
+    model,his = buildESIM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+                          sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
+                          right_sequence_length,num_classes,epoch,batch_size,mode)
     
 #    test_sentences_pair = [(x1, x2) for x1, x2 in zip(sampled_file.claim[:10], sampled_file.evidences[:10])]
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])
     
-    # plot_acc(his,'figure/ESIM',0,items)
+    plot_acc(his,'figure/ESIM',0,items)
 
     
 #    model = load_model('/Users/loretta/watson-junior/trained_model/ESIM/1558325833.h5',\
@@ -186,17 +186,17 @@ if __name__ == '__main__':
     #"""
     #siamese LSTM
     #"""
-    number_lstm_units = 50
-    rate_drop_lstm = 0.17
-    rate_drop_dense = 0.15
-    number_dense_units = 100
-    model,his = buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
-                          sim_dev,embed_dimensions,embedding_matrix,number_lstm_units,\
-                          rate_drop_lstm, rate_drop_dense, number_dense_units,\
-                          left_sequence_length,right_sequence_length,num_classes,\
-                          epoch,batch_size,mode)
+    # number_lstm_units = 50
+    # rate_drop_lstm = 0.17
+    # rate_drop_dense = 0.15
+    # number_dense_units = 100
+    # model,his = buildLSTM(tokenizer,sentences_pair_train,sim_train,sentences_pair_dev,\
+    #                       sim_dev,embed_dimensions,embedding_matrix,number_lstm_units,\
+    #                       rate_drop_lstm, rate_drop_dense, number_dense_units,\
+    #                       left_sequence_length,right_sequence_length,num_classes,\
+    #                       epoch,batch_size,mode)
 
-    plot_acc(his,'figure/LSTM',1,items)
+    # plot_acc(his,'figure/LSTM',1,items)
     
 #    pred = model.predict([test_claim,test_evidence])
 #    pred = np.argmax(pred,axis=1)

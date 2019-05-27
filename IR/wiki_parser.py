@@ -28,7 +28,7 @@ def parse_wiki_docs(folder_name=FOLDER_NAME):
         # loop through raw lines in file
         for raw_line in raw_lines:
             page_id, passage_idx, tokens = parse_raw_line(raw_line)
-            passage = Passage(page_id, passage_idx, tokens)         # instantiate new passage objet
+            passage = Passage(passage_idx, tokens)         # instantiate new passage objet
 
             pages[page_id] = pages.get(page_id, Page(page_id))      # instantiate page if not exist
             pages[page_id].passages.append(passage)                 # append passage to page's passages list

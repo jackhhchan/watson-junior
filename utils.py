@@ -13,6 +13,7 @@ import time
 from datetime import datetime
 
 from nltk.stem import PorterStemmer
+ps = PorterStemmer()
 
 class encoding(Enum):
     UTF8 = "UTF-8"
@@ -33,7 +34,7 @@ def load_file(f_path, encoding=encoding.UTF8.name):
 
 def extract_processed_tokens(passage):
     """ Returns stemmed lower cased tokens with - and \\s split from the passage """
-    ps = PorterStemmer()
+
     tokens = []
     for token in passage:
         token_s = re.split("-|\\s", token.lower())              # split up tokens that are hyphenated, may return a list
