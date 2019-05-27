@@ -13,7 +13,7 @@ import utils
 from mongodb.mongodb_query import WikiQuery, WikiIdxQuery
 
 # PATHS #
-data_name = 'train'
+data_name = 'devset'
 data_json_path = 'resource/train/{}.json'.format(data_name)           # NOTE: THIS IS THE ONLY THING THAT NEEDS TO CHANGE
 page_ids_idx_dict_path = 'page_ids_idx_dict_normalized_proper_fixed.pkl'        # This is REQUIRED to convert page idx to page id
 
@@ -189,6 +189,7 @@ def parse_json(json_file):
             json_array.append(json_file.get(key))
         else:
             continue
+    print("[INFO] Length of json array: {}".format(len(json_array)))
     return json_array
 
     

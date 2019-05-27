@@ -117,6 +117,44 @@ class WikiIdxQuery(object):
                 self.WikiField.page_id.value: page_idx
             })
 
+class WikiIdxRawQuery(object):
+    class WikiField(Enum):
+        page_idx = "page_idx"             # indexed
+        passage_idx = "passage_idx"
+        tokens = "tokens"
+
+
+    def __init__(self):
+        self.db_name = 'wikiDatabase'
+        self.col_name = 'wiki_idx_raw'
+
+        # connect to DB
+        client = connected(host='localhost')
+        db = get_database(client, self.db_name)
+        self.col = get_collection(db, self.col_name)
+
+    def query(self, page_idx, passage_idx):
+        """ Returns the query cursor for the query matching the page_id and passage_idx """
+       
+        return self.col.find_one({
+            self.WikiField.page_idx.value : page_idx, 
+            self.WikiField.passage_idx.value : str(passage_idx)
+                })
+    def query_page_id_only(self, page_idx, single):
+        """ Returns the a json with the matching page_id picked from the first doc
+        Args:
+        single -- if True, returns only 1 passage.
+        """
+        if single:
+            return self.col.find_one({
+                self.WikiField.page_idx.value: page_idx
+                })
+        else:
+            return self.col.find({
+                self.WikiField.page_idx.value: page_idx
+            })
+
+
 class InvertedIndexQuery(object):
     """ Query object for the collection 'InvertedIndex' """
     

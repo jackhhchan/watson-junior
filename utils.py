@@ -5,6 +5,7 @@ This module contains a list of helper functions to be used by watson-junior
 """
 from enum import Enum
 import os
+import sys
 
 import pickle
 import re
@@ -12,8 +13,6 @@ import json
 import time
 from datetime import datetime
 
-from nltk.stem import PorterStemmer
-ps = PorterStemmer()
 
 class encoding(Enum):
     UTF8 = "UTF-8"
@@ -26,22 +25,11 @@ def load_file(f_path, encoding=encoding.UTF8.name):
     with open(f_path, 'r', encoding=encoding) as f_handle:
         for raw_line in f_handle:
             # split line into tokens
-            raw_lines.append(raw_line.split())
+            raw_lines.append(raw_line)
 
     print("[INFO] Extracted {}, len(raw_lines) = {}".format(f_path, len(raw_lines)))
     return raw_lines
 
-
-def extract_processed_tokens(passage):
-    """ Returns stemmed lower cased tokens with - and \\s split from the passage """
-
-    tokens = []
-    for token in passage:
-        token_s = re.split("-|\\s", token.lower())              # split up tokens that are hyphenated, may return a list
-        token_s = [ps.stem(t) for t in token_s if t.isalnum()]           # keep only if token is alphanumerical
-        tokens.extend(token_s)
-
-    return tokens
 
 ########## USEFUL FUNCTIONS #########
 def sorted_dict(dictionary):
@@ -93,6 +81,8 @@ def log(string, f_name="logs.txt"):
         string = "{}  -  {}\n".format(get_timestamp(), string)
         handle.write(string)
 
+
+###### TIMER ########
 def get_timestamp():
     """ Returns timestamp with format e.g.'25-05-2019--01-02-14'"""
     return datetime.now().strftime("%d-%m-%Y--%H-%M-%S")
@@ -109,3 +99,15 @@ def get_elapsed_time_in(function):
 
 def get_elapsed_time(start, end):
     return "{} seconds elapsed".format(end-start)
+
+
+######## Useful Utilities ########
+def reverse_key_value_dict(orig_dict):
+    """ Return a dictionary with key and value reversed """
+    return dict([v,k] for k,v in orig_dict.items())
+
+def get_size(obj, verbose=False, obj_name=""):
+    size = sys.getsizeof(obj)
+    if verbose:
+        print("{} bytes {}".format(size, obj_name))
+    return size
