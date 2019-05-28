@@ -94,6 +94,13 @@ if __name__ == '__main__':
     claims, evidences, labels = get_training_data(claims_path=SS_CLAIMS,
                                                   evidences_path=SS_EVIDENCES,
                                                   labels_path=SS_LABELS)
+    
+    # TU_CLAIMS = "resource/unlabelled_test"
+    # TU_EVIDENCES = 
+
+    # claims, evidences, labels = get_training_data_concat(claims_folder_path=,
+    #                                                      evidences_folder_path=,
+    #                                                      labels_folder_path=,)
 
     # claims = []
     # evidences = []
@@ -163,7 +170,7 @@ if __name__ == '__main__':
                           sim_dev,embed_dimensions,embedding_matrix,left_sequence_length,\
                           right_sequence_length,num_classes,epoch,batch_size,mode)
     
-#    test_sentences_pair = [(x1, x2) for x1, x2 in zip(sampled_file.claim[:10], sampled_file.evidences[:10])]
+#    test_sentences_pair = [(x1, x2) for x1, x2 in zip(sampled_file.claim[:10], sampled_file.evidences[:10])]-
 #    test_claim,test_evidence = create_test_data(tokenizer, test_sentences_pair, \
 #                                                left_sequence_length, right_sequence_length)
 #    pred = model.predict([test_claim,test_evidence])

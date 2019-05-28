@@ -6,11 +6,11 @@ from tqdm import tqdm
 
 import utils
 # from IR.InvertedIndex import InvertedIndex
-from mongodb.mongodb_query import WikiQuery
-from IR.InvertedIndex import InvertedIndex
-from IR.entity_linking import get_title_entity_match
-from mongodb.mongodb_query import WikiQuery, WikiIdxQuery
-from data_generators.data_generator_sentence_selection import get_passages_from_db
+# from mongodb.mongodb_query import WikiQuery
+# from IR.InvertedIndex import InvertedIndex
+# from IR.entity_linking import get_title_entity_match
+# from mongodb.mongodb_query import WikiQuery, WikiIdxQuery
+# from data_generators.data_generator_sentence_selection import get_passages_from_db
 from keras.models import load_model
 from NLI.attention import DotProductAttention
 from NLI.prepare_set import create_test_data,create_test_data_lstm
@@ -23,11 +23,11 @@ json_file = "test-unlabelled"                                        # test-unla
 json_path = "resource/test/{}.json".format(json_file)            
 
 ######PRE-TRAINED MODEL######
-PASSAGE_SELECTION_MODEL_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_model.h5'
-PASSAGE_SELECTION_TKN_ESIM = 'trained_model/ESIM/PassageSelection/ESIM_tokenizer.pkl'
+PASSAGE_SELECTION_MODEL_ESIM = 'trained_model/ESIM/CLF_26-05-2019--23-03-58/ESIM_model.h5'
+PASSAGE_SELECTION_TKN_ESIM = 'trained_model/ESIM/CLF_26-05-2019--23-03-58/ESIM_tokenizer.pkl'
 
-PASSAGE_SELECTION_MODEL_LSTM = 'trained_model/LSTM/REG_25-05-2019--22-32-31/LSTM_model.h5'
-PASSAGE_SELECTION_TKN_LSTM = 'trained_model/LSTM/REG_25-05-2019--22-32-31/LSTM_tokenizer.pkl'
+PASSAGE_SELECTION_MODEL_LSTM = 'trained_model/LSTM/CLF_26-05-2019--20-37-42/LSTM_model.h5'
+PASSAGE_SELECTION_TKN_LSTM = 'trained_model/LSTM/CLF_26-05-2019--20-37-42/LSTM_tokenizer.pkl'
 
 ENTAILMENT_RECOGNIZER_MODEL_ESIM = 'trained_model/ESIM/NLI/ESIM_model.h5'
 ENTAILMENT_RECOGNIZER_TKN_ESIM = 'trained_model/ESIM/NLI/ESIM_tokenizer.pkl'
@@ -44,7 +44,7 @@ posting_limit = 1000                # limit to postings returned per term -- we 
 # Passage Selection
 confidence_threshold = None
 passage_ids_threshold = None        # gets thresholded to 6 in score.py anyway
-which_model = 'LSTM' #{‘ESIM','LSTM}
+which_model = 'ESIM' #{‘ESIM','LSTM}
 one_sentence_length = 32
 multiple_sentence_length = 64
 
@@ -54,82 +54,82 @@ confidence_threshold = None         # maybe?
 
 def main():
     # Load test claims
-    test_json = utils.load_json(json_path)          
-    raw_claims, page_ids = parse_test_json(test_json, output_page_ids=True)
-    print("[INFO] Number of unique claims: {}".format(len(raw_claims)))
+    # test_json = utils.load_json(json_path)          
+    # raw_claims, page_ids = parse_test_json(test_json, output_page_ids=True)
+    # print("[INFO] Number of unique claims: {}".format(len(raw_claims)))
 
-    ##### PAGE ID RETRIEVAL #####
-    # exact match entity linking
-    page_ids_string_dict = utils.load_pickle("page_ids_string_dict.pkl")
-
-
-    # get relevant page_ids from the inverted index
-
-    inv_index = InvertedIndex(verbose=inv_index_verbose)
-    wiki_query = WikiIdxQuery()
-
-    total_test_claims = []
-    total_test_evidences = []
-    total_test_indices = []
-
-    total_true_page_ids_length = 0
-    total_true_pos = 0
-    for idx, raw_claim in tqdm(enumerate(raw_claims)):
-        if entity: 
-            print("[INFO - MAIN] Getting exact match entity links")
-            matched = get_title_entity_match(raw_claim, page_ids_string_dict)
+    # ##### PAGE ID RETRIEVAL #####
+    # # exact match entity linking
+    # page_ids_string_dict = utils.load_pickle("page_ids_string_dict.pkl")
 
 
-        print("[INFO - Main] Getting ranked page ids from inverted index...")
-        if verbose:
-            print("[INFO - Main] Claim: \n{}".format(raw_claim))
-        ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit, tfidf=False)        # tfidf nust be false for production
-        ranked_page_ids = set(process_ranked_page_ids(ranked_page_ids, page_ids_threshold, verbose=verbose))
-        if entity:
-            ranked_page_ids = ranked_page_ids.union(matched)
+    # # get relevant page_ids from the inverted index
+
+    # inv_index = InvertedIndex(verbose=inv_index_verbose)
+    # wiki_query = WikiQuery()
+
+    # total_test_claims = []
+    # total_test_evidences = []
+    # total_test_indices = []
+
+    # total_true_page_ids_length = 0
+    # total_true_pos = 0
+    # for idx, raw_claim in tqdm(enumerate(raw_claims)):
+    #     if entity: 
+    #         print("[INFO - MAIN] Getting exact match entity links")
+    #         matched = get_title_entity_match(raw_claim, page_ids_string_dict)
+
+
+    #     print("[INFO - Main] Getting ranked page ids from inverted index...")
+    #     if verbose:
+    #         print("[INFO - Main] Claim: \n{}".format(raw_claim))
+    #     ranked_page_ids = inv_index.get_ranked_page_ids(raw_claim, posting_limit=posting_limit, tfidf=False)        # tfidf nust be false for production
+    #     ranked_page_ids = set(process_ranked_page_ids(ranked_page_ids, page_ids_threshold, verbose=verbose))
+    #     if entity:
+    #         ranked_page_ids = ranked_page_ids.union(matched)
         
-        true_page_ids_length = len(page_ids[idx])
-        if not true_page_ids_length <= 0:
-            true_pos = 0
-            for page_id in page_ids[idx]:
-                if page_id in ranked_page_ids:
-                    true_pos += 1
+    #     true_page_ids_length = len(page_ids[idx])
+    #     if not true_page_ids_length <= 0:
+    #         true_pos = 0
+    #         for page_id in page_ids[idx]:
+    #             if page_id in ranked_page_ids:
+    #                 true_pos += 1
 
-            percentage = float(true_pos)/float(true_page_ids_length)*100.0
-            print("[DEBUG INFO] {}'%' returned, {}/{}".format(percentage, true_pos, true_page_ids_length))
-            total_true_page_ids_length += true_page_ids_length
-            total_true_pos += true_pos
-            recall = float(total_true_pos)/float(total_true_page_ids_length)*100.0
-
-
-        if verbose:
-            print("[INFO - Main] Returned ranked page ids: \n{}".format(ranked_page_ids))
-
-        test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
-                                                                               page_ids=ranked_page_ids, 
-                                                                               query_object=wiki_query)
-
-        total_test_claims.extend(test_claims)
-        total_test_evidences.extend(test_evidences)
-        total_test_indices.extend(test_indices)
+    #         percentage = float(true_pos)/float(true_page_ids_length)*100.0
+    #         print("[DEBUG INFO] {}'%' returned, {}/{}".format(percentage, true_pos, true_page_ids_length))
+    #         total_true_page_ids_length += true_page_ids_length
+    #         total_true_pos += true_pos
+    #         recall = float(total_true_pos)/float(total_true_page_ids_length)*100.0
 
 
-    avg_evidence_per_claim = float(len(total_test_evidences))/float(idx+1)
-    message = "Entity Linking: {}\nThreshold: {}, Recall: {}\nAvg evidences per claim: {}\n".format(entity,
-                                                page_ids_threshold,
-                                                recall,
-                                                avg_evidence_per_claim)
-    utils.log(message, "inv_index_log.txt")
+    #     if verbose:
+    #         print("[INFO - Main] Returned ranked page ids: \n{}".format(ranked_page_ids))
+
+    #     test_claims, test_evidences, test_indices = get_passage_selection_data(raw_claim=raw_claim, 
+    #                                                                            page_ids=ranked_page_ids, 
+    #                                                                            query_object=wiki_query)
+
+    #     total_test_claims.extend(test_claims)
+    #     total_test_evidences.extend(test_evidences)
+    #     total_test_indices.extend(test_indices)
 
 
-    utils.save_pickle(total_test_claims, "test_{}_entity_{}_claims.pkl".format(json_file, entity))
-    utils.save_pickle(total_test_evidences, "test_{}_entity_{}_evidences.pkl".format(json_file, entity))
-    utils.save_pickle(total_test_indices, "test_{}_entity_{}_indices.pkl".format(json_file, entity))
+    # avg_evidence_per_claim = float(len(total_test_evidences))/float(idx+1)
+    # message = "Entity Linking: {}\nThreshold: {}, Recall: {}\nAvg evidences per claim: {}\n".format(entity,
+    #                                             page_ids_threshold,
+    #                                             recall,
+    #                                             avg_evidence_per_claim)
+    # utils.log(message, "inv_index_log.txt")
+
+
+    # utils.save_pickle(total_test_claims, "test_{}_entity_{}_claims.pkl".format(json_file, entity))
+    # utils.save_pickle(total_test_evidences, "test_{}_entity_{}_evidences.pkl".format(json_file, entity))
+    # utils.save_pickle(total_test_indices, "test_{}_entity_{}_indices.pkl".format(json_file, entity))
    
-    # format into the proper format to be passed into the passage selection NN
-    claims, raw_evidences, page_info = get_training_data(claims_path='resource/training_data/test/test_devset_claims.pkl',
-                                                         evidences_path='resource/training_data/test/test_devset_evidences.pkl',
-                                                         labels_path='resource/training_data/test/test_devset_indices.pkl')
+    # # format into the proper format to be passed into the passage selection NN
+    # claims, raw_evidences, page_info = get_training_data(claims_path='resource/training_data/test/test_devset_claims.pkl',
+    #                                                      evidences_path='resource/training_data/test/test_devset_evidences.pkl',
+    #                                                      labels_path='resource/training_data/test/test_devset_indices.pkl')
      
     ##### RELEVANT PASSAGE SELECTION #####
 
@@ -137,8 +137,11 @@ def main():
         # use an NN object
         # output: {page_id, passage_idx, classification, confidence}
     
-    test_set = pd.DataFrame({'claim':claims,'raw_evidence':raw_evidences,'evidence':page_info})
-    
+
+    # test_set = pd.DataFrame({'claim':claims,'raw_evidence':raw_evidences,'evidence':page_info})
+    print("start loading..")
+    test_set = pd.read_csv('resource/unlabelled_test/test_set_filtered_50.csv')
+    print("finish loading.")
     sentences_pair = [(x1, x2) for x1, x2 in zip(test_set.claim, test_set.raw_evidence)]
 
     if which_model == 'ESIM':
@@ -157,9 +160,9 @@ def main():
     
 #    pred = np.where(pred>0.5,1,0) # round up :)
         
-    test_set['relevance'] = pred
-    relevant_test_set = test_set[test_set['relevance']>0.9]
-    relevant_test_set.to_csv('relevant_test_devset_set.csv')
+    test_set['relevance'] = [p[1] for p in pred]
+    relevant_test_set = test_set[test_set['relevance']>=0.8]
+    relevant_test_set.to_csv('relevant_test_testset.csv')
     #manully set the threshold here
 #    tmp = test_set[test_set['claim']=='Andrew Kevin Walker is only Chinese.']
 
@@ -268,7 +271,7 @@ def get_model_prediction(model_dir,tkn_dir,which_model,sentences_pair,left_seque
         tokenizer = utils.load_pickle(tkn_dir)
         test_claim,test_evidence = create_test_data(tokenizer, sentences_pair, \
                                                 left_sequence_length, right_sequence_length)
-        pred = model.predict([test_claim,test_evidence])
+        pred = model.predict([test_claim,test_evidence],batch_size=1024,verbose=1 )
 
     elif which_model == 'LSTM':
         model = load_model(model_dir)
@@ -276,7 +279,7 @@ def get_model_prediction(model_dir,tkn_dir,which_model,sentences_pair,left_seque
         tokenizer = utils.load_pickle(tkn_dir)
         test_claim,test_evidence,test_leaks = create_test_data_lstm(tokenizer, sentences_pair, \
                                                 left_sequence_length, right_sequence_length)
-        pred = model.predict([test_claim,test_evidence,test_leaks])
+        pred = model.predict([test_claim,test_evidence,test_leaks],batch_size=1024,verbose=1)
 
     else:
         raise ValueError('Model Type Not Understood:{}'.format(which_model))

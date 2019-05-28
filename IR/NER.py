@@ -7,7 +7,7 @@ Created on Sun May 12 21:19:18 2019
 """
 from enum import Enum
 
-from allennlp.predictors import Predictor
+# from allennlp.predictors import Predictor
 
 import utils
 
