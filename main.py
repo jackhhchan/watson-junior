@@ -54,9 +54,11 @@ confidence_threshold = None         # maybe?
 
 def main():
     # Load test claims
-    # test_json = utils.load_json(json_path)          
-    # raw_claims, page_ids = parse_test_json(test_json, output_page_ids=True)
-    # print("[INFO] Number of unique claims: {}".format(len(raw_claims)))
+    test_json = utils.load_json(json_path) 
+    raw_claims = parse_test_json(test_json, output_page_ids=False)
+         
+    # raw_claims, page_ids = parse_test_json(test_json, output_page_ids=False)
+    print("[INFO] Number of unique claims: {}".format(len(raw_claims)))
 
     # ##### PAGE ID RETRIEVAL #####
     # # exact match entity linking
@@ -88,18 +90,18 @@ def main():
     #     if entity:
     #         ranked_page_ids = ranked_page_ids.union(matched)
         
-    #     true_page_ids_length = len(page_ids[idx])
-    #     if not true_page_ids_length <= 0:
-    #         true_pos = 0
-    #         for page_id in page_ids[idx]:
-    #             if page_id in ranked_page_ids:
-    #                 true_pos += 1
+        # true_page_ids_length = len(page_ids[idx])
+        # if not true_page_ids_length <= 0:
+        #     true_pos = 0
+        #     for page_id in page_ids[idx]:
+        #         if page_id in ranked_page_ids:
+        #             true_pos += 1
 
-    #         percentage = float(true_pos)/float(true_page_ids_length)*100.0
-    #         print("[DEBUG INFO] {}'%' returned, {}/{}".format(percentage, true_pos, true_page_ids_length))
-    #         total_true_page_ids_length += true_page_ids_length
-    #         total_true_pos += true_pos
-    #         recall = float(total_true_pos)/float(total_true_page_ids_length)*100.0
+        #     percentage = float(true_pos)/float(true_page_ids_length)*100.0
+        #     print("[DEBUG INFO] {}'%' returned, {}/{}".format(percentage, true_pos, true_page_ids_length))
+        #     total_true_page_ids_length += true_page_ids_length
+        #     total_true_pos += true_pos
+        #     recall = float(total_true_pos)/float(total_true_page_ids_length)*100.0
 
 
     #     if verbose:
@@ -217,7 +219,7 @@ def process_ranked_page_ids(ranked_page_ids, threshold, verbose):
     length = len(ranked_page_ids)
     if length <= 0:
         print("[INFO - Main] No relevant page id returned.")
-        return 
+        return ranked_page_ids
     else:
         if length <= threshold+1:
             if verbose:
@@ -300,9 +302,9 @@ def parse_test_json(test_json, output_page_ids=False):
     for test_data in test_json.values():
         test_array.append(test_data.get('claim'))
         page_ids = set()
-        [page_ids.add(ev[0]) for ev in test_data.get('evidence')]
+        # [page_ids.add(ev[0]) for ev in test_data.get('evidence')]
         # page_ids = [evidence[0] for evidence in test_data.get('evidence')]
-        test_page_ids.append(page_ids)
+        # test_page_ids.append(page_ids)
 
     if output_page_ids:
         return test_array, test_page_ids

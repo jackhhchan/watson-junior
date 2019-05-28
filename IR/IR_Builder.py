@@ -56,6 +56,7 @@ InvIdxRawDB = InvIdxRawDB()
 
 ############### DB VERSION ###########################
 
+<<<<<<< HEAD
 def doc_term_freqs_build():
     unique_page_indices_path = 'raw_db_page_ids_idx_dict.pkl'
     unique_page_indices = load_pickle(unique_page_indices_path)                    # get this from passing all docs -- 
@@ -93,6 +94,39 @@ def doc_term_freqs_build():
     save_pickle(doc_term_freqs, "doc_term_freqs_stemmed.pkl")
 
 # doc_term_freqs_build()
+=======
+unique_page_indices_path = 'raw_db_page_ids_idx_dict.pkl'
+unique_page_indices = load_pickle(unique_page_indices_path)                    # get this from passing all docs -- 
+# loop through all the unique page ids
+counter = Counter()
+doc_term_freqs = {}
+stop_words = stopwords.words('english')
+
+#### BUILD DOC TERM FREQS ####
+print("[INFO] Building doc term freqs...")
+for page_idx in tqdm(unique_page_indices):
+    # pull tokens_string from page_idx
+    page_idx_docs = list(wikiIdxRaw.query_page_id_only(page_idx, single=False))
+    for doc in page_idx_docs:
+        tokens_string = doc.get("tokens")
+        # preprocess string
+        terms = preprocess_tokens_list(tokens_string.split(), stem=True)        # --> stemmed
+        terms = [t for t in terms if t not in stop_words]                       # remove stop words
+        
+        c = Counter(terms)      # TODO Check terms, play, check counter & doc term freqs
+        for unique_term in c:
+        # update doc term freqs
+            if doc_term_freqs.get(unique_term) is None:
+                doc_term_freqs[unique_term] = int_encode(0)
+                raw_count = int_encode(doc_term_freqs.get(unique_term) + 1)
+                doc_term_freqs[unique_term] = raw_count
+        
+        counter.update(terms)           # keeps track of all terms
+
+    save_pickle(doc_term_freqs, "doc_term_freqs_stemmed_{}")
+
+save_pickle(doc_term_freqs, "doc_term_freqs_stemmed.pkl")
+>>>>>>> 7bc9c5cb0d53d82b373db316de9be7c1ab7171b3
 # doc_term_freqs = load_pickle("doc_term_freqs_stemmed.pkl")
 
 # # insert all unique terms, then index it.

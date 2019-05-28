@@ -1,11 +1,16 @@
 import sys
 sys.path.append(sys.path[0] + '/..')
 import re
+from itertools import chain
 
 import pickle
 import json
 from tqdm import tqdm
 from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.corpus import wordnet
+# import nltk
+# nltk.download('wordnet')
 
 # import nltk
 # nltk.download("stopwords")
@@ -18,6 +23,7 @@ from mongodb.mongodb_query import InvertedIndexQuery
 class InvertedIndex(object):
     def __init__(self, verbose=False):
         self.db_query = InvertedIndexQuery()
+        self.stemmer = PorterStemmer()
         self.verbose = verbose
     
     #########################
@@ -33,8 +39,8 @@ class InvertedIndex(object):
         """
         assert type(tfidf) == bool, "tfidf argument if True also returns the tfidf"
 
-        claim_terms = self.query_reformulated(raw_claim)
-        page_ids_tfidf = self.get_page_ids_tfidf(claim_terms, posting_limit)
+        claim_terms, NER_tokens, synonyms = self.query_reformulated(raw_claim)
+        page_ids_tfidf = self.get_page_ids_tfidf(claim_terms, posting_limit, NER_tokens, synonyms)
         ranked_page_ids_tfidf = self.ranked_page_ids_tfidf(page_ids_tfidf)      # array of dicts in order
 
         if tfidf:
@@ -44,22 +50,30 @@ class InvertedIndex(object):
             return ranked_page_ids
 
 
-    def get_page_ids_tfidf(self, claim_terms, limit):
+    def get_page_ids_tfidf(self, claim_terms, limit, NER_tokens, synonyms):
         output ={}
         if self.verbose:
             print("[INFO - InvIdx] Query: {}".format(claim_terms))
             print("[INFO - InvIdx] Number of tokens in claim: {}".format(len(claim_terms)))
 
         for term in claim_terms:
-            postings = self.db_query.get_postings(term=term, limit=limit, verbose=self.verbose)
+            postings = list(self.db_query.get_postings(term=term, limit=limit, verbose=self.verbose))
+            if len(postings) <= 0:
+                continue
 
             for i, posting in enumerate(postings):
                 page_id = posting.get(self.db_query.InvertedIndexField.page_id.value)
-                tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)
+                if term in NER_tokens:
+                    tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)*1.5
+                else:
+                    if term in synonyms:
+                        tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)*0.5
+                    else:
+                        tfidf = posting.get(self.db_query.InvertedIndexField.tfidf.value)
+
                 output[page_id] = output.get(page_id, 0) + tfidf
                 if i >= limit-1:
-                    break
-        
+                    continue
         return output
 
     def ranked_page_ids_tfidf(self, page_ids_tfidf):
@@ -78,20 +92,32 @@ class InvertedIndex(object):
         
         # named entities linking
         NER_tokens = self.get_named_entities(tokens_string)
-        tokens = self.remove_duplicates(NER_tokens)         # NER sometimes return duplicates
+        # NER_tokens = self.remove_duplicates(NER_tokens)         # NER sometimes return duplicates
 
         # handle stop words
-        tokens = self.removed_stop_words(tokens)
+        NER_tokens = self.removed_stop_words(NER_tokens)
+
+        tokens_list.extend(NER_tokens)
+        tokens = self.removed_stop_words(tokens_list)
+        tokens = self.remove_duplicates(tokens)
 
         ## TODO -- QUERY EXPANSION
-
-        processed_claim_tokens = tokens
-        return processed_claim_tokens
+        processed_claim_tokens = []
+        synonyms = []
+        # for token in tokens:
+        #     syns = self.get_synonyms(token)
+        #     synonyms.extend(syns)
+        #     processed_claim_tokens.extend(syns)
+        
+        for tokens in processed_claim_tokens:
+            processed_claim_tokens.extend(self.add_suffixes(token))
+        
+        return set(processed_claim_tokens), set(NER_tokens), set(synonyms)
 
     def IR_Builder_formatter(self, raw_claim):
         """ Return format used to build the TFIDF"""
         raw_claim = raw_claim.split()
-        tokens_list = preprocess_tokens_list(raw_claim)
+        tokens_list = preprocess_tokens_list(raw_claim, stem=False)
         return tokens_list
 
     def remove_punctuations(self, raw_claim, string=True):
@@ -109,8 +135,7 @@ class InvertedIndex(object):
 
         NER_tokens = []
         for raw_NER_token in raw_NER_tokens:
-            tokens = re.split('\\s', raw_NER_token)
-            [NER_tokens.extend(t) for t in tokens]
+            NER_tokens.extend(re.split('\\s', raw_NER_token))
         
         return NER_tokens
     
@@ -132,7 +157,39 @@ class InvertedIndex(object):
             tokens_string = tokens_string + token + ' '
             
         return tokens_string
+    
+    def add_suffixes(self, token):
+        suffixes = ['s', 'ed', 'acy', 'al', 'ance', 'ence', 'en', 'fy', 'ify', 'able', 'ible', 'al']
+        expanded = []
+        expanded.append(token)      # keep original token
+        token = self.stemmer.stem(token)
+        expanded.append(token)
+        for suf in suffixes:
+            expanded.append(token+suf)
+        return expanded
 
+    def get_synonyms(self, word):
+        syn_sets = wordnet.synsets(word)
+        # syn_sets = set(chain.from_iterable([word.lemma_names() for word in syn_sets]))
+        syns = []
+        for word in syn_sets:
+            syns.extend(word.lemma_names())
+        synonyms = set()
+        for syn in syns:
+            if self.remove_syn_doubles(syn): continue
+            # syn = self.substitute_puncs(syn).split()
+            # for s in syn:
+            #     synonyms.add(s)
+            synonyms.add(syn)
+        return synonyms
+    
+    def substitute_puncs(self, word):
+        return re.sub(r'[^\w\s|]|_|-',' ', word)
+    
+    def remove_syn_doubles(self, word):
+        if '_' in word:
+            return True
+        return False
 
 
 
