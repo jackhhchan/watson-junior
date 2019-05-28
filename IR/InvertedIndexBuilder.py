@@ -7,10 +7,10 @@ Note:
 
 RUN THIS SCRIPT
 """
-
+import sys
+sys.path.append(sys.path[0] + '/..')
 import math
 import os
-import sys
 import json
 import gc
 import time
@@ -38,7 +38,7 @@ def inverted_index_builder():
     inverted_index.inverted_index; {term: {page_id:weight, page_id:weight}}
     """
     folders_name = 'resource'
-    folders = os.listdir(folders_name)
+    folders = os.listdir(folders_name+"/wiki")
     inverted_index = {}
     page_ids_idx_dict = {}
     num_folders = len(folders)
@@ -46,19 +46,19 @@ def inverted_index_builder():
 
     inverted_index_builder = InvertedIndexBuilder()
 
-    # construct doc-term-freqs by portions
-    for idx, wiki_folder in enumerate(folders):
-        folder_path = "{}/{}".format(folders_name, wiki_folder)
+    # # construct doc-term-freqs by portions
+    # for idx, wiki_folder in enumerate(folders):
+    #     folder_path = "{}/wiki/{}/".format(folders_name, wiki_folder)
 
-        print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
-        pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values()) 
+    #     print("[INFO] Parsing the wiki docs in {}...".format(folder_path))
+    #     pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values()) 
 
-        # build up doc term freqs and page collection
-        print("[INFO] Building {}/{} of the doc term freqs...".format(idx + 1, num_folders))
-        inverted_index_builder.parse_pages(pages_collection)
+    #     # build up doc term freqs and page collection
+    #     print("[INFO] Building {}/{} of the doc term freqs...".format(idx + 1, num_folders))
+    #     inverted_index_builder.parse_pages(pages_collection)
 
-    with open(DOC_TERM_FREQS_FNAME, 'wb') as handle:
-        pickle.dump(inverted_index_builder.doc_term_freqs, handle)
+    # with open(DOC_TERM_FREQS_FNAME, 'wb') as handle:
+    #     pickle.dump(inverted_index_builder.doc_term_freqs, handle)
 
     with open(DOC_TERM_FREQS_FNAME, 'rb') as handle:
         doc_term_freqs = pickle.load(handle)
@@ -67,7 +67,7 @@ def inverted_index_builder():
     # construct inverted index by portions
     page_idx = 0
     for idx, wiki_folder in enumerate(folders):
-        folder_path = "{}/{}".format(folders_name, wiki_folder)
+        folder_path = "{}/wiki/{}".format(folders_name, wiki_folder)
         
         print("[INFO] Building portion {}/{} of the inverted index...".format(idx + 1, num_folders))
         pages_collection = list(wiki_parser.parse_wiki_docs(folder_name=folder_path).values()) 
@@ -118,7 +118,7 @@ class InvertedIndexBuilder(object):
                     inverted_index[term] = {"DocIDs": [posting]}
                 else:
                     # inverted_index[term].update(posting)
-                    inverted_index[term]["DocIDs"] = inverted_index[term].get("DocIDs").append(posting)
+                    inverted_index[term]["DocIDs"].append(posting)
                     
             page_idx += 1
 
@@ -175,8 +175,8 @@ class Page(object):
 
 class Passage(object):
     __slots__ = ('page_id', 'passage_idx', 'tokens')       
-    def __init__(self, page_id, passage_idx, tokens):
-        self.page_id = page_id
+    def __init__(self, passage_idx, tokens):
+        # self.page_id = page_id
         self.passage_idx = passage_idx
         self.tokens = tokens
 

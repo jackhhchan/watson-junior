@@ -1,0 +1,199 @@
+26-05-2019--21-46-51  -  Passage idx Chrysomelidae can't be converted to integer in page id Gonioctena_olivacea
+26-05-2019--21-46-51  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-48-56  -  Passage idx world can't be converted to integer in page id Haile_Gebrselassie
+26-05-2019--21-48-56  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-49-26  -  Passage idx top-down can't be converted to integer in page id Halo-COLON-_Spartan_Assault
+26-05-2019--21-49-26  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-49-36  -  Passage idx Green can't be converted to integer in page id Green_Building_Council_of_Australia
+26-05-2019--21-49-36  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-49-54  -  wiki-040.txt successfully parsed, saved to resource/builder_checkpoint/wiki-040.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--21-51-16  -  Passage idx Constitutional can't be converted to integer in page id Chief_Justice_of_South_Africa
+26-05-2019--21-51-16  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-52-01  -  Passage idx Permanent can't be converted to integer in page id Celestino_Migliore
+26-05-2019--21-52-01  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-53-54  -  Passage idx Officer can't be converted to integer in page id Chris_Wallace-Crabbe
+26-05-2019--21-53-54  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-54-35  -  Passage idx Köppen can't be converted to integer in page id Climate_of_Miami
+26-05-2019--21-54-35  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-54-35  -  Passage idx Köppen can't be converted to integer in page id Climate_of_Miami
+26-05-2019--21-54-35  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-55-04  -  wiki-022.txt successfully parsed, saved to resource/builder_checkpoint/wiki-022.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--21-55-36  -  Passage idx Glen can't be converted to integer in page id Kelso_Conservation_Area
+26-05-2019--21-55-36  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-55-36  -  Passage idx Glen can't be converted to integer in page id Kelso_Conservation_Area
+26-05-2019--21-55-36  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-55-39  -  Passage idx unincorporated can't be converted to integer in page id Kapaa,_Hawaii
+26-05-2019--21-55-39  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-56-31  -  Passage idx Hadhrami can't be converted to integer in page id L.W.C_van_den_Berg
+26-05-2019--21-56-31  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-58-27  -  Passage idx legislative can't be converted to integer in page id Kostas_Zouraris
+26-05-2019--21-58-27  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-58-27  -  Passage idx legislative can't be converted to integer in page id Kostas_Zouraris
+26-05-2019--21-58-27  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-58-34  -  Passage idx US can't be converted to integer in page id Lauson_Stone
+26-05-2019--21-58-34  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-59-15  -  Passage idx trapeze can't be converted to integer in page id Laser_2
+26-05-2019--21-59-15  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--21-59-42  -  wiki-055.txt successfully parsed, saved to resource/builder_checkpoint/wiki-055.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--22-01-07  -  Passage idx Sridevi can't be converted to integer in page id Ninne_Ishtapaddanu
+26-05-2019--22-01-07  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-01-15  -  Passage idx Public can't be converted to integer in page id National_Savings_Certificates_-LRB-India-RRB-
+26-05-2019--22-01-15  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-01-41  -  Passage idx Mirage can't be converted to integer in page id Natalya_Vetlitskaya
+26-05-2019--22-01-41  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-03-17  -  Passage idx Christopher can't be converted to integer in page id Nicholas_-LRB-Yarushevich-RRB-
+26-05-2019--22-03-17  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-04-41  -  wiki-071.txt successfully parsed, saved to resource/builder_checkpoint/wiki-071.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--22-05-11  -  Passage idx John can't be converted to integer in page id The_Sunlight_Dialogues
+26-05-2019--22-05-11  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-05-21  -  Passage idx WNTP can't be converted to integer in page id The_Spokesmen
+26-05-2019--22-05-21  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-05-21  -  Passage idx WNTP can't be converted to integer in page id The_Spokesmen
+26-05-2019--22-05-21  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-07-45  -  Passage idx Cornwall can't be converted to integer in page id The_School_of_Dance
+26-05-2019--22-07-45  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-08-39  -  Passage idx I-291 can't be converted to integer in page id The_Shoppes_at_Buckland_Hills
+26-05-2019--22-08-39  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-09-39  -  wiki-097.txt successfully parsed, saved to resource/builder_checkpoint/wiki-097.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--22-09-47  -  Passage idx Walnut can't be converted to integer in page id Acalanes_Union_High_School_District
+26-05-2019--22-09-47  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-09-47  -  Passage idx Walnut can't be converted to integer in page id Acalanes_Union_High_School_District
+26-05-2019--22-09-47  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-11-22  -  Passage idx component can't be converted to integer in page id Administrative_divisions_of_Ilocos_Sur
+26-05-2019--22-11-22  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-12-01  -  Passage idx Le can't be converted to integer in page id Alan_Stacey
+26-05-2019--22-12-01  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-14-03  -  wiki-007.txt successfully parsed, saved to resource/builder_checkpoint/wiki-007.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--22-14-36  -  Passage idx application can't be converted to integer in page id International_Society_for_Stem_Cell_Research
+26-05-2019--22-14-36  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-14-54  -  Passage idx Platinum can't be converted to integer in page id Iné_Kafe
+26-05-2019--22-14-54  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-20-48  -  wiki-047.txt successfully parsed, saved to resource/builder_checkpoint/wiki-047.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--22-23-11  -  Passage idx Eastern can't be converted to integer in page id 2012–13_Miami_Heat_season
+26-05-2019--22-23-11  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-23-43  -  Passage idx 14th can't be converted to integer in page id 2016–17_SD_Eibar_season
+26-05-2019--22-23-43  -  Page_id {}, Passage_idx {} skipped.
+26-05-2019--22-24-26  -  wiki-003.txt successfully parsed, saved to resource/builder_checkpoint/wiki-003.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper]
+26-05-2019--22-25-39  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-30-28  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-30-40  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-31-15  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-31-53  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-32-51  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-33-23  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-38-44  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-45-58  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-47-02  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-48-25  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-49-06  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-50-41  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--22-55-27  -  Passage idx Qingong can't be converted to integer in page id Caséo-Sojaïne
+26-05-2019--22-55-27  -  Page_id Caséo-Sojaïne, Passage_idx Qingong skipped.
+26-05-2019--22-56-29  -  wiki-020.txt successfully parsed, saved to resource/builder_checkpoint/wiki-020.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--22-57-19  -  Passage idx unincorporated can't be converted to integer in page id Lihue,_Hawaii
+26-05-2019--22-57-19  -  Page_id Lihue,_Hawaii, Passage_idx unincorporated skipped.
+26-05-2019--22-58-44  -  Passage idx Dutch can't be converted to integer in page id List_of_mayors_of_Leeuwarden
+26-05-2019--22-58-44  -  Page_id List_of_mayors_of_Leeuwarden, Passage_idx Dutch skipped.
+26-05-2019--23-00-12  -  Passage idx professional can't be converted to integer in page id List_of_professional_sports_leagues
+26-05-2019--23-00-12  -  Page_id List_of_professional_sports_leagues, Passage_idx professional skipped.
+26-05-2019--23-00-12  -  Passage idx professional can't be converted to integer in page id List_of_professional_sports_leagues
+26-05-2019--23-00-12  -  Page_id List_of_professional_sports_leagues, Passage_idx professional skipped.
+26-05-2019--23-00-12  -  Passage idx professional can't be converted to integer in page id List_of_professional_sports_leagues
+26-05-2019--23-00-12  -  Page_id List_of_professional_sports_leagues, Passage_idx professional skipped.
+26-05-2019--23-00-12  -  Passage idx professional can't be converted to integer in page id List_of_professional_sports_leagues
+26-05-2019--23-00-12  -  Page_id List_of_professional_sports_leagues, Passage_idx professional skipped.
+26-05-2019--23-01-19  -  wiki-059.txt successfully parsed, saved to resource/builder_checkpoint/wiki-059.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-02-05  -  Passage idx September can't be converted to integer in page id Craig_Winn
+26-05-2019--23-02-05  -  Page_id Craig_Winn, Passage_idx September skipped.
+26-05-2019--23-06-04  -  wiki-026.txt successfully parsed, saved to resource/builder_checkpoint/wiki-026.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-06-46  -  Passage idx enclosure can't be converted to integer in page id Enclosed_cremation_cemetery
+26-05-2019--23-06-46  -  Page_id Enclosed_cremation_cemetery, Passage_idx enclosure skipped.
+26-05-2019--23-07-10  -  Passage idx Dayton can't be converted to integer in page id Eric_Kissinger
+26-05-2019--23-07-10  -  Page_id Eric_Kissinger, Passage_idx Dayton skipped.
+26-05-2019--23-10-48  -  wiki-033.txt successfully parsed, saved to resource/builder_checkpoint/wiki-033.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-10-54  -  Passage idx Kalapuya can't be converted to integer in page id Melville_Jacobs
+26-05-2019--23-10-54  -  Page_id Melville_Jacobs, Passage_idx Kalapuya skipped.
+26-05-2019--23-11-00  -  Passage idx fullback can't be converted to integer in page id Mike_Faulkerson_Dulaney
+26-05-2019--23-11-00  -  Page_id Mike_Faulkerson_Dulaney, Passage_idx fullback skipped.
+26-05-2019--23-11-17  -  Passage idx Roman can't be converted to integer in page id Miguel_García_Cuesta
+26-05-2019--23-11-17  -  Page_id Miguel_García_Cuesta, Passage_idx Roman skipped.
+26-05-2019--23-15-23  -  wiki-068.txt successfully parsed, saved to resource/builder_checkpoint/wiki-068.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-15-26  -  Passage idx Kimber can't be converted to integer in page id Sportco
+26-05-2019--23-15-26  -  Page_id Sportco, Passage_idx Kimber skipped.
+26-05-2019--23-15-48  -  Passage idx trampolines can't be converted to integer in page id Skate_-LRB-dinghy-RRB-
+26-05-2019--23-15-48  -  Page_id Skate_-LRB-dinghy-RRB-, Passage_idx trampolines skipped.
+26-05-2019--23-16-48  -  Passage idx Thomas can't be converted to integer in page id St.Thomas_Mount-cum-Pallavaram
+26-05-2019--23-16-48  -  Page_id St.Thomas_Mount-cum-Pallavaram, Passage_idx Thomas skipped.
+26-05-2019--23-16-48  -  Passage idx Thomas can't be converted to integer in page id St.Thomas_Mount-cum-Pallavaram
+26-05-2019--23-16-48  -  Page_id St.Thomas_Mount-cum-Pallavaram, Passage_idx Thomas skipped.
+26-05-2019--23-18-10  -  Passage idx slavery can't be converted to integer in page id Somerset_v_Stewart
+26-05-2019--23-18-10  -  Page_id Somerset_v_Stewart, Passage_idx slavery skipped.
+26-05-2019--23-18-10  -  Passage idx slavery can't be converted to integer in page id Somerset_v_Stewart
+26-05-2019--23-18-10  -  Page_id Somerset_v_Stewart, Passage_idx slavery skipped.
+26-05-2019--23-18-10  -  Passage idx slavery can't be converted to integer in page id Somerset_v_Stewart
+26-05-2019--23-18-10  -  Page_id Somerset_v_Stewart, Passage_idx slavery skipped.
+26-05-2019--23-19-00  -  Passage idx William can't be converted to integer in page id St._James'_Church,_Delhi
+26-05-2019--23-19-00  -  Page_id St._James'_Church,_Delhi, Passage_idx William skipped.
+26-05-2019--23-19-12  -  Passage idx Butte can't be converted to integer in page id Sonny_Holland
+26-05-2019--23-19-12  -  Page_id Sonny_Holland, Passage_idx Butte skipped.
+26-05-2019--23-19-54  -  Passage idx northwest can't be converted to integer in page id Spring_Valley,_Washington,_D.C.
+26-05-2019--23-19-54  -  Page_id Spring_Valley,_Washington,_D.C., Passage_idx northwest skipped.
+26-05-2019--23-20-33  -  wiki-090.txt successfully parsed, saved to resource/builder_checkpoint/wiki-090.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-22-55  -  Passage idx 2nd can't be converted to integer in page id 27_Infantry_Battalion_-LRB-Ireland-RRB-
+26-05-2019--23-22-55  -  Page_id 27_Infantry_Battalion_-LRB-Ireland-RRB-, Passage_idx 2nd skipped.
+26-05-2019--23-23-00  -  Passage idx Andrew can't be converted to integer in page id 2011_Australian_Open_–_Boys'_Doubles
+26-05-2019--23-23-00  -  Page_id 2011_Australian_Open_–_Boys'_Doubles, Passage_idx Andrew skipped.
+26-05-2019--23-23-37  -  Passage idx Troy can't be converted to integer in page id 2010_Ohio_Bobcats_football_team
+26-05-2019--23-23-37  -  Page_id 2010_Ohio_Bobcats_football_team, Passage_idx Troy skipped.
+26-05-2019--23-25-07  -  wiki-004.txt successfully parsed, saved to resource/builder_checkpoint/wiki-004.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-25-18  -  Passage idx Souris can't be converted to integer in page id Alice_Masak_French
+26-05-2019--23-25-18  -  Page_id Alice_Masak_French, Passage_idx Souris skipped.
+26-05-2019--23-26-53  -  Passage idx philosophical can't be converted to integer in page id American_Society_for_Aesthetics
+26-05-2019--23-26-53  -  Page_id American_Society_for_Aesthetics, Passage_idx philosophical skipped.
+26-05-2019--23-27-21  -  Passage idx Racquetball can't be converted to integer in page id Aimee_Ruiz
+26-05-2019--23-27-21  -  Page_id Aimee_Ruiz, Passage_idx Racquetball skipped.
+26-05-2019--23-27-21  -  Passage idx Racquetball can't be converted to integer in page id Aimee_Ruiz
+26-05-2019--23-27-21  -  Page_id Aimee_Ruiz, Passage_idx Racquetball skipped.
+26-05-2019--23-28-41  -  Passage idx Highfield can't be converted to integer in page id Alester_Maregwede
+26-05-2019--23-28-41  -  Page_id Alester_Maregwede, Passage_idx Highfield skipped.
+26-05-2019--23-28-41  -  Passage idx Highfield can't be converted to integer in page id Alester_Maregwede
+26-05-2019--23-28-41  -  Page_id Alester_Maregwede, Passage_idx Highfield skipped.
+26-05-2019--23-28-41  -  Passage idx Highfield can't be converted to integer in page id Alester_Maregwede
+26-05-2019--23-28-41  -  Page_id Alester_Maregwede, Passage_idx Highfield skipped.
+26-05-2019--23-29-04  -  Passage idx Cyclopaedia can't be converted to integer in page id Alexander_Malcolm_-LRB-writer_on_music-RRB-
+26-05-2019--23-29-04  -  Page_id Alexander_Malcolm_-LRB-writer_on_music-RRB-, Passage_idx Cyclopaedia skipped.
+26-05-2019--23-30-05  -  wiki-008.txt successfully parsed, saved to resource/builder_checkpoint/wiki-008.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+26-05-2019--23-54-14  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--23-54-23  -  IR_Builder.py -- main() initiatied; Stemming = True
+26-05-2019--23-56-28  -  Passage idx the can't be converted to integer in page id Wu_Ding
+26-05-2019--23-56-28  -  Page_id Wu_Ding, Passage_idx the skipped.
+26-05-2019--23-56-50  -  Passage idx Racquetball can't be converted to integer in page id Álvaro_Beltrán
+26-05-2019--23-56-50  -  Page_id Álvaro_Beltrán, Passage_idx Racquetball skipped.
+27-05-2019--00-06-35  -  IR_Builder.py -- main() initiatied; Stemming = True
+27-05-2019--00-09-13  -  IR_Builder.py -- main() initiatied; Stemming = True
+27-05-2019--00-11-34  -  Passage idx the can't be converted to integer in page id Wu_Ding
+27-05-2019--00-11-34  -  Page_id Wu_Ding, Passage_idx the skipped.
+27-05-2019--00-12-02  -  Passage idx Racquetball can't be converted to integer in page id Álvaro_Beltrán
+27-05-2019--00-12-02  -  Page_id Álvaro_Beltrán, Passage_idx Racquetball skipped.
+27-05-2019--00-14-45  -  wiki-108.txt successfully parsed, saved to resource/builder_checkpoint/wiki-108.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--00-15-12  -  Passage idx President can't be converted to integer in page id Herman_De_Croo
+27-05-2019--00-15-12  -  Page_id Herman_De_Croo, Passage_idx President skipped.
+27-05-2019--00-16-40  -  Passage idx moderator can't be converted to integer in page id Humans_vs._Zombies
+27-05-2019--00-16-40  -  Page_id Humans_vs._Zombies, Passage_idx moderator skipped.

@@ -28,7 +28,7 @@ def main():
     pages = {}
     page_id_idx_mapper = {}
     page_idx_id_mapper = {}
-    page_idx_iter = 398342
+    page_idx_iter = 0
     completed_files = []
     
     completed_path = "{}/{}.pkl".format(CHECKPOINT_FOLDER, COMPLETED_FILES)
@@ -146,8 +146,13 @@ def parse_raw_line(raw_line, stem=True):
     try:
         passage_idx = int(passage_idx)
     except:
-        message = "Passage idx {} can't be converted to integer in page id {}".format(passage_idx, page_id)
-        utils.log(message, log_file)
+        passage_idx = ' '
+
+    # try:
+    #     passage_idx = int(passage_idx)
+    # except:
+    #     message = "Passage idx {} can't be converted to integer in page id {}".format(passage_idx, page_id)
+    #     utils.log(message, log_file)
 
     # assert type(passage_idx) == int, "Passage index is not an integer."
 

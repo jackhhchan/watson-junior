@@ -21,7 +21,7 @@ log_file = "mongodb-populate.txt"
 
 class WikiField(Enum):
     """ Field types used in the wiki collection """
-    page_id = "page_id"
+    page_idx = "page_idx"
     passage_idx = "passage_idx"
     tokens = "tokens"
 
@@ -137,7 +137,7 @@ def concatenate(tokens):
 def wiki_doc_formatted(page_id, passage_idx, tokens):
     """ Returns the formatted dictionary to store each passage """
     return {
-        WikiField.page_id.value : page_id, 
+        WikiField.page_idx.value : page_idx, 
         WikiField.passage_idx.value : passage_idx, 
         WikiField.tokens.value : tokens
     }
