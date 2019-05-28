@@ -1,0 +1,124 @@
+27-05-2019--15-33-17  -  IR_Builder.py -- main() initiatied; Stemming = True
+27-05-2019--15-34-44  -  Passage idx Warwick can't be converted to integer in page id 1971_Castrol_Trophy
+27-05-2019--15-34-44  -  Page_id 1971_Castrol_Trophy, Passage_idx Warwick skipped.
+27-05-2019--15-34-45  -  Passage idx Michigan can't be converted to integer in page id 1965_Rose_Bowl
+27-05-2019--15-34-45  -  Page_id 1965_Rose_Bowl, Passage_idx Michigan skipped.
+27-05-2019--15-36-59  -  wiki-001.txt successfully parsed, saved to resource/builder_checkpoint/wiki-001.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--15-38-04  -  Passage idx Alfa can't be converted to integer in page id 1936_Vanderbilt_Cup
+27-05-2019--15-38-04  -  Page_id 1936_Vanderbilt_Cup, Passage_idx Alfa skipped.
+27-05-2019--15-39-25  -  Passage idx Paris can't be converted to integer in page id 1828_in_birding_and_ornithology
+27-05-2019--15-39-25  -  Page_id 1828_in_birding_and_ornithology, Passage_idx Paris skipped.
+27-05-2019--15-39-37  -  Passage idx Wanneroo can't be converted to integer in page id 1971_Australian_Sports_Car_Championship
+27-05-2019--15-39-37  -  Page_id 1971_Australian_Sports_Car_Championship, Passage_idx Wanneroo skipped.
+27-05-2019--15-40-54  -  wiki-002.txt successfully parsed, saved to resource/builder_checkpoint/wiki-002.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--15-42-18  -  Passage idx ERP can't be converted to integer in page id AdvPL
+27-05-2019--15-42-18  -  Page_id AdvPL, Passage_idx ERP skipped.
+27-05-2019--15-42-50  -  Passage idx paleontological can't be converted to integer in page id Abraham_Jacobus_Wendel
+27-05-2019--15-42-50  -  Page_id Abraham_Jacobus_Wendel, Passage_idx paleontological skipped.
+27-05-2019--15-43-15  -  Passage idx Derna can't be converted to integer in page id Abu_Sufian_bin_Qumu
+27-05-2019--15-43-15  -  Page_id Abu_Sufian_bin_Qumu, Passage_idx Derna skipped.
+27-05-2019--15-45-11  -  wiki-005.txt successfully parsed, saved to resource/builder_checkpoint/wiki-005.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--15-45-31  -  Passage idx numerous can't be converted to integer in page id Administrator_of_the_Environmental_Protection_Agency
+27-05-2019--15-45-31  -  Page_id Administrator_of_the_Environmental_Protection_Agency, Passage_idx numerous skipped.
+27-05-2019--15-46-32  -  Passage idx Regis can't be converted to integer in page id 85th_Street_-LRB-Manhattan-RRB-
+27-05-2019--15-46-32  -  Page_id 85th_Street_-LRB-Manhattan-RRB-, Passage_idx Regis skipped.
+27-05-2019--15-47-49  -  Passage idx Deliver can't be converted to integer in page id 63rd_Bodil_Awards
+27-05-2019--15-47-49  -  Page_id 63rd_Bodil_Awards, Passage_idx Deliver skipped.
+27-05-2019--15-49-15  -  wiki-006.txt successfully parsed, saved to resource/builder_checkpoint/wiki-006.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--15-49-36  -  Passage idx Highway can't be converted to integer in page id Airport_Road_-LRB-Ontario-RRB-
+27-05-2019--15-49-36  -  Page_id Airport_Road_-LRB-Ontario-RRB-, Passage_idx Highway skipped.
+27-05-2019--15-49-43  -  Passage idx Aristophanes can't be converted to integer in page id Aison_-LRB-vase_painter-RRB-
+27-05-2019--15-49-43  -  Page_id Aison_-LRB-vase_painter-RRB-, Passage_idx Aristophanes skipped.
+27-05-2019--15-50-06  -  Passage idx climbing-grade can't be converted to integer in page id Alport_Height
+27-05-2019--15-50-06  -  Page_id Alport_Height, Passage_idx climbing-grade skipped.
+27-05-2019--15-52-17  -  Passage idx qualification can't be converted to integer in page id Andrew_Munro_-LRB-footballer-RRB-
+27-05-2019--15-52-17  -  Page_id Andrew_Munro_-LRB-footballer-RRB-, Passage_idx qualification skipped.
+27-05-2019--15-52-17  -  Passage idx qualification can't be converted to integer in page id Andrew_Munro_-LRB-footballer-RRB-
+27-05-2019--15-52-17  -  Page_id Andrew_Munro_-LRB-footballer-RRB-, Passage_idx qualification skipped.
+27-05-2019--15-52-26  -  Passage idx capo can't be converted to integer in page id Anthony_Indelicato
+27-05-2019--15-52-26  -  Page_id Anthony_Indelicato, Passage_idx capo skipped.
+27-05-2019--15-53-41  -  wiki-009.txt successfully parsed, saved to resource/builder_checkpoint/wiki-009.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--15-54-21  -  Passage idx Fuencaliente can't be converted to integer in page id Arenas_Blancas_Lighthouse
+27-05-2019--15-54-21  -  Page_id Arenas_Blancas_Lighthouse, Passage_idx Fuencaliente skipped.
+27-05-2019--15-54-59  -  Passage idx United can't be converted to integer in page id Arab_Peace_Initiative
+27-05-2019--15-54-59  -  Page_id Arab_Peace_Initiative, Passage_idx United skipped.
+27-05-2019--15-55-23  -  Passage idx transfering can't be converted to integer in page id Archimedes'_screw
+27-05-2019--15-55-23  -  Page_id Archimedes'_screw, Passage_idx transfering skipped.
+27-05-2019--15-55-36  -  Passage idx investigative can't be converted to integer in page id Andrew_A._Skolnick
+27-05-2019--15-55-36  -  Page_id Andrew_A._Skolnick, Passage_idx investigative skipped.
+27-05-2019--15-55-52  -  Passage idx German can't be converted to integer in page id Anton_Stankowski
+27-05-2019--15-55-52  -  Page_id Anton_Stankowski, Passage_idx German skipped.
+27-05-2019--15-58-00  -  wiki-010.txt successfully parsed, saved to resource/builder_checkpoint/wiki-010.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--15-58-26  -  Passage idx Kimble can't be converted to integer in page id Andrew_Murr
+27-05-2019--15-58-26  -  Page_id Andrew_Murr, Passage_idx Kimble skipped.
+27-05-2019--16-00-52  -  Passage idx Pleiades can't be converted to integer in page id Atlas_-LRB-mythology-RRB-
+27-05-2019--16-00-52  -  Page_id Atlas_-LRB-mythology-RRB-, Passage_idx Pleiades skipped.
+27-05-2019--16-02-20  -  wiki-011.txt successfully parsed, saved to resource/builder_checkpoint/wiki-011.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--16-02-38  -  Passage idx Bald can't be converted to integer in page id Bald_Hill_Claystone
+27-05-2019--16-02-38  -  Page_id Bald_Hill_Claystone, Passage_idx Bald skipped.
+27-05-2019--16-02-38  -  Passage idx Bald can't be converted to integer in page id Bald_Hill_Claystone
+27-05-2019--16-02-38  -  Page_id Bald_Hill_Claystone, Passage_idx Bald skipped.
+27-05-2019--16-02-38  -  Passage idx Long can't be converted to integer in page id Bald_Hill_Claystone
+27-05-2019--16-02-38  -  Page_id Bald_Hill_Claystone, Passage_idx Long skipped.
+27-05-2019--16-04-42  -  Passage idx Member can't be converted to integer in page id August_Nybergh
+27-05-2019--16-04-42  -  Page_id August_Nybergh, Passage_idx Member skipped.
+27-05-2019--16-04-45  -  Passage idx Dhivehi can't be converted to integer in page id Baa_Atoll_Education_Centre
+27-05-2019--16-04-45  -  Page_id Baa_Atoll_Education_Centre, Passage_idx Dhivehi skipped.
+27-05-2019--16-04-46  -  Passage idx five can't be converted to integer in page id Baengnyeongdo
+27-05-2019--16-04-46  -  Page_id Baengnyeongdo, Passage_idx five skipped.
+27-05-2019--16-05-15  -  Passage idx microregion can't be converted to integer in page id Baldim
+27-05-2019--16-05-15  -  Page_id Baldim, Passage_idx microregion skipped.
+27-05-2019--16-06-43  -  wiki-012.txt successfully parsed, saved to resource/builder_checkpoint/wiki-012.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--16-07-35  -  Passage idx Shaka can't be converted to integer in page id Ashvin
+27-05-2019--16-07-35  -  Page_id Ashvin, Passage_idx Shaka skipped.
+27-05-2019--16-08-17  -  Passage idx Pedro can't be converted to integer in page id Arístides_Victoria_Yeb
+27-05-2019--16-08-17  -  Page_id Arístides_Victoria_Yeb, Passage_idx Pedro skipped.
+27-05-2019--16-08-57  -  Passage idx Carrick can't be converted to integer in page id Austin_Ardill
+27-05-2019--16-08-57  -  Page_id Austin_Ardill, Passage_idx Carrick skipped.
+27-05-2019--16-08-57  -  Passage idx Carrick can't be converted to integer in page id Austin_Ardill
+27-05-2019--16-08-57  -  Page_id Austin_Ardill, Passage_idx Carrick skipped.
+27-05-2019--16-08-57  -  Passage idx Carrick can't be converted to integer in page id Austin_Ardill
+27-05-2019--16-08-57  -  Page_id Austin_Ardill, Passage_idx Carrick skipped.
+27-05-2019--16-09-01  -  Passage idx Maharashtra can't be converted to integer in page id Ashok_Mankad
+27-05-2019--16-09-01  -  Page_id Ashok_Mankad, Passage_idx Maharashtra skipped.
+27-05-2019--16-11-08  -  wiki-013.txt successfully parsed, saved to resource/builder_checkpoint/wiki-013.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--16-53-49  -  IR_Builder.py -- main() initiatied; Stemming = True
+27-05-2019--16-59-45  -  IR_Builder.py -- main() initiatied; Stemming = True
+27-05-2019--17-00-34  -  Page_id Basker_Fest, Passage_idx   skipped.
+27-05-2019--17-01-25  -  Page_id Berend_Wilhelm_Feddersen, Passage_idx   skipped.
+27-05-2019--17-02-18  -  Page_id Battle_of_Averasborough, Passage_idx   skipped.
+27-05-2019--17-02-39  -  Page_id Bill_Buford, Passage_idx   skipped.
+27-05-2019--17-05-11  -  wiki-014.txt successfully parsed, saved to resource/builder_checkpoint/wiki-014.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--17-05-46  -  Page_id Billy_Chandler, Passage_idx   skipped.
+27-05-2019--17-06-14  -  Page_id Bill_-LRB-footballer-RRB-, Passage_idx   skipped.
+27-05-2019--17-06-30  -  Page_id Benty_Grange_Helmet, Passage_idx   skipped.
+27-05-2019--17-06-31  -  Page_id Beijing–Tongliao_Railway, Passage_idx   skipped.
+27-05-2019--17-08-25  -  Page_id Beaker_-LRB-archaeology-RRB-, Passage_idx   skipped.
+27-05-2019--17-10-31  -  wiki-015.txt successfully parsed, saved to resource/builder_checkpoint/wiki-015.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--17-10-41  -  Page_id Bhagawan_Koirala, Passage_idx   skipped.
+27-05-2019--17-15-53  -  wiki-016.txt successfully parsed, saved to resource/builder_checkpoint/wiki-016.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--17-16-37  -  Page_id Brandon_Richardson, Passage_idx   skipped.
+27-05-2019--17-16-47  -  Page_id Bizzaria, Passage_idx   skipped.
+27-05-2019--17-17-44  -  Page_id Bryant_Park_Project, Passage_idx   skipped.
+27-05-2019--17-17-59  -  Page_id Brian_McLaughlin_-LRB-footballer,_born_1954-RRB-, Passage_idx   skipped.
+27-05-2019--17-18-01  -  Page_id Boleyn_family, Passage_idx   skipped.
+27-05-2019--17-18-01  -  Page_id Boleyn_family, Passage_idx   skipped.
+27-05-2019--17-18-13  -  Page_id Blue_Hawaii, Passage_idx   skipped.
+27-05-2019--17-18-18  -  Page_id Blelham_Tarn, Passage_idx   skipped.
+27-05-2019--17-18-36  -  Page_id Blake_McCormick, Passage_idx   skipped.
+27-05-2019--17-21-10  -  wiki-017.txt successfully parsed, saved to resource/builder_checkpoint/wiki-017.pkl
+Format: [pages, page_id_idx_mapper, page_idx_id_mapper, page_idx_iter]
+27-05-2019--17-22-14  -  Page_id BlackBerry_Torch_9800, Passage_idx   skipped.
+27-05-2019--17-23-10  -  Page_id C_data_types, Passage_idx   skipped.
