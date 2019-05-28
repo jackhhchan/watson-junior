@@ -19,7 +19,8 @@ import pandas as pd
 from NLI.train import get_training_data
 
 ###### PATHS ######
-json_file = "test-unlabelled"                                        # test-unlabelled, devset
+# json_file = "test-unlabelled"                                        # test-unlabelled, devset
+json_file = "test-unlabelled"
 json_path = "resource/test/{}.json".format(json_file)            
 
 ######PRE-TRAINED MODEL######
@@ -34,12 +35,12 @@ ENTAILMENT_RECOGNIZER_TKN_ESIM = 'trained_model/ESIM/NLI/ESIM_tokenizer.pkl'
 ENTAILMENT_RECOGNIZER_MODEL_LSTM = 'trained_model/LSTM/NLI/LSTM_model.h5'
 ENTAILMENT_RECOGNIZER_TKN_LSTM = 'trained_model/LSTM/NLI/LSTM_tokenizer.pkl'
 ###### PARAMS TO CHANGE ######
-verbose = True
+verbose = False
 # Inverted Index
-entity = False                       # use entity title matching
+entity = True                       # use entity title matching
 page_ids_threshold = 15             # only return this many page ids from inverted index
 inv_index_verbose = False
-posting_limit = 1000                # limit to postings returned per term -- we could be missing a lot of page ids with the same tfidf scores. (1 term)
+posting_limit = 100                # limit to postings returned per term -- we could be missing a lot of page ids with the same tfidf scores. (1 term)
 
 # Passage Selection
 confidence_threshold = None
@@ -53,11 +54,12 @@ confidence_threshold = None         # maybe?
 
 
 def main():
+    split = 0
     # Load test claims
     test_json = utils.load_json(json_path) 
     raw_claims = parse_test_json(test_json, output_page_ids=False)
-         
-    # raw_claims, page_ids = parse_test_json(test_json, output_page_ids=False)
+    # raw_claims, page_ids = parse_test_json(test_json, output_page_ids=True)
+
     print("[INFO] Number of unique claims: {}".format(len(raw_claims)))
 
     ##### PAGE ID RETRIEVAL #####
@@ -76,7 +78,12 @@ def main():
 
     total_true_page_ids_length = 0
     total_true_pos = 0
-    for idx, raw_claim in tqdm(enumerate(raw_claims)):
+    idx = 0
+    for raw_claim in tqdm(raw_claims):
+        # if idx <= 500:
+        #     continue
+        
+
         if entity: 
             print("[INFO - MAIN] Getting exact match entity links")
             matched = get_title_entity_match(raw_claim, page_ids_string_dict)
@@ -115,6 +122,21 @@ def main():
         total_test_evidences.extend(test_evidences)
         total_test_indices.extend(test_indices)
 
+        if (idx + 1)%7001 == 0:
+            break
+
+        if (idx+1)%1000 == 0:
+            utils.save_pickle(total_test_claims, "total_test_claims_{}.pkl".format(split))
+            utils.save_pickle(total_test_evidences, "total_test_evidences_{}.pkl".format(split))
+            utils.save_pickle(total_test_indices, "total_test_indices_{}.pkl".format(split))
+            split += 1
+            total_test_claims = []
+            total_test_evidences = []
+            total_test_indices = []
+
+        idx += 1
+
+
 
     # avg_evidence_per_claim = float(len(total_test_evidences))/float(idx+1)
     # message = "Entity Linking: {}\nThreshold: {}, Recall: {}\nAvg evidences per claim: {}\n".format(entity,
@@ -122,11 +144,13 @@ def main():
     #                                             recall,
     #                                             avg_evidence_per_claim)
     # utils.log(message, "inv_index_log.txt")
+    utils.save_pickle(total_test_claims, "total_test_claims_{}.pkl".format(split))
+    utils.save_pickle(total_test_evidences, "total_test_evidences_{}.pkl".format(split))
+    utils.save_pickle(total_test_indices, "total_test_indices_{}.pkl".format(split))
 
-
-    utils.save_pickle(total_test_claims, "test_{}_entity_{}_claims.pkl".format(json_file, entity))
-    utils.save_pickle(total_test_evidences, "test_{}_entity_{}_evidences.pkl".format(json_file, entity))
-    utils.save_pickle(total_test_indices, "test_{}_entity_{}_indices.pkl".format(json_file, entity))
+    # utils.save_pickle(total_test_claims, "test_{}_entity_{}_claims.pkl".format(json_file, entity))
+    # utils.save_pickle(total_test_evidences, "test_{}_entity_{}_evidences.pkl".format(json_file, entity))
+    # utils.save_pickle(total_test_indices, "test_{}_entity_{}_indices.pkl".format(json_file, entity))
    
     # format into the proper format to be passed into the passage selection NN
     claims, raw_evidences, page_info = get_training_data(claims_path='resource/training_data/test/test_devset_claims.pkl',
