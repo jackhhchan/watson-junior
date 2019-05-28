@@ -84,6 +84,8 @@ for page_idx in tqdm(unique_page_indices):
         
         counter.update(terms)           # keeps track of all terms
 
+    save_pickle(doc_term_freqs, "doc_term_freqs_stemmed_{}")
+
 save_pickle(doc_term_freqs, "doc_term_freqs_stemmed.pkl")
 # doc_term_freqs = load_pickle("doc_term_freqs_stemmed.pkl")
 

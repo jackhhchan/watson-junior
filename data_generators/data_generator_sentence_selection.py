@@ -290,6 +290,12 @@ def get_passages_from_db(page_id, query_object, output_string=True):
         tokens = passage.get(WikiQuery.WikiField.tokens.value)
         passage_idx = passage.get(WikiQuery.WikiField.passage_idx.value)
 
+        try:
+            if int(passage_idx) > 50:
+                continue
+        except:
+            continue
+
         if output_string:
             tokens = cocatenate(tokens)     # technically tokens_string
         
